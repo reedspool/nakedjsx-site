@@ -1,0 +1,18 @@
+{
+    "name": "blog",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "npx nakedjsx src --out build --plugin mdx @nakedjsx/plugin-asset-mdx --pretty",
+        "start": "npm run build -- --dev"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@nakedjsx/plugin-asset-mdx": "^0.14.0",
+        "nakedjsx": "^0.14.0"
+    }
+}

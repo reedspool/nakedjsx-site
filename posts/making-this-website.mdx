@@ -1,0 +1,65 @@
+# Making This Website
+
+My life is full of web pages. Sometimes I want to make web pages for myself.
+This site is where I keep them.
+
+My last website used React. I fell in love with JSX and MDX. I wanted to try a
+website with JSX and MDX without React. And the `vanillajsx` project seemed to
+fit my needs perfectly. 
+
+I spoke to the developer of `vanillajsx` on Discord and he walked me through how
+to make a website that fit some requirements I had:
+
+1. JSX to compile static HTML pages.
+1. MDX to write posts in plain text with custom components peppered throughout.
+1. A post need only be in the right directory to get compiled without external
+   configuration.
+
+I achieved those goals with the help of the developer. He helped me with
+explanations of how the software already worked as well as some enhancements. I
+was grateful for the personal attention. He said he was grateful for the
+challenges I presented, but I believe I got the better end of the deal.
+
+It was pretty fast too. I made 1000 copies of a 2.5kb post file and it took 18.5
+seconds to run the compilation command.
+
+These were just the baseline requirements. I also wanted a few more things.
+
+1. To use TailwindCSS
+1. To use a development server
+
+## TailwindCSS
+
+I was not a fan of CSS-in-JS when I used it, but I was a fan of Tailwind. To
+implement it, I knew I 'd need these steps:
+
+1. Copy my existing Tailwind configuration and the basic CSS from my old website
+   1. Now would be a good opportunity to pare down or my existing CSS
+1. Test Tailwind to ensure it generated the CSS correctly
+1. Link to the generated CSS file in the template shared by all posts
+1. Hook up NakedJSX's build system to Tailwind's, so that they always build at
+   the same time
+1. Ideally hook up NakedJSX's development server so that when CSS changes, the
+   page refreshes after building.
+   
+## Development Server
+   
+NakedJSX shipped with a dev server when I began to use it. But it did not work
+perfectly. The issues were that:
+
+1. It regenerated all posts when a post changed.
+1. It did not refresh the page when a post changed.
+
+Every time I edited a post, all of the posts were subsequently recompiled.
+Ideally, only the post I had edited and saved would be recompiled.
+
+When I edited a file outside my posts directory, the development server would
+regenerate only that file which was took less than half a second. 
+
+The documentation also promised that the page would refresh which I didn't
+experience on either posts or other JSX files.
+
+So far I hadn't had to dig in and understand the source code of NakedJSX to
+solve any of my issues because the developer was so generous with his time. I
+decided to push all my current work to GitHub and point him to it to ask for his help.
+
