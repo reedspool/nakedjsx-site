@@ -12,7 +12,6 @@ for (const [{ inputFileName, outputFileName, shouldCompile }, Post] of posts) {
     Page.Create('en');
     Page.AppendBody(
         <main>
-            <h1>Body Content H1</h1>
             <Post originFilename={inputFileName} />
         </main>
     );
