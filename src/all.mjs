@@ -1,7 +1,7 @@
 import { readdir, stat } from 'node:fs/promises';
+import { OUT_DIR_REL_PATH } from './constants.mjs'
 
 const POST_DIR_REL_PATH = '../posts'
-const OUT_DIR_REL_PATH = '../build'
 
 const exists = async (path) => {
     try {
@@ -31,18 +31,19 @@ export default async () => {
         if (!inputFileName.endsWith('.mdx'))
             continue;
 
-        const postPath = `${POST_DIR_REL_PATH}/${inputFileName}`;
         const fileNameWithoutExtension = inputFileName.replace(/\.mdx$/, '');
+        const postPath = `${POST_DIR_REL_PATH}/${inputFileName}`;
         const outputFileName = `${fileNameWithoutExtension}.html`
+        const outputPath = `${OUT_DIR_REL_PATH}/${outputFileName}`
         let shouldCompile = true;
 
         // We'll skip this file if the output is newer than the input
-        if (outputDirectoryExists) {
+        if (outputDirectoryExists && await exists(outputPath)) {
             // Get the most recent time the input file was modified
             const { mtimeMs: inputModified } = await stat(postPath)
 
             // Also get the most recent time the output was modified
-            const { mtimeMs: outputModified } = await stat(`${OUT_DIR_REL_PATH}/${outputFileName}`)
+            const { mtimeMs: outputModified } = await stat(outputPath)
 
             if (outputModified > inputModified) {
                 console.warn(`Skipping ${fileNameWithoutExtension} as the output is newer`)
