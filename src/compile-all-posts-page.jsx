@@ -17,8 +17,9 @@ for (const [{ inputFileName, outputFileName, shouldCompile }, Post] of posts) {
     Page.AppendHead(<link rel="stylesheet" href="./build.css" />)
     Page.AppendBody(
         <main class="cpnt-blog-article">
-            <a href="/">Home</a>
+            <Link slug="home">Home</Link>
             <Post originFilename={inputFileName} components={{ Link, Future }} />
+            <Link slug="home">Home</Link>
         </main>
     );
 
