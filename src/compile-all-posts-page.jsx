@@ -1,5 +1,8 @@
 import { Page } from '@nakedjsx/core/page';
 import posts from ':dynamic:./all.mjs'
+import { Link } from "../components/Link.jsx"
+import { Future } from "../components/Future.jsx"
+
 
 for (const [{ inputFileName, outputFileName, shouldCompile }, Post] of posts) {
     // See NOTE in `all.mjs` Line ~50. This should go away when the flag goes away.
@@ -15,7 +18,7 @@ for (const [{ inputFileName, outputFileName, shouldCompile }, Post] of posts) {
     Page.AppendBody(
         <main class="cpnt-blog-article">
             <a href="/">Home</a>
-            <Post originFilename={inputFileName} />
+            <Post originFilename={inputFileName} components={{ Link, Future }} />
         </main>
     );
 
