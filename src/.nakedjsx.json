@@ -1,0 +1,19 @@
+{
+    "pathAliases": {},
+    "definitions": {},
+    "browserslistTargetQuery": "defaults",
+    "plugins": {
+        "mdx": "@nakedjsx/plugin-asset-mdx"
+    },
+    "importResolveOverrides": {},
+    "output": {
+        "pageJs": {
+            "sourcemaps": "auto"
+        },
+        "clientJs": {
+            "sourcemaps": "auto"
+        },
+        "dir": "../build"
+    },
+    "pretty": true
+}

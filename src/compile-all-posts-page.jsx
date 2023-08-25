@@ -10,8 +10,11 @@ for (const [{ inputFileName, outputFileName, shouldCompile }, Post] of posts) {
         console.log(`compiling ${outputFileName}!`)
     }
     Page.Create('en');
+    Page.AppendHead(<title>Reed's Website</title>)
+    Page.AppendHead(<link rel="stylesheet" href="./build.css" />)
     Page.AppendBody(
-        <main>
+        <main class="cpnt-blog-article">
+            <a href="/">Home</a>
             <Post originFilename={inputFileName} />
         </main>
     );
