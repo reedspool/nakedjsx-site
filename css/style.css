@@ -293,7 +293,7 @@ a:hover .cpnt-logo {
   & h3,
   & h4,
   & h6 {
-    @apply mt-md;
+    @apply my-md;
   }
 }
 

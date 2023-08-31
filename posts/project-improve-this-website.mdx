@@ -8,25 +8,17 @@ I'll view this project as successful if my site continually improves over time. 
 
 ## Project Log
 
-My last website used React. I fell in love with JSX and MDX. I wanted to try a
-website with JSX and MDX without React. And the NakedJSX project seemed to
-fit my needs perfectly. 
+My last website used React. I fell in love with JSX and MDX. I wanted to try a website with JSX and MDX without React. And the NakedJSX project seemed to fit my needs perfectly.
 
-I spoke to the developer of NakedJSX on Discord and he walked me through how
-to make a website that fit some requirements I had:
+I spoke to the developer of NakedJSX on Discord and he walked me through how to make a website that fit some requirements I had:
 
 1. JSX to compile static HTML pages.
 1. MDX to write posts in plain text with custom components peppered throughout.
-1. A post need only be in the right directory to get compiled without external
-   configuration.
+1. A post need only be in the right directory to get compiled without external configuration.
 
-I achieved those goals with the help of the developer. He helped me with
-explanations of how the software already worked as well as some enhancements. I
-was grateful for the personal attention. He said he was grateful for the
-challenges I presented, but I believe I got the better end of the deal.
+I achieved those goals with the help of the developer. He helped me with explanations of how the software already worked as well as some enhancements. I was grateful for the personal attention. He said he was grateful for the challenges I presented, but I believe I got the better end of the deal.
 
-It was pretty fast too. I made 1000 copies of a 2.5kb post file and it took 18.5
-seconds to run the compilation command.
+It was pretty fast too. I made 1000 copies of a 2.5kb post file and it took 18.5 seconds to run the compilation command.
 
 These were just the baseline requirements. I also wanted a few more things.
 
@@ -35,8 +27,7 @@ These were just the baseline requirements. I also wanted a few more things.
 
 ### TailwindCSS
 
-I was not a fan of CSS-in-JS when I used it, but I was a fan of Tailwind. To
-implement it, I knew I 'd need these steps:
+I was not a fan of CSS-in-JS when I used it, but I was a fan of Tailwind. To implement it, I knew I 'd need these steps:
 
 1. Copy my existing Tailwind configuration and the basic CSS from my old website
    1. Now would be a good opportunity to pare down or my existing CSS
@@ -70,55 +61,35 @@ I realized I didn't need to hook up the build systems to each other. I could run
 Next I had to link the CSS output in the HTML output. This was as easy as adding a single line to the compilation files.
 
 ```jsx
-Page.AppendHead(<link rel="stylesheet" href="./build.css" />)
+Page.AppendHead(<link rel="stylesheet" href="./build.css" />);
 ```
 
 [TODO: continue]
-   
+
 ### Development Server
-   
-NakedJSX shipped with a dev server when I began to use it. But it did not work
-perfectly. The issues were that:
+
+NakedJSX shipped with a dev server when I began to use it. But it did not work perfectly. The issues were that:
 
 1. It regenerated all posts when a post changed.
 1. It did not refresh the page when a post changed.
 
-Every time I edited a post, all of the posts were subsequently recompiled.
-Ideally, only the post I had edited and saved would be recompiled.
+Every time I edited a post, all of the posts were subsequently recompiled. Ideally, only the post I had edited and saved would be recompiled.
 
-When I edited a file outside my posts directory, the development server would
-regenerate only that file which was took less than half a second. 
+When I edited a file outside my posts directory, the development server would regenerate only that file which was took less than half a second.
 
-The documentation also promised that the page would refresh which I didn't
-experience on either posts or other JSX files.
+The documentation also promised that the page would refresh which I didn't experience on either posts or other JSX files.
 
-So far I hadn't had to dig in and understand the source code of NakedJSX to
-solve any of my issues because the developer was so generous with his time. I
-decided to push all my current work to GitHub and point him to it to ask for his
-help.
+So far I hadn't had to dig in and understand the source code of NakedJSX to solve any of my issues because the developer was so generous with his time. I decided to push all my current work to GitHub and point him to it to ask for his help.
 
-He mentioned an idea: Because my NakedJSX script should always write the output
-after the input file was last saved, the output file should always be newer than
-the input. Therefore, I could check each input file against each output file,
-and only re-compile if the output was older than the input. 
+He mentioned an idea: Because my NakedJSX script should always write the output after the input file was last saved, the output file should always be newer than the input. Therefore, I could check each input file against each output file, and only re-compile if the output was older than the input.
 
-So I tried it. I used Node's `fs.access` and `fs.stat` to read the input and the
-output and determine which was newer. I found the same issue which the NakedJSX
-developer mentioned. Unfortunately, the development server wouldn't register 
-any files which were not exported, so those with no changes would never be
-recompiled again. To get around this for now, I ended up writing imports for
-each file but including a flag as to whether it should be recompiled or not.
+So I tried it. I used Node's `fs.access` and `fs.stat` to read the input and the output and determine which was newer. I found the same issue which the NakedJSX developer mentioned. Unfortunately, the development server wouldn't register any files which were not exported, so those with no changes would never be recompiled again. To get around this for now, I ended up writing imports for each file but including a flag as to whether it should be recompiled or not.
 
-Unfortunately this still did not solve the issue. It seemed to my eyes that when
-one of my post files changed, `all.mjs` was not re-run. Was its output being
-cached? I never saw my `console.log`s from `all.mjs` again after the first build.
+Unfortunately this still did not solve the issue. It seemed to my eyes that when one of my post files changed, `all.mjs` was not re-run. Was its output being cached? I never saw my `console.log`s from `all.mjs` again after the first build.
 
-A small annoyance I had was that the development server did not respond to
-Control-C. Instead, the development server responded to "x" to exit. I was so
-used to Control-C to exit out of other programs, I was repeatedly confused when nothing happened. 
+A small annoyance I had was that the development server did not respond to Control-C. Instead, the development server responded to "x" to exit. I was so used to Control-C to exit out of other programs, I was repeatedly confused when nothing happened.
 
-Another random issue I found is that the information I logged with `console.log`
-was overwritten by the output of the server. I wasn't sure what was going on there.
+Another random issue I found is that the information I logged with `console.log` was overwritten by the output of the server. I wasn't sure what was going on there.
 
 ### Sun Aug 20 22:56:55 PDT 2023
 
@@ -131,12 +102,11 @@ I tried to use a random attribute with underscores in my JSX and I got this erro
 
 I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I had enjoyed writing attributes using similar structures to BEM CSS, which uses a lot of underscores. It was easy enough to replace these with dashes `-`. I did find a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores should be allowed in attribute names. StackOverflow isn't usually definitive, but [the spec to which that answer refers](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2) are. I just thought the SO answer was easier to interpret.
 
-I understand that arbitrary attributes turn HTML invalid, but it's often fun to quickly add a random attribute to target with a CSS selector like `[my-random-attribute]`. 
+I understand that arbitrary attributes turn HTML invalid, but it's often fun to quickly add a random attribute to target with a CSS selector like `[my-random-attribute]`.
 
 I also tried out the NakedJSX config file with `npm run build -- --config-save`. This was nice! I'd love to add a switch to this.
 
 [TODO: I tried my hand at adding a configuration for turning off the arbitrary attribute validation. Maybe I could configure the allowable characters in an HTML attribute. Also it would be nice to turn the error into a warning because then I could review a report of many such issues instead of stopping processing with the first instance.]
-
 
 ### Thu Aug 24 15:37:02 PDT 2023
 
