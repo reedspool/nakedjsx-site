@@ -18,7 +18,7 @@ I spoke to the developer of NakedJSX on Discord and he walked me through how to 
 
 I achieved those goals with the help of the developer. He helped me with explanations of how the software already worked as well as some enhancements. I was grateful for the personal attention. He said he was grateful for the challenges I presented, but I believe I got the better end of the deal.
 
-It was pretty fast too. I made 1000 copies of a 2.5kb post file and it took 18.5 seconds to run the compilation command.
+NakedJSX was pretty fast too. I made 1000 copies of a 2.5kb post file and it took 18.5 seconds to compile the entire site.
 
 These were just the baseline requirements. I also wanted a few more things.
 
@@ -27,12 +27,11 @@ These were just the baseline requirements. I also wanted a few more things.
 
 ### TailwindCSS
 
-I was not a fan of CSS-in-JS when I used it, but I was a fan of Tailwind. To implement it, I knew I 'd need these steps:
+I was a fan of Tailwind. To implement it, I thought I 'd need these steps:
 
-1. Copy my existing Tailwind configuration and the basic CSS from my old website
-   1. Now would be a good opportunity to pare down or my existing CSS
+1. Copy my existing Tailwind configuration and the basic CSS from my old website (removing any irrelevant styles)
 1. Test Tailwind to ensure it generated the CSS correctly
-1. Link to the generated CSS file in the template shared by all posts
+1. Link to the generated CSS file in the HTML template shared by all posts
 1. Hook up NakedJSX's build system to Tailwind's, so that they always build at the same time
 1. Ideally hook up NakedJSX's development server so that when CSS changes, the page refreshes after building.
 
@@ -42,29 +41,31 @@ So I copied the config JS files and base CSS:
 1. `tailwind.config.js`
 1. `style.css`
 
-[TODO: I reviewed them and removed a lot which was specific to that project.]
+I reviewed all these files and removed a lot of irrelevant or unused kruft.
 
-Then I pulled up the Tailwind installation instructions to review.
+Then I pulled up the official Tailwind installation instructions to review.
 
-I realized that in my previous project, PostCSS was configured automatically by Vite. So I researched PostCSS to see how I might use it standalone. I wanted to avoid the complication of Vite in this project if possible. I found PostCSS's CLI which was perfect, I wouldn't have to use any other build tool.
+In my previous project, Vite automatically configured PostCSS. So I researched PostCSS to see how I might use it standalone. I wanted to avoid the complication of Vite in this project. I discovered PostCSS's CLI which excited me as I wouldn't have to use any other build tool.
 
-I had to install the PostCSS, its CLI, and few dependencies that I had used in the old project:
+I had to install the PostCSS, its CLI, and a few dependencies that I found useful in the old project:
 
 ```
 npm install -D postcss postcss-cli postcss-import @tailwindcss/nesting postcss-nesting tailwindcss autoprefixer
 ```
 
-And the my basic NPM script just worked. Very encouraging.
+I wrote a simple command for the PostCSS CLI in `package.json` in the `scripts` section. It just worked and which encouraged me.
 
-I realized I didn't need to hook up the build systems to each other. I could run both dev servers simultaneously in different processes, and I could run both build commands in sequence.
+```
+"build:css": "postcss css/style.css --output build/build.css",
+```
 
-Next I had to link the CSS output in the HTML output. This was as easy as adding a single line to the compilation files.
+I thought I would have to time this with NakedJSX's build system. But it occurred to me once I got PostCSS working that there was no timing conflict. PostCSS could write the output `build.css` and NakedJSX could write the output HTML files. No sweat. I could run both dev servers simultaneously in different processes, and I could run both build commands in sequence or parallel.
+
+Next I had to link the CSS output in the HTML output. This was as easy as adding a single line to my NakedJSX JS files.
 
 ```jsx
 Page.AppendHead(<link rel="stylesheet" href="./build.css" />);
 ```
-
-[TODO: continue]
 
 ### Development Server
 
@@ -73,23 +74,23 @@ NakedJSX shipped with a dev server when I began to use it. But it did not work p
 1. It regenerated all posts when a post changed.
 1. It did not refresh the page when a post changed.
 
-Every time I edited a post, all of the posts were subsequently recompiled. Ideally, only the post I had edited and saved would be recompiled.
+Every time I edited a post, all of the posts were subsequently recompiled. Ideally, only the post I had edited and saved would recompile.
 
-When I edited a file outside my posts directory, the development server would regenerate only that file which was took less than half a second.
+When I edited a file outside my posts directory, the development server would regenerate only that file. That took less than half a second which was nice. But I wanted to focus on writing posts, and that would be slow.
 
-The documentation also promised that the page would refresh which I didn't experience on either posts or other JSX files.
+The documentation also promised that the browser page would refresh when the file was recompiled. I didn't experience that on either posts or other JSX files.
 
-So far I hadn't had to dig in and understand the source code of NakedJSX to solve any of my issues because the developer was so generous with his time. I decided to push all my current work to GitHub and point him to it to ask for his help.
+The developer was so generous with his time so far. I decided to push all my current work to GitHub and point him to it to ask for his help.
 
 He mentioned an idea: Because my NakedJSX script should always write the output after the input file was last saved, the output file should always be newer than the input. Therefore, I could check each input file against each output file, and only re-compile if the output was older than the input.
 
-So I tried it. I used Node's `fs.access` and `fs.stat` to read the input and the output and determine which was newer. I found the same issue which the NakedJSX developer mentioned. Unfortunately, the development server wouldn't register any files which were not exported, so those with no changes would never be recompiled again. To get around this for now, I ended up writing imports for each file but including a flag as to whether it should be recompiled or not.
+So I tried it. I used Node's `fs.access` and `fs.stat` to read the input and the output and determine which was newer. I found the same issue which the NakedJSX developer mentioned. Unfortunately, the development server wouldn't register any files which were not exported, so those files with no changes would never recompile again. To get around this, I wrote imports for each file but included a flag so signal if it should recompile or not.
 
-Unfortunately this still did not solve the issue. It seemed to my eyes that when one of my post files changed, `all.mjs` was not re-run. Was its output being cached? I never saw my `console.log`s from `all.mjs` again after the first build.
+This still did not solve the issue. When one of my post files changed, `all.mjs` was not re-executed. Was its output cached? I added `console.log` messages to `all.mjs`, but I never saw them again after the first build.
 
-A small annoyance I had was that the development server did not respond to Control-C. Instead, the development server responded to "x" to exit. I was so used to Control-C to exit out of other programs, I was repeatedly confused when nothing happened.
+As an aside, the development server did not respond to Control-C. Instead, I had to hit "x" to exit the development server. I was so used to Control-C to exit out of other programs, and the lack of response confused me.
 
-Another random issue I found is that the information I logged with `console.log` was overwritten by the output of the server. I wasn't sure what was going on there.
+Another random issue I experienced was the output of the server sometimes overwrote my `console.log` messages. This limited my basic debugging strategy.
 
 ### Sun Aug 20 22:56:55 PDT 2023
 
@@ -100,9 +101,9 @@ I tried to use a random attribute with underscores in my JSX and I got this erro
     at requireValidAttributeName (file:///home/human/projects/nakedjsx-site/node_modules/nakedjsx/node_modules/@nakedjsx/core/runtime/page/document.mjs:313:15)
 ```
 
-I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I had enjoyed writing attributes using similar structures to BEM CSS, which uses a lot of underscores. It was easy enough to replace these with dashes `-`. I did find a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores should be allowed in attribute names. StackOverflow isn't usually definitive, but [the spec to which that answer refers](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2) are. I just thought the SO answer was easier to interpret.
+I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I wrote attributes with similar structures to BEM CSS which uses a lot of underscores. It was easy to replace underscores with dashes `-`. I found a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores are valid in HTML attribute names. StackOverflow isn't usually definitive, so I was grateful that answer refered to [the spec](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2).
 
-I understand that arbitrary attributes turn HTML invalid, but it's often fun to quickly add a random attribute to target with a CSS selector like `[my-random-attribute]`.
+I understand that arbitrary attributes turn HTML invalid, but it's fun to add a random attribute to target with a CSS selector like `[my-random-attribute]`. I learned at some point that CSS attribute selectors are a performance trap, but optimization must balance against fun in personal projects.
 
 I also tried out the NakedJSX config file with `npm run build -- --config-save`. This was nice! I'd love to add a switch to this.
 
@@ -111,3 +112,7 @@ I also tried out the NakedJSX config file with `npm run build -- --config-save`.
 ### Thu Aug 24 15:37:02 PDT 2023
 
 I wanted to add links between pages, but I found I was renaming pages frequently in this early stage of development. To lower the friction to name changes, I [made a component](https://github.com/reedspool/nakedjsx-site/blob/main/components/Link.jsx) which would throw an error if I used an incorrect name for another post.
+
+<Future>I experimented with `ref` to collect all of the links in each post to create backlinks.</Future>
+
+<Future>I experimented with post-processing the HTML output of NakedJSX with an HTML parser to collect all the links in each post to create back links.</Future>
