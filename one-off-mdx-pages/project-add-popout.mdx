@@ -4,156 +4,34 @@
 
 ### Sun Aug 20 22:31:14 PDT 2023
 
-I wanted to use the popout component in JSX. I was working on this NakedJSX website so I thought I'd try it there. I'd originally written the component in Vanilla JavaScript for my "scroll exploration" project. I wanted to use the idea in a new exploration I was beginning in MDX. And all the better if it would also work as a reusable component, imported into my MDX page from an external JSX file.
+I wrote a useful utility in vanilla JavaScript for my "scroll exploration" project. The utility had two parts. First it was an empty container which was "sticky," i.e. it followed the user and stayed on their screen as they scrolled around the page. That empty container was not useful on its own. The other part of the utility was a button which would "pop out" another element into the empty container. Once an element was in the "pop-out container" the user could also pop it back into its original place, removing it from the pop-out container. I found this very successful and useful in my scroll project. I made widgets which visualized properties of the scroll situation, and one could pop out any of these widgets to watch them as they scrolled.
 
-I'd already tried this in my previous website, but since it used React behind the JSX, it was not easy to write Vanilla JS to control it. For example, to make a `script` tag with some random Vanilla JavaScript for the page, I had to use the `dangerouslySetInnerHTML` attribute and put the code in a string. Of course, in retrospect that makes sense because React is built to make non-Vanilla JS, so of course it wouldn't make it easy.
+I wanted to use this utility in JSX for another project. I was working on this NakedJSX website so I thought I'd try it there. I wrote this new project in MDX, so the pop-out utility would have to work there. Originally I wrote the utility in vanilla JS in raw HTML, so there was friction in porting it to JSX.
+
+Before attempting it in NakedJSX, I tried it in my previous website driven by React. It was not easy to write Vanilla JS with React's JSX compiler. For example, to make a `script` tag with some random Vanilla JavaScript for the page, I had to use the `dangerouslySetInnerHTML` attribute and put the code in a string. Of course, in retrospect that made sense because React's front-end scripting methodology is so specific, the term "vanilla JS" was coined just to distinguish from it. 
 
 So to start my experiment, I did the first thing I had tried in my React website. I tried to copy the basic HTML tags from my old Vanilla page directly into this MDX document.
 
+```
 <details cpnt-popout open>
     <summary>Popout</summary>
-    <div cpnt-popout--target></div>
+    <div cpnt-popout__target></div>
 </details>
-
-I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I had enjoyed writing attributes using similar structures to BEM CSS, which uses a lot of underscores. It was easy enough to replace these with dashes `-`. I did find a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores should be allowed in attribute names. StackOverflow isn't usually definitive, but [the spec to which that answer refers](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2) are. I just thought the SO answer was easier to interpret.
-
-Once I established that I could see the output of that basic HTML in the document, I tried adding a `script` tag with the code to drive the interactivity of the widget.
-
-<script type="module">
-    console.log('test')
-</script>
-
-The whole `script` tag didn't compile immediately. Unfortunately there was no useful information about the error, just that there was an error:
-
-```
-0.217: ERROR: Page compilation error in page /compile-one-off-mdx
-0.217: ERROR:
-0.218: ERROR: Finished build (with errors).
 ```
 
-Without any information to direct my investigation, I tried reducing the issue to its smallest reproduction. I stripped out the contents to see if an empty `script` tag would compile. It did! So I tried writing a `console.log` in there. That still succeeded in compiling, so I checked if I could see my logged string in the console. There I saw a runtime JS error:
+I got this error.
 
 ```
-Uncaught SyntaxError: Unexpected token '<' (at my-page.html:69:18)
+0.212: ERROR: Error: Invalid attribute name: my_random_attribute
+    at requireValidAttributeName (file:///home/human/projects/nakedjsx-site/node_modules/nakedjsx/node_modules/@nakedjsx/core/runtime/page/document.mjs:313:15)
 ```
 
-This is an error I commonly see when JavaScript tries to execute HTML as JavaScript. And looking at the built output it made sense. For this input in my MDX file:
+I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I wrote attributes with similar structures to BEM CSS which uses a lot of underscores. It was easy to replace underscores with dashes `-`. I found a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores are valid in HTML attribute names. StackOverflow isn't usually definitive, so I was grateful that answer refered to [the spec](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2).
 
-```html
-<script type="module">
-    console.log('test')
-</script>
-```
+I understand that arbitrary attributes turn HTML invalid, but it's fun to add a random attribute to target with a CSS selector like `[my-random-attribute]`. I learned at some point that CSS attribute selectors are a performance trap, but optimization must balance against fun in personal projects.
 
-The compiler output this HTML:
+Once I established that I could see the output of that basic HTML in the document, I tried adding a `script` tag with the code to drive the interactivity of the widget. But it didn't work. I recorded my effort to make that work in <Link slug="project-write-script-and-style-tags">another project.</Link>
 
-```html
-<script type="module">
-    ;<p>console.log(&#039;test&#039;)</p>
-</script>
-```
-
-So the JSX compiler or its MDX compiler dependency were reading the contents of my `script` tag and translating contents to HTML. But I want my JavaScript to be put on the page literally! I wanted to know if this translation would occur for any HTML, or if the `script` tag was a special case. I tried this input in my MDX file:
-
-<div>Hey, I'm some text content!</div>
-
-```html
-<div>
-    Hey, I'm some text content!
-</div>
-```
-
-and got this output:
-
-```html
-<div>
-    <p>Hey, I&#039;m some text content!</p>
-</div>
-```
-
-So it would wrap any plain text in a `p` tag, regardless of if it were in another tag. I thought that MDX did not do this by default. I thought that if text was inside a literal HTML tag inside MDX, then MDX would just copy it literally. I also tried both of these experiments with a single line of HTML instead of separate lines, and that did get rid of the added `p` tags; however, the compiler still turned the quote marks in my JavaScript into HTML entity fancy quotes (`&#039;`).
-
-Next I tried the same concepts as components defined within the MDX as JS variables like this.
-
-export const A = () =>
-  <div>
-      Hey, I'm some text content!
-  </div>
-
-<A />
-
-```html
-export const A = () =>
-  <div>
-      Hey, I'm some text content!
-  </div>
-
-<A />
-```
-
-The output did not have added `p` tags or fancified quote marks! Next I tried the same experiment with my script tag.
-
-export const B = () =>
-    <script type="module">
-        console.log('test')
-    </script>
-
-<B />
-
-```html
-export const B = () =>
-    <script type="module">
-        console.log('test')
-    </script>
-
-<B />
-```
-
-I was confused to find that the output of this experiment *did* have  fancy quotes!
-
-```html
-<script type="module">
-    console.log(&#039;test&#039;)
-</script>
-```
-
-I was confounded, so I tried to repeat this experiment with my `script` tag component in an external JSX file. I hoped that would help me separate NakedJSX from MDX as for the source of these fancy quotes.
-
-Unfortunately that opened up another can of worms. Unfortunately in this MDX file within this NakedJSX project, I couldn't get an import of an external JSX file to work.
-
-```html
-import { ScriptTagExperiment } from "./script-tag-component-test.jsx"
-```
-
-This didn't work as I expected it would from a [suggestion from the NakedJSX developer](https://discord.com/channels/1101319012673134614/1101319013285498882/1123077151789432863). Instead I got a `RollupError` was unable to resolve that path. I also tried moving both this MDX file and the external JSX file into the `src` directory, but that failed similarly.
-
-### Mon Aug 21 20:18:15 PDT 2023
-
-Instead of importing my JSX file into the MDX file, I realized that the top-level `page.jsx` file which imported the MDX file was JSX itself, so I could import my component there. When I did that, I still saw the same fancy quote entities. That meant that it was NakedJSX performing this escape and not MDX.
-
-I also wanted to try a different strategy where I passed this component as a prop into my MDX import so I tried that quickly. It worked!
-
-```html
-<props.ScriptTagExperiment>
-    console.log("here's my custom script tag!")
-</props.ScriptTagExperiment>
-```
-
-<props.ScriptTagExperiment> console.log("here's my custom script tag!") </props.ScriptTagExperiment>
-
-This worked, but not directly as written. Unfortunately the same issue with the `p` tags being added occured if I had any newlines. But if I put all of the script on one line, it would work!
-
-<div>
-  <span>This is a span test</span>
-</div>
-
-Now that I knew it was NakedJSX, I looked in its source to see if I could find where this was happening. Maybe I would find an inspiration to contribute to the project if I thought I could fix this use case for myself.
-
-So I cloned the NakedJSX core, ran `npm uninstall nakedjsx` and `npm link ../nakedjsx-core`. I found the `escapeHtml` function and subverted it by just returning its input. I checked to ensure my build worked and did not output escaped HTML. It worked! Except it worked a little too well. All the HTML I had written in Markdown code blocks was also unescaped. So when I viewed the page, half of it was bold and all the example HTML was invisible. The page was bold because I'd used `B` as an example component name, and so that left an un-escaped `<B />` in the DOM with no ending `</b>`.
-
-I modified NakedJSX core again to only escape the insides of `<code>` elements. That seemed to work perfectly. I couldn't see anything in a brief look of the webpage which seemed off to me. So I went back through my progress to see which tangent I could wind back from. It seemed I could now write a `script` tag with vanilla JavaScript which would be run in the browser so long as I made that `script` tag a local JSX component. Ideally I would also learn to write simpler `script` tags, but this wasn't a huge issue.
-
-Finally, I found an answer to the challenge which MDX presented which was that any text nodes seemed to be processed as markdown and wrapped in `p` tags or other formatting. The answer for components was to wrap the entire component in curly braces, e.g. `{<Component>Text</Component>}`. And for text within a component I could also make that into a string via curly braces and backticks `\``. I figured all this out via [this GitHub discussion](https://github.com/orgs/mdx-js/discussions/1603#discussioncomment-1091688).  
 
 <Future>I continued from here</Future>
 
