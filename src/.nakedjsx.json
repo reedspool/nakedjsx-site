@@ -15,5 +15,5 @@
         },
         "dir": "../build"
     },
-    "pretty": true
+    "pretty": false
 }
