@@ -94,16 +94,7 @@ Another random issue I experienced was the output of the server sometimes overwr
 
 ### Sun Aug 20 22:56:55 PDT 2023
 
-I tried to use a random attribute with underscores in my JSX and I got this error.
-
-```
-0.212: ERROR: Error: Invalid attribute name: my_random_attribute
-    at requireValidAttributeName (file:///home/human/projects/nakedjsx-site/node_modules/nakedjsx/node_modules/@nakedjsx/core/runtime/page/document.mjs:313:15)
-```
-
-I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I wrote attributes with similar structures to BEM CSS which uses a lot of underscores. It was easy to replace underscores with dashes `-`. I found a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores are valid in HTML attribute names. StackOverflow isn't usually definitive, so I was grateful that answer refered to [the spec](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2).
-
-I understand that arbitrary attributes turn HTML invalid, but it's fun to add a random attribute to target with a CSS selector like `[my-random-attribute]`. I learned at some point that CSS attribute selectors are a performance trap, but optimization must balance against fun in personal projects.
+One of the reasons I wanted to avoid React was to focus on writing vanilla JS and CSS for the front-end. I wanted my site to be flexible enough for ad hoc JS experiments so I <Link slug="project-write-script-and-style-tags">tried to write some script tags</Link>. This wasn't as straightforward as I'd hoped in NakedJSX, but I learned a lot.
 
 I also tried out the NakedJSX config file with `npm run build -- --config-save`. This was nice! I'd love to add a switch to this.
 
