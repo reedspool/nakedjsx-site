@@ -7,6 +7,7 @@ import { Future } from "../components/Future.jsx"
 
 Page.Create('en');
 Page.AppendHead(<title>Reed's Website</title>)
+Page.AppendHead(<meta name="viewport" content="width=device-width, initial-scale=1" />)
 Page.AppendHead(<link rel="stylesheet" href="./build.css" />)
 Page.AppendBody(
     <main class="cpnt-blog-article">
