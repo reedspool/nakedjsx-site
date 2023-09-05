@@ -86,7 +86,7 @@ He mentioned an idea: Because my NakedJSX script should always write the output 
 
 So I tried it. I used Node's `fs.access` and `fs.stat` to read the input and the output and determine which was newer. I found the same issue which the NakedJSX developer mentioned. Unfortunately, the development server wouldn't register any files which were not exported, so those files with no changes would never recompile again. To get around this, I wrote imports for each file but included a flag so signal if it should recompile or not.
 
-This still did not solve the issue. When one of my post files changed, `all.mjs` was not re-executed. Was its output cached? I added `console.log` messages to `all.mjs`, but I never saw them again after the first build.
+<span id="all-mjs-cached-by-dev-server">This still did not solve the issue. When one of my post files changed, `all.mjs` was not re-executed. Was its output cached? I added `console.log` messages to `all.mjs`, but I never saw them again after the first build.</span>
 
 As an aside, the development server did not respond to Control-C. Instead, I had to hit "x" to exit the development server. I was so used to Control-C to exit out of other programs, and the lack of response confused me.
 
@@ -119,3 +119,13 @@ I wanted to add links between pages, but I found I was renaming pages frequently
 ### Mon Sep 4 04:40:02 PM PDT 2023
 
 I investigated why inline components (like my `Link` component) had additional spaces when rendered. I spelunked through the NakedJSX core for a while, but found nothing. Finally, I found it was due to the `pretty` option to NakedJSX which prettified the output HTML. Turning off this option fixed the issue. [I let the developer know](https://discord.com/channels/1101319012673134614/1101319013285498882/1148401967308222474).
+
+My development server did not automatically rebuild pages because of caching as I detailed [here](#all-mjs-cached-by-dev-server). I decided to fix this.
+
+My idea was to write a script to generate a JavaScript file which imported all of my posts and wrote that file to disk. This was basically what the development server was already doing, except it was trying to do it intelligently at run-time. I wanted to do it on demand instead. I'd just have to re-run that script every time I added a new file, which seemed simple enough.
+
+To write [this script](https://github.com/reedspool/nakedjsx-site/blob/main/bin/generate-post-imports.mjs#L1) was as easy as copying and pasting the contents of my development server script which essentially did the same thing. I just wrote the result to a file instead of returning it from a dynamic script.
+
+<Future>I used an HTML ID and a link to that ID to anchor within a page. I wanted to formalize that approach across the site with a component.</Future>
+
+<Future>I found that the NakedJSX development server was not correctly rendering this "link" emoji `🔗`. This seemed to be a problem only with the development server because the output HTML looked correct and when I served those files with another server, the emoji looked correct.</Future>
