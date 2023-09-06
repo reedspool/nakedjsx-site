@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Jost&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Jost|Karla&display=swap");
 @config "./tailwind.config.js";
 @tailwind base;
 @tailwind components;
@@ -17,7 +17,7 @@ html {
   --flashybg-rgb: 33 35 55;
 
   --flashy-font: "Jost", sans-serif;
-  --prose-font: "Jost", sans-serif;
+  --prose-font: "Karla", sans-serif;
 
   @apply flex flex-col items-center;
   @apply text-primaryfg bg-primarybg;
