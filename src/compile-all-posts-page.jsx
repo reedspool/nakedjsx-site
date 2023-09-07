@@ -10,11 +10,13 @@ for (const [{ inputFileName, outputFileName }, Post] of posts) {
     Page.AppendHead(<meta name="viewport" content="width=device-width, initial-scale=1" />)
     Page.AppendHead(<link rel="stylesheet" href="./build.css" />)
     Page.AppendBody(
-        <main class="cpnt-blog-article">
-            <Link slug="home">Home</Link>
-            <Post originFilename={inputFileName} components={{ Link, Future }} />
-            <Link slug="home">Home</Link>
-        </main>
+        <>
+            <header class="sticky"><Link slug="home">Home</Link></header>
+            <main class="cpnt-blog-article">
+                <Post originFilename={inputFileName} components={{ Link, Future }} />
+            </main>
+            <footer><Link slug="home">Home</Link></footer>
+        </>
     );
 
     Page.Render(outputFileName);

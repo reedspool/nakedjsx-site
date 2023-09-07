@@ -63,11 +63,16 @@ header,
 footer {
   /* The translate on the box titlebar covers the navbar unless this */
   z-index: 1;
+
+  @apply py-sm;
+
+  @apply layout-full cpnt-bleed-layout;
 }
 
 header {
   justify-content: flex-start;
   @apply bg-primarybg;
+  box-shadow: 0px -0.2rem 1rem rgb(var(--primaryfg-rgb));
 }
 
 header.sticky {
@@ -238,8 +243,8 @@ a:hover .cpnt-logo {
 }
 
 .cpnt-blog-article {
-  @apply my-md;
   @apply layout-full cpnt-bleed-layout;
+  @apply py-sm;
 
   & p,
   & ul,
