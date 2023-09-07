@@ -4,12 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Begin modifications to missing.style */
+html,
+body {
+  /* Should be auto for sticky header */
+  /* See https://stackoverflow.com/a/47352847 */
+  height: auto;
+}
 
 html {
   font-size: 20px;
   line-height: 1.65em;
-  height: 100%;
 
   --primaryfg-rgb: 40 40 40;
   --primarybg-rgb: 251 241 199;
@@ -22,11 +26,6 @@ html {
   @apply flex flex-col items-center;
   @apply text-primaryfg bg-primarybg;
   @apply font-prose;
-}
-
-body {
-  height: 100%;
-  width: 100%;
 }
 
 h1,
