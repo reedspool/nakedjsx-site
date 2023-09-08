@@ -270,10 +270,10 @@ a:hover .cpnt-logo {
   }
 
   & pre {
-    font-size: 0.9em;
-    line-height: 1.45em;
+    @apply text-xs;
+    line-height: 1.4em;
 
-    @apply layout-popout bg-primaryfg/10 text-primaryfg px-xl py-md rounded-md overflow-x-auto mb-md;
+    @apply layout-popout bg-primaryfg/10 text-primaryfg px-lg py-sm rounded-md overflow-x-auto mb-md;
   }
 
   & figure {
