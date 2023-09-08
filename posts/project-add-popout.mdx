@@ -26,12 +26,11 @@ I got this error.
     at requireValidAttributeName (file:///home/human/projects/nakedjsx-site/node_modules/nakedjsx/node_modules/@nakedjsx/core/runtime/page/document.mjs:313:15)
 ```
 
-I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I wrote attributes with similar structures to BEM CSS which uses a lot of underscores. It was easy to replace underscores with dashes `-`. I found a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores are valid in HTML attribute names. StackOverflow isn't usually definitive, so I was grateful that answer refered to [the spec](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2).
+I learned that I couldn't have underscores `_` in my attribute names. In Vanilla HTML and JS, I wrote attributes with similar structures to BEM CSS which uses a lot of underscores. It was easy to replace underscores with dashes `-`. I found a [definitive resource](https://stackoverflow.com/a/926136) which explained that underscores are valid in HTML attribute names. StackOverflow isn't usually definitive, so I was grateful that answer referred to [the spec](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2).
 
 I understand that arbitrary attributes turn HTML invalid, but it's fun to add a random attribute to target with a CSS selector like `[my-random-attribute]`. I learned at some point that CSS attribute selectors are a performance trap, but optimization must balance against fun in personal projects.
 
 Once I established that I could see the output of that basic HTML in the document, I tried adding a `script` tag with the code to drive the interactivity of the widget. But it didn't work. I recorded my effort to make that work in <Link slug="project-write-script-and-style-tags">another project.</Link>
-
 
 <Future>I continued from here</Future>
 
