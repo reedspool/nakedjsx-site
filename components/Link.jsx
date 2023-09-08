@@ -5,7 +5,8 @@ export const slugsToHrefs = {
     "about-project-logs": "topic-project-logs.html",
     "project-index": "topic-project-index.html",
     "project-add-popout": "project-add-popout.html",
-    "project-write-script-and-style-tags": "project-write-script-and-style-tags.html"
+    "project-write-script-and-style-tags": "project-write-script-and-style-tags.html",
+    "project-precision-timer": "project-precision-timer.html"
 }
 export const Link = ({ slug, children }) => {
     const href = slugsToHrefs[slug];
