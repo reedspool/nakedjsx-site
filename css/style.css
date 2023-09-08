@@ -5,9 +5,11 @@
 
 html,
 body {
-  /* Should be auto for sticky header */
-  /* See https://stackoverflow.com/a/47352847 */
-  height: auto;
+  height: 100%;
+}
+
+body {
+  @apply flex flex-col;
 }
 
 html {
