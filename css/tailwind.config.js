@@ -9,7 +9,7 @@ const colors = [
 
 module.exports = {
     // TODO Can we include a lib?
-    content: ["./src/**/*.{html,js,ejs}", "./**/*.{tsx,ts,mdx}"],
+    content: ["./src/**/*.{html,js,ejs,jsx}", "./**/*.{tsx,ts,mdx,jsx}"],
     theme: {
         extend: {
             colors,
