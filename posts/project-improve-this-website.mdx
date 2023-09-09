@@ -137,3 +137,13 @@ To write [this script](https://github.com/reedspool/nakedjsx-site/blob/main/bin/
 <Future>I added a link to the end of every post page to its file in GitHub</Future>
 
 <Future>My friend Bryan asked me to add an RSS feed to my website, and I finally obliged.</Future>
+
+### Fri Sep 8 06:40:27 PM PDT 2023
+
+I made some changes to my fork of NakedJSX core and installed it as a direct dependency.
+
+```
+npm install git+https://github.com/reedspool/nakedjsx-core.git\#reed-hacks
+```
+
+There were two commits I wanted. First, I didn't want every bit of JSX to be HTML-escaped for my <Link slug="project-write-script-and-style-tags">script and style tags</Link>. Second, I wanted more permissive HTML attribute validation so I could add an SVG with the standard attribute `xmlns:svg`.
