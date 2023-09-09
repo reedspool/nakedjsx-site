@@ -247,4 +247,175 @@ countDown();
 
 Some strange things occurred. First, the timer sometimes ended on `0.00` seconds, but not always! Often it ended with a negative sign in front of it, and even `-0.01`. The duration sometimes reported `5.00` as I'd hoped, but other times it reported `5.01`. Better than the previous result, but not perfect!
 
-<Future>I mentioned above that my measurement was imprecise as well due to the limits of `Date.now()`. So while my main goal was to improve the timer itself, I also wanted a better measurement system to increase my confidence. So I tried using the ["Performance API"](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API/High_precision_timing) to perform my measurements. Since I was using `Date.now()` for my timer as well, I decided to switch out both at once and see what happened.</Future>
+### Fri Sep 8 08:34:39 PM PDT 2023
+
+My timer was not precise!
+
+I mentioned above that my measurement was imprecise as well due to the limits of `Date.now()`. So while my main goal was to improve the timer itself, I also wanted a better measurement system to increase my confidence. So I tried using the [Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API/High_precision_timing) to perform my measurements. Since I was using `Date.now()` for my timer as well, I decided to switch out both at once and see what happened.
+
+After reading the MDN page on the Performance API, I copied my last example and replaced `Date.now()` with `performance.now()`.
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-5 w-2xl">Hit Start</output>
+  <output class="duration-output-5">Duration</output>
+  <button class="cpnt-button" onclick="startCountdown5()">Start</button>
+</p>
+
+{`
+
+<script>
+  {
+    let totalTime; 
+    let start;
+    let timeBetweenRenders = 1000 * 0.01 
+    const output = document.querySelector("output.output-5")
+    const durationOutput = document.querySelector("output.duration-output-5")
+    const originalContentDurationOutput = durationOutput.innerHTML;
+    const countDown = () => {
+      const now = performance.now();
+      const timeElapsed = now - start;
+      const timeLeft = totalTime - timeElapsed;
+      output.innerHTML = formatMillisToHundredths(timeLeft);
+      if (timeLeft <= 0) {
+        durationOutput.innerHTML = formatMillisToHundredths(timeElapsed)
+        return;
+      }
+      setTimeout(countDown, timeBetweenRenders);
+    }
+    window.startCountdown5 = () => {
+      totalTime = 1000 * 5; 
+      start = performance.now();
+      durationOutput.innerHTML = originalContentDurationOutput;
+      output.innerHTML = formatMillisToHundredths(totalTime);
+      countDown();
+    }
+  }
+</script>
+
+`}
+
+This had very similar results. My timer stopped at `-0.00` or `0.01`. The duration was either `5.00` or `5.01`. I thought maybe the issue was that my `setTimeout` time scheduled a tick every hundredth of a second, so I tried lowering that to a thousandth of a second.
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-6 w-2xl">Hit Start</output>
+  <output class="duration-output-6">Duration</output>
+  <button class="cpnt-button" onclick="startCountdown6()">Start</button>
+</p>
+
+{`
+
+<script>
+  {
+    let totalTime; 
+    let start;
+    let timeBetweenRenders = 1000 * 0.001 
+    const output = document.querySelector("output.output-6")
+    const durationOutput = document.querySelector("output.duration-output-6")
+    const originalContentDurationOutput = durationOutput.innerHTML;
+    const countDown = () => {
+      const now = performance.now();
+      const timeElapsed = now - start;
+      const timeLeft = totalTime - timeElapsed;
+      output.innerHTML = formatMillisToHundredths(timeLeft);
+      if (timeLeft <= 0) {
+        durationOutput.innerHTML = formatMillisToHundredths(timeElapsed)
+        return;
+      }
+      setTimeout(countDown, timeBetweenRenders);
+    }
+    window.startCountdown6 = () => {
+      totalTime = 1000 * 5; 
+      start = performance.now();
+      durationOutput.innerHTML = originalContentDurationOutput;
+      output.innerHTML = formatMillisToHundredths(totalTime);
+      countDown();
+    }
+  }
+</script>
+
+`}
+
+That made the output more consistent. A few times the duration did hit `5.01` and the timer did hit `-0.01`, but far less often.
+
+I realized that having the negative sign on my timer was unavoidable because of these lines in my code:
+
+```js
+const now = performance.now();
+const timeElapsed = now - start;
+const timeLeft = totalTime - timeElapsed;
+if (timeLeft <= 0) { /* stop the timer */
+```
+
+The `timeLeft` is a difference of two numbers, and the conditional only stops the timer if `timeLeft` is less than or equal to zero. So it makes sense that it never stops above zero! Any amount of time beyond the `totalTime` would cause that zero would turn negative. The difference could be as small as microseconds with `performance.now()`. I knew [JavaScript had negative zero](https://stackoverflow.com/a/29219831) but I hadn't seen it in a while. Fun!
+
+So, I had traded some precision for performance. I was afraid that a tick of my timer every millisecond was too often. It was okay when there was no other JavaScript running on the page, but if anything else was happening on the page that could cause the `setTimeout` to be scheduled late. I wanted to demonstrate this for myself to justify (or disprove) my fears.
+
+I wanted to make another timer but with another computationally expensive task ongoing in the event loop. I thought I could write a function which created a large array of random numbers and then sorted it inefficiently. Before I wrote anything, though, I searched for "computationally expensive JavaScript function" and found [a great answer](https://stackoverflow.com/a/62607353) on StackOverflow which suggested this randomized time waster:
+
+```js
+function wait(seconds) {
+  // add or subtract up to 50%
+  seconds *= Math.random() + 0.5;
+  var start = new Date();
+  while ((new Date() - start) / 1000 < seconds);
+}
+```
+
+I took that example and made a new timer which filled up the event loop with calls to `wait` for a quarter of a second each.
+
+**Warning** This may heat up your computer or crash this page if you click it a lot.
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-7 w-2xl">Hit Start</output>
+  <output class="duration-output-7">Duration</output>
+  <button class="cpnt-button" onclick="startCountdown7()">Start</button>
+</p>
+
+{`
+
+<script>
+  window.wait = (seconds) => {
+    seconds *= Math.random() + 0.5;
+    var start = new Date();
+    while ((new Date() - start) / 1000 < seconds);
+  }
+  let busyTimerId7;
+  {
+    let totalTime; 
+    let start;
+    let timeBetweenRenders = 1000 * 0.001 
+    const output = document.querySelector("output.output-7")
+    const durationOutput = document.querySelector("output.duration-output-7")
+    const originalContentDurationOutput = durationOutput.innerHTML;
+    const countDown = () => {
+      const now = performance.now();
+      const timeElapsed = now - start;
+      const timeLeft = totalTime - timeElapsed;
+      output.innerHTML = formatMillisToHundredths(timeLeft);
+      if (timeLeft <= 0) {
+        durationOutput.innerHTML = formatMillisToHundredths(timeElapsed)
+        clearTimeout(busyTimerId7);
+        return;
+      }
+      setTimeout(countDown, timeBetweenRenders);
+    }
+    const busyLoop = () => {
+       wait(0.25)
+       busyTimerId7 = setTimeout(busyLoop, 0)
+    }
+    window.startCountdown7 = () => {
+      totalTime = 1000 * 5; 
+      start = performance.now();
+      durationOutput.innerHTML = originalContentDurationOutput;
+      output.innerHTML = formatMillisToHundredths(totalTime);
+      countDown();
+      busyLoop();
+    }
+  }
+</script>
+
+`}
+
+As expected, it made the timer much slower. I observed varied durations between `5.01` and `5.34`.
+
+Of course, this is an exaggeration of real-world usage. I would not use my timer on a page with constantly-running busywork. That some poorly-timed JavaScript could impact the precision of my timer so much gave me pause.
