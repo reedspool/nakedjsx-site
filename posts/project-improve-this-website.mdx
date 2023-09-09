@@ -147,3 +147,9 @@ npm install git+https://github.com/reedspool/nakedjsx-core.git\#reed-hacks
 ```
 
 There were two commits I wanted. First, I didn't want every bit of JSX to be HTML-escaped for my <Link slug="project-write-script-and-style-tags">script and style tags</Link>. Second, I wanted more permissive HTML attribute validation so I could add an SVG with the standard attribute `xmlns:svg`.
+
+<Future>In my <Link slug="project-precision-timer">precision timer project</Link> I wrote many similar ad-hoc HTML widgets with adjacent script tags to drive the widgets' interactions. Since I was repeating the same widget with minor modifications, I ended up copying and pasting similar code. Each time, I changed a number at the end of each repeated function name as well as class names for targeting associated the HTML elements. So I wondered if I could write a functional wrapper which would give me a unique name/number for each iteration, instead of making the same repetitive change to the numbers for each copy of the code. I was thinking of [`gensym` from Lisp macros](https://stackoverflow.com/a/59493183). I wasn't sure how this would work in JSX.</Future>
+
+<Future>I wanted to improve my `Future` component to style it differently from the prose around it.</Future>
+
+<Future>I wanted to improve my `Future` component to add a link to an explanation of why I wrote something I'd never done in the past tense.</Future>
