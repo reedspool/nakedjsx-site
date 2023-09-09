@@ -2,6 +2,8 @@ import { Page } from '@nakedjsx/core/page';
 import posts from './generated-post-imports.mjs'
 import { Link } from "../components/Link.jsx"
 import { Future } from "../components/Future.jsx"
+import { LogoSVG, LogoSVGSymbol } from "../components/LogoSVGSymbol.jsx"
+
 
 
 for (const [{ inputFileName, outputFileName }, Post] of posts) {
@@ -12,8 +14,10 @@ for (const [{ inputFileName, outputFileName }, Post] of posts) {
     Page.AppendHead(<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />)
     Page.AppendHead(<link href="https://fonts.googleapis.com/css2?family=Jost&family=Karla&display=swap" rel="stylesheet" />)
     Page.AppendHead(<link rel="stylesheet" href="./build.css" />)
+
     Page.AppendBody(
         <>
+            <LogoSVGSymbol />
             {/*
                 Wrap the header and the header AND main content in a growing
                 container so that A) the sticky header never scrolls off the
@@ -25,6 +29,7 @@ for (const [{ inputFileName, outputFileName }, Post] of posts) {
             <div class="flex-grow">
                 <header class="sticky">
                     <div class=" flex flex-row gap-4 items-center font-flashy">
+                        <LogoSVG />
                         <Link slug="home">Reed's Website</Link>
                     </div>
                 </header>
