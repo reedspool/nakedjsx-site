@@ -419,3 +419,158 @@ I took that example and made a new timer which filled up the event loop with cal
 As expected, it made the timer much slower. I observed varied durations between `5.01` and `5.34`.
 
 Of course, this is an exaggeration of real-world usage. I would not use my timer on a page with constantly-running busywork. That some poorly-timed JavaScript could impact the precision of my timer so much gave me pause.
+
+### Sun Sep 10 11:14:21 PM PDT 2023
+
+I considered the real-world use case of this. If someone used my timer and expected it to be as precise as a digital clock, they might be disappointed. My clock might give their chess opponent a lot of extra time if some other JavaScript were running, or if my timer's JavaScript were interrupted for any reason. The timer could have large skips in it at random times. If it was used for the basis of a video game, the timer may mislead the player and feel laggy or late. I know I'd be disappointed if I put up a basketball with 2 seconds left on the clock, and then suddenly the timer jumped forward and the buzzer rang right before the ball went in.
+
+So I realized that precision could mean many things and I wanted a demonstration to point out exactly what I was looking for. I felt it was the feeling of precision more than precision itself. After all I wasn't going to be able to make a more precise timer than the built-in Performance API's time stamps and JavaScript's function scheduling allowed for, right?
+
+<Future>I built a "skill test" with a slider along a gradient and a test to hit a big red button right at the specific time.</Future>
+
+I flashed back to above where I'd used a `wait` function from StackOverflow. I realized that had a timer in it too. If you used the non-random version, it was the most high-precision a JavaScript timer could be. But it had problems so ingrained in my head that I walked right by them as obviously problematic. I realiezd I should unpack and explain to myself why this is so problematic to differentiate why I can't use the most precise solution. Who wouldn't ask me why I didn't just use that? People who also had the same ingrained understandings of how JavaScript should work.
+
+The problem with that `wait` function was also its biggest strength. It consumed the entire single thread of JavaScript for itself, gobbling up the processing capability allotted for this browser tab or `node` process. It makes my laptop hot and it disallows anything else happening on the page. Hence the `setTimeout` method - it only uses the thread every so often, at the time interval I specified.
+
+If this `wait` timer was the most precise JavaScript timer I could imagine, I wondered what the maximum precision it could have would be. That would be the average gap of time between two iterations if its loop. Here's the non-random version again.
+
+```js
+function wait(seconds) {
+  var start = new Date();
+  while ((new Date() - start) / 1000 < seconds);
+}
+```
+
+So I wanted to make a loop which would calculate average time between iterations.
+
+```js
+const averageLoopTime = (seconds) => {
+  const start = performance.now();
+  let now = performance.now();
+  let last = now;
+  let count = 0;
+  let total = 0;
+
+  while ((now - start) / 1000 < seconds) {
+    last = now;
+    now = performance.now();
+    count += 1;
+    total += now - last;
+  }
+
+  return { total, count, average: total / count };
+};
+```
+
+And here's a button that does this for 5 seconds.
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-8">Hit Start</output>
+  <button class="cpnt-button" onclick="startCountdown8()">Start</button>
+</p>
+
+{`
+
+<script>
+  {
+    const output = document.querySelector("output.output-8")
+    const averageLoopTime = (seconds) => {
+      const start = performance.now();
+      let now = performance.now();
+      let last = now;
+      let count = 0;
+      let total = 0;
+      while ((now - start) / 1000 < seconds) {
+        last = now;
+        now = performance.now();
+        count += 1;
+        total += now - last;
+      }
+      return { total, count, average: total / count };
+    };
+    window.startCountdown8 = () => {
+      output.innerHTML = "Running..."
+      // Have to schedule this for the next loop to see our "Running message"
+      setTimeout(() => {
+        const { total, count, average } = averageLoopTime(5);
+        output.innerHTML = average + " average milliseconds per loop after "  + count + " loops."
+      }, 0)
+    }
+  }
+</script>
+
+`}
+
+Wow, those numbers were way smaller and bigger than I thought they'd be! In hindsight, I'm not sure what I expected. I guess I'm so used to playing with async code. I was curious to see some hard numbers about what the difference between each loop would be if I did a similar measure for async code:
+
+```js
+const averageSetTimeoutTime = (seconds) => {
+  const start = performance.now();
+  let now = performance.now();
+  let last = now;
+  let count = 0;
+  let total = 0;
+
+  return new Promise((resolve) => {
+    const tick = () => {
+      last = now;
+      now = performance.now();
+      count += 1;
+      total += now - last;
+
+      if ((now - start) / 1000 < seconds) {
+        setTimeout(tick, 0);
+      } else {
+        resolve({ total, count, average: total / count });
+      }
+    };
+
+    tick();
+  });
+};
+```
+
+And a button to drive it.
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-9">Hit Start</output>
+  <button class="cpnt-button" onclick="startCountdown9()">Start</button>
+</p>
+
+{`
+
+<script>
+  {
+    const output = document.querySelector("output.output-9")
+    const averageSetTimeoutTime = (seconds) => {
+      const start = performance.now();
+      let now = performance.now();
+      let last = now;
+      let count = 0;
+      let total = 0;
+      return new Promise((resolve) => {
+        const tick = () => {
+          last = now;
+          now = performance.now();
+          count += 1;
+          total += now - last;
+          if ((now - start) / 1000 < seconds) { 
+            setTimeout(tick, 0)
+          } else {
+            resolve({ total, count, average: total / count })
+          }
+        }
+        tick();
+      })
+    };
+    window.startCountdown9 = async () => {
+      output.innerHTML = "Running..."
+      const { total, count, average } = await averageSetTimeoutTime(5);
+      output.innerHTML = average + " average milliseconds per loop after "  + count + " loops."
+    }
+  }
+</script>
+
+`}
+
+A number over 4 milliseconds here was evidence that the [HTML spec was being followed](https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#timers).
