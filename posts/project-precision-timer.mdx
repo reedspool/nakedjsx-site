@@ -2,6 +2,45 @@
 
 I wanted to make a countdown timer in JavaScript which was as precise to real-time as possible.
 
+## Prototype
+
+So you don't have to read through this entire page to see what my best finding looks like, here's a timer:
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-Prototype w-2xl">Hit Start</output>
+  <button class="cpnt-button" onclick="startCountdownPrototype()">Start</button>
+</p>
+
+{`
+
+<script>
+  {
+    let totalTime; 
+    let start;
+    let timeBetweenRenders = 1000 * 0.001 
+    const output = document.querySelector("output.output-Prototype")
+    const countDown = () => {
+      const now = performance.now();
+      const timeElapsed = now - start;
+      const timeLeft = totalTime - timeElapsed;
+      if (timeLeft <= 0) {
+        output.innerHTML = formatMillisToHundredths(0);
+        return;
+      }
+      output.innerHTML = formatMillisToHundredths(timeLeft);
+      setTimeout(countDown, timeBetweenRenders);
+    }
+    window.startCountdownPrototype = () => {
+      totalTime = 1000 * 5; 
+      start = performance.now();
+      output.innerHTML = formatMillisToHundredths(totalTime);
+      countDown();
+    }
+  }
+</script>
+
+`}
+
 ## Criteria
 
 I'd call this a success if I could watch my timer count down from the set time to zero. I wanted to see the current time roll by in tenths or hundredths of seconds without sacrificing rendering performance even on a lower power device like my phone. I also wanted the ability to pause the timer and have it stop on a dime with no perceptible lag between my click and the timer stopping.
@@ -574,3 +613,11 @@ And a button to drive it.
 `}
 
 A number over 4 milliseconds here was evidence that the [HTML spec was being followed](https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#timers).
+
+For this async test, I got numbers on the order of `1000` loops. For the sync test above I got on the order of `20000000` loops. I knew sync code was faster than async code, but I had no idea it was 20,000 times faster! Really interesting result.
+
+### Fri Sep 15 09:45:28 PM PDT 2023
+
+I made a space at the top of this page to present my best timer at the moment. I thought someone shouldn't have to read through this entire log to see what my best guess was. And that someone would probably be me when I wanted to use my timer!
+
+<Future>I wanted to see if a smoother timer could be done with CSS animations. I was concerned how closely JavaScript interaction could map to a CSS-based timer.</Future>
