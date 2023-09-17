@@ -8,6 +8,8 @@ export const slugsToHrefs = {
   "project-write-script-and-style-tags":
     "project-write-script-and-style-tags.html",
   "project-precision-timer": "project-precision-timer.html",
+  "project-add-rss": "project-add-rss.html",
+};
 export const Link = ({ slug, children }) => {
   const href = slugsToHrefs[slug];
   if (!href) throw new Error(`No href found for slug "${slug}"`);

@@ -6,31 +6,35 @@
  * Run that again to regenerate this file.
  ******************************************************************************/
 import mdx_0 from ':mdx:../posts/project-add-popout.mdx';
-import mdx_1 from ':mdx:../posts/project-improve-this-website.mdx';
-import mdx_2 from ':mdx:../posts/project-precision-timer.mdx';
-import mdx_3 from ':mdx:../posts/project-track-my-projects.mdx';
-import mdx_4 from ':mdx:../posts/project-write-script-and-style-tags.mdx';
-import mdx_5 from ':mdx:../posts/topic-project-index.mdx';
-import mdx_6 from ':mdx:../posts/topic-project-logs.mdx';
+import mdx_1 from ':mdx:../posts/project-add-rss.mdx';
+import mdx_2 from ':mdx:../posts/project-improve-this-website.mdx';
+import mdx_3 from ':mdx:../posts/project-precision-timer.mdx';
+import mdx_4 from ':mdx:../posts/project-track-my-projects.mdx';
+import mdx_5 from ':mdx:../posts/project-write-script-and-style-tags.mdx';
+import mdx_6 from ':mdx:../posts/topic-project-index.mdx';
+import mdx_7 from ':mdx:../posts/topic-project-logs.mdx';
 export default [[{
   "inputFileName": "project-add-popout.mdx",
   "outputFileName": "project-add-popout.html"
 }, mdx_0],[{
+  "inputFileName": "project-add-rss.mdx",
+  "outputFileName": "project-add-rss.html"
+}, mdx_1],[{
   "inputFileName": "project-improve-this-website.mdx",
   "outputFileName": "project-improve-this-website.html"
-}, mdx_1],[{
+}, mdx_2],[{
   "inputFileName": "project-precision-timer.mdx",
   "outputFileName": "project-precision-timer.html"
-}, mdx_2],[{
+}, mdx_3],[{
   "inputFileName": "project-track-my-projects.mdx",
   "outputFileName": "project-track-my-projects.html"
-}, mdx_3],[{
+}, mdx_4],[{
   "inputFileName": "project-write-script-and-style-tags.mdx",
   "outputFileName": "project-write-script-and-style-tags.html"
-}, mdx_4],[{
+}, mdx_5],[{
   "inputFileName": "topic-project-index.mdx",
   "outputFileName": "topic-project-index.html"
-}, mdx_5],[{
+}, mdx_6],[{
   "inputFileName": "topic-project-logs.mdx",
   "outputFileName": "topic-project-logs.html"
-}, mdx_6]];
+}, mdx_7]];

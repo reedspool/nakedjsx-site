@@ -11,3 +11,68 @@ curl https://www.youtube.com/feeds/videos.xml?channel_id=UClZbO3wehSIsPUKLx_X5ca
 ```
 
 I figured if anyone would have a quality RSS example, it would be YouTube or podcasts.
+
+I then Googled around for "RSS npm package" and found a couple packages and [a tutorial](https://blog.logrocket.com/adding-rss-feed-next-js-app/).
+
+The tutorial pointed me to the [`feed` NPM package](https://www.npmjs.com/package/feed) which I hadn't seen in my initial search.
+
+I installed `feed`. Then I grabbed the example configuration code from their readme and began to fill it in.
+
+```js
+import { Feed } from "feed";
+
+const feed = new Feed({
+  title: "Reed's Website",
+  description: "Updates and additions",
+  id: "https://reeds.website/",
+  link: "https://reeds.website/",
+  language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+  image: "http://reeds.website/assets/circle_r.svg",
+  favicon: "http://reeds.website/favicon.ico",
+  copyright: "All rights reserved 2023, Reed Spool",
+  // updated: new Date(2013, 6, 14), // optional, default = today
+  generator: "awesome", // optional, default = 'Feed for Node.js'
+  feedLinks: {
+    rss2: `https://reeds.website/rss.xml`,
+    json: `https://reeds.website/rss.json`,
+    atom: `https://reeds.website/atom.xml`,
+  },
+  author: {
+    name: "Reed's Website",
+    email: "reedwith2es@gmail.com",
+    link: "https://reeds.website/"
+  }
+});
+```
+
+That was easy, so I moved on to considering how I would populate the feed with posts. The example code in `feed`'s README:
+
+```js
+posts.forEach({
+  url, description, content, date, image
+} => {
+  feed.addItem({
+    title,
+    id: url,
+    link: url,
+    description,
+    content,
+    author: [],
+    contributor: [],
+    date,
+    image
+  });
+});
+```
+
+So those were the properties I needed to derive for each post:.
+
+```js
+{ url, description, content, date, image }
+```
+
+Before moving on, I wanted to verify that the code would work, so I added it to [my compilation script](https://github.com/reedspool/nakedjsx-site/blob/6bcaf25e60d2170a5bb9e132d2a93c9878163588/src/compile-all-posts-page.jsx#L1).
+
+I realized I'd need to export each title from each project file because I'd need to put that in each feed. I'd probably want to export a description as well. I wasn't sure what would go in the `content` field.
+
+Before doing that, I decided just to push the working RSS and try to put it in my own RSS feeder to see what the audience experience is like.

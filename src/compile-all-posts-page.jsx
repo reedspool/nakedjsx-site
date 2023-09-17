@@ -1,10 +1,50 @@
+import { writeFile } from "node:fs/promises";
 import { Page } from "@nakedjsx/core/page";
 import posts from "./generated-post-imports.mjs";
 import { Link } from "../components/Link.jsx";
 import { Future } from "../components/Future.jsx";
 import { LogoSVG, LogoSVGSymbol } from "../components/LogoSVGSymbol.jsx";
 
+import { Feed } from "feed";
+import { OUT_DIR_REL_PATH } from "./constants.mjs";
+
+const rssSiteImageUrl = "https://reeds.website/assets/circle_r.svg";
+
+const feed = new Feed({
+  title: "Reed's Website",
+  description: "Updates and additions",
+  id: "https://reeds.website/",
+  link: "https://reeds.website/",
+  language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+  image: rssSiteImageUrl,
+  favicon: "https://reeds.website/favicon.ico",
+  copyright: "All rights reserved 2023, Reed Spool",
+  // updated: new Date(2013, 6, 14), // optional, default = today
+  generator: "awesome", // optional, default = 'Feed for Node.js'
+  feedLinks: {
+    rss2: `https://reeds.website/rss.xml`,
+    json: `https://reeds.website/rss.json`,
+    atom: `https://reeds.website/atom.xml`,
+  },
+  author: {
+    name: "Reed's Website",
+    email: "reedwith2es@gmail.com",
+    link: "https://reeds.website/",
+  },
+});
+
 for (const [{ inputFileName, outputFileName }, Post] of posts) {
+  const url = `https//reeds.website/${outputFileName}`;
+  feed.addItem({
+    // Need to export these
+    title: "Post title",
+    description: "Post description",
+    content: "Post content",
+    date: new Date(),
+    id: url,
+    link: url,
+    image: rssSiteImageUrl,
+  });
   Page.Create("en");
   Page.AppendHead(<title>Reed's Website</title>);
   Page.AppendHead(
@@ -54,3 +94,8 @@ for (const [{ inputFileName, outputFileName }, Post] of posts) {
 
   Page.Render(outputFileName);
 }
+
+// Must match `feedLinks` in the feed config
+writeFile(`./build/rss.xml`, feed.rss2());
+writeFile(`./build/rss.json`, feed.json1());
+writeFile(`./build/atom.xml`, feed.atom1());
