@@ -293,7 +293,10 @@ a:hover .cpnt-logo {
     }
   }
 
-  & h1,
+  & h1 {
+    @apply my-lg;
+  }
+
   & h2,
   & h3,
   & h4,
