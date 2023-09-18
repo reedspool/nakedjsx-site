@@ -36,26 +36,41 @@ const feed = new Feed({
   },
 });
 const url = `${BASE_URL}/${filename}`;
-feed.addItem({
-  // Need to export these
-  title: "Post title",
-  description: "Post description",
-  content: "Post content",
-  date: new Date("2023-09-16T07:00:00.000Z"),
+const itemDefaults = {
   id: url,
   link: url,
   image,
+};
+
+feed.addItem({
+  ...itemDefaults,
+  date: new Date("2023-09-16T07:00:00.000Z"),
+  title: "Fake first",
+  description: "Hello World",
+  content: `
+    This is content to my RSS feed! It's not very stable right now so you might
+    see this more than once :-/ Sorry about that!
+  `,
 });
 
 feed.addItem({
-  // Need to export these
-  title: "Post title 2",
-  description: "Post description",
-  content: "Post content",
+  ...itemDefaults,
   date: new Date("2023-09-17T07:00:00.000Z"),
-  id: url,
-  link: url,
-  image,
+  title: "Fake second",
+  description: "Hello Universe",
+  content: `
+    Ditto my last I'm sorry to say. I've got a long ways to go before my feed is stable
+  `,
+});
+
+feed.addItem({
+  ...itemDefaults,
+  date: new Date("2023-09-18T07:00:00.000Z"),
+  title: "Fake third",
+  description: "Hello Universe",
+  content: `
+    Ditto my last I'm sorry to say. I've got a long ways to go before my feed is stable
+  `,
 });
 
 // Write out all RSS Feeds
@@ -64,14 +79,12 @@ writeFile(`./build/rss.xml`, feed.rss2());
 writeFile(`./build/rss.json`, feed.json1());
 writeFile(`./build/atom.xml`, feed.atom1());
 
-const feedItems = [...feed.items].sort(
-  (a, b) => b.date.getTime() - a.date.getTime()
-);
+const feedItems = [...feed.items].sort((a, b) => b.date - a.date);
 
 await CommonNakedJSXPage({
   outputFileName: `${OUT_DIR_REL_PATH}/${filename}`,
   Body: () => (
-    <>
+    <GenericPageBody>
       <h1>Feed/Change Log</h1>
 
       <p>
@@ -79,12 +92,15 @@ await CommonNakedJSXPage({
         It is exactly the content of my RSS feed.
       </p>
 
-      {feedItems.map(({ title, date }) => (
+      {feedItems.map(({ title, date, description, content }) => (
         <>
-          <h2>{title}</h2>
-          <h3>{date}</h3>
+          <h2>
+            {date.toLocaleDateString()} | {title || "Update"}
+          </h2>
+          <blockquote>{description}</blockquote>
+          <p>{content}</p>
         </>
       ))}
-    </>
+    </GenericPageBody>
   ),
 });
