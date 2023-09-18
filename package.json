@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "npm run build:generate-post-imports && npm run build:html && npm run build:css && npm build static",
+        "build": "npm run build:generate-post-imports && npm run build:html && npm run build:css && npm run build:static",
         "build:html": "npx nakedjsx src",
         "build:static": "cp -r static build/static",
         "start": "npm run build:html -- --dev",

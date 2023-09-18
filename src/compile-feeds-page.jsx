@@ -6,7 +6,7 @@ import { GenericPageBody } from "../components/GenericPageBody.jsx";
 import { Feed } from "feed";
 import { BASE_URL } from "./constants.mjs";
 
-const image = `${BASE_URL}/assets/circle_r.svg`;
+const image = `${BASE_URL}/static/circle_r.svg`;
 const filename = "feed.html";
 
 /**
@@ -67,6 +67,16 @@ feed.addItem({
   ...itemDefaults,
   date: new Date("2023-09-18T07:00:00.000Z"),
   title: "Fake third",
+  description: "Hello Universe",
+  content: `
+    Ditto my last I'm sorry to say. I've got a long ways to go before my feed is stable
+  `,
+});
+
+feed.addItem({
+  ...itemDefaults,
+  date: new Date("2023-09-19T07:00:00.000Z"),
+  title: "Fake four",
   description: "Hello Universe",
   content: `
     Ditto my last I'm sorry to say. I've got a long ways to go before my feed is stable
