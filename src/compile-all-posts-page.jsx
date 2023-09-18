@@ -6,35 +6,35 @@ import { Future } from "../components/Future.jsx";
 import { LogoSVG, LogoSVGSymbol } from "../components/LogoSVGSymbol.jsx";
 
 import { Feed } from "feed";
-import { OUT_DIR_REL_PATH } from "./constants.mjs";
+import { BASE_URL } from "./constants.mjs";
 
-const rssSiteImageUrl = "https://reeds.website/assets/circle_r.svg";
+const rssSiteImageUrl = `${BASE_URL}/assets/circle_r.svg`;
 
 const feed = new Feed({
-  title: "Reed's Website",
+  title: "Reed's Website1",
   description: "Updates and additions",
-  id: "https://reeds.website/",
-  link: "https://reeds.website/",
+  id: `${BASE_URL}/`,
+  link: `${BASE_URL}/`,
   language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
   image: rssSiteImageUrl,
-  favicon: "https://reeds.website/favicon.ico",
+  favicon: `${BASE_URL}/favicon.ico`,
   copyright: "All rights reserved 2023, Reed Spool",
   // updated: new Date(2013, 6, 14), // optional, default = today
   generator: "awesome", // optional, default = 'Feed for Node.js'
   feedLinks: {
-    rss2: `https://reeds.website/rss.xml`,
-    json: `https://reeds.website/rss.json`,
-    atom: `https://reeds.website/atom.xml`,
+    rss2: `${BASE_URL}/rss.xml`,
+    json: `${BASE_URL}/rss.json`,
+    atom: `${BASE_URL}/atom.xml`,
   },
   author: {
     name: "Reed's Website",
     email: "reedwith2es@gmail.com",
-    link: "https://reeds.website/",
+    link: `${BASE_URL}/`,
   },
 });
 
 for (const [{ inputFileName, outputFileName }, Post] of posts) {
-  const url = `https//reeds.website/${outputFileName}`;
+  const url = `${BASE_URL}/${outputFileName}`;
   feed.addItem({
     // Need to export these
     title: "Post title",
