@@ -6,7 +6,7 @@ import { GenericPageBody } from "../components/GenericPageBody.jsx";
 import { Feed } from "feed";
 import { BASE_URL } from "./constants.mjs";
 
-const image = `${BASE_URL}/static/circle_r.svg`;
+const image = `${BASE_URL}/assets/circle_r.svg`;
 const filename = "feed.html";
 
 /**
@@ -16,8 +16,8 @@ const filename = "feed.html";
 const feed = new Feed({
   title: "Reed's Website",
   description: "Updates and additions",
-  id: `${BASE_URL}/`,
-  link: `${BASE_URL}/`,
+  id: `${BASE_URL}/${filename}`,
+  link: `${BASE_URL}/${filename}`,
   language: "en", // optional, used only in RSS 2.0, possible values: http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
   image,
   favicon: `${BASE_URL}/favicon.ico`,

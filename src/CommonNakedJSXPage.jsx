@@ -7,6 +7,9 @@ export const CommonNakedJSXPage = async ({ outputFileName, Body }) => {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   );
   Page.AppendHead(
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+  );
+  Page.AppendHead(
     <link rel="preconnect" href="https://fonts.googleapis.com" />
   );
   Page.AppendHead(

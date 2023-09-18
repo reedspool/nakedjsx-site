@@ -6,8 +6,8 @@
     "scripts": {
         "build": "npm run build:generate-post-imports && npm run build:html && npm run build:css && npm run build:static",
         "build:html": "npx nakedjsx src",
-        "build:static": "cp -r static build/static",
-        "start": "npm run build:html -- --dev",
+        "build:static": "cp -r static/* build/",
+        "start": "npm run build:static && npm run build:css && npm run build:html -- --dev",
         "build:css": "postcss css/style.css --output build/build.css",
         "start:css": "npm run build:css -- --watch",
         "build:generate-post-imports": "node bin/generate-post-imports.mjs"
