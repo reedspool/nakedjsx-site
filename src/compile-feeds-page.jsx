@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { CommonNakedJSXPage } from "./CommonNakedJSXPage.jsx";
 import { OUT_DIR_REL_PATH } from "./constants.mjs";
 import { GenericPageBody } from "../components/GenericPageBody.jsx";
+import { Link } from "../components/Link.jsx";
 
 import { Feed } from "feed";
 import { BASE_URL } from "./constants.mjs";
@@ -67,7 +68,8 @@ await CommonNakedJSXPage({
       <h1>Updates</h1>
 
       <p>
-        This is the same content as my RSS feed. The newest entries are on top.
+        This is the same content as my <Link slug="rss-feed">RSS feed</Link>.
+        The newest entries are on top.
       </p>
 
       {feedItems.map(({ title, date, description, content }) => (
