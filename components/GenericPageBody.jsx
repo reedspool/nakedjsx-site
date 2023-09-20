@@ -32,6 +32,11 @@ export const GenericPageBody = ({ children }) => (
           Updates{" "}
           <i className={`bx bx-calendar align-middle ml-sm inline-block`} />
         </Link>
+
+        <a href="https://www.github.com/reedspool/nakedjsx-site">
+          GitHub{" "}
+          <i className={`bx bxl-github align-middle ml-sm inline-block`} />
+        </a>
       </div>
     </footer>
   </>
