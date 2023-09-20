@@ -45,41 +45,10 @@ const itemDefaults = {
 feed.addItem({
   ...itemDefaults,
   date: new Date("2023-09-16T07:00:00.000Z"),
-  title: "Fake first",
-  description: "Hello World",
+  title: "Hello World",
   content: `
-    This is content to my RSS feed! It's not very stable right now so you might
-    see this more than once :-/ Sorry about that!
-  `,
-});
-
-feed.addItem({
-  ...itemDefaults,
-  date: new Date("2023-09-17T07:00:00.000Z"),
-  title: "Fake second",
-  description: "Hello Universe",
-  content: `
-    Ditto my last I'm sorry to say. I've got a long ways to go before my feed is stable
-  `,
-});
-
-feed.addItem({
-  ...itemDefaults,
-  date: new Date("2023-09-18T07:00:00.000Z"),
-  title: "Fake third",
-  description: "Hello Universe",
-  content: `
-    Ditto my last I'm sorry to say. I've got a long ways to go before my feed is stable
-  `,
-});
-
-feed.addItem({
-  ...itemDefaults,
-  date: new Date("2023-09-19T07:00:00.000Z"),
-  title: "Fake four",
-  description: "Hello Universe",
-  content: `
-    Ditto my last I'm sorry to say. I've got a long ways to go before my feed is stable
+    Thank you for subscribing to my feed. I intend to add an entry to this feed
+    arbitrarily and randomly as I work on this site.
   `,
 });
 
@@ -95,11 +64,10 @@ await CommonNakedJSXPage({
   outputFileName: `${OUT_DIR_REL_PATH}/${filename}`,
   Body: () => (
     <GenericPageBody>
-      <h1>Feed/Change Log</h1>
+      <h1>Updates</h1>
 
       <p>
-        Welcome from my RSS feed! This page is in reverse chronological order.
-        It is exactly the content of my RSS feed.
+        This is the same content as my RSS feed. The newest entries are on top.
       </p>
 
       {feedItems.map(({ title, date, description, content }) => (
@@ -107,7 +75,7 @@ await CommonNakedJSXPage({
           <h2>
             {date.toLocaleDateString()} | {title || "Update"}
           </h2>
-          <blockquote>{description}</blockquote>
+          {description && <blockquote>{description}</blockquote>}
           <p>{content}</p>
         </>
       ))}
