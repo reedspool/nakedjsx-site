@@ -9,6 +9,8 @@ export const slugsToHrefs = {
     "project-write-script-and-style-tags.html",
   "project-precision-timer": "project-precision-timer.html",
   "project-add-rss": "project-add-rss.html",
+  "rss-feed": "rss.xml",
+  feed: "feed.html",
 };
 export const Link = ({ slug, children }) => {
   const href = slugsToHrefs[slug];

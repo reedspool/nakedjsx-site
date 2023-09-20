@@ -22,6 +22,12 @@ export const CommonNakedJSXPage = async ({ outputFileName, Body }) => {
     />
   );
   Page.AppendHead(<link rel="stylesheet" href="./build.css" />);
+  Page.AppendHead(
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  );
 
   Page.AppendBody(<Body />);
 

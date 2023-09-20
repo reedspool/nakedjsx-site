@@ -21,7 +21,18 @@ export const GenericPageBody = ({ children }) => (
       <main class="cpnt-blog-article">{children}</main>
     </div>
     <footer>
-      <Link slug="home">Home</Link>
+      <div class="flex flex-row gap-4">
+        <Link slug="home">Home</Link>
+
+        <Link slug="rss-feed">
+          RSS <i className={`bx bx-rss align-middle ml-sm inline-block`} />
+        </Link>
+
+        <Link slug="feed">
+          Updates{" "}
+          <i className={`bx bx-calendar align-middle ml-sm inline-block`} />
+        </Link>
+      </div>
     </footer>
   </>
 );

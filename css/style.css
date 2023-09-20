@@ -9,7 +9,7 @@ body {
 }
 
 body {
-  @apply flex flex-col;
+  @apply flex flex-col w-full;
 }
 
 html {
