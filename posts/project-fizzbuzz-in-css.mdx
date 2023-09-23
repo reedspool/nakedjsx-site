@@ -196,3 +196,18 @@ The way I wrote the output in my examples, `div`s and `span`s within `pre code` 
   }
 </style>&lt;/style&gt;</code></pre>
 `}
+
+I wanted to try a trick to change every instance of the word `Fizz` on this page to `Crackle` and `Buzz` to `Pop`. So `FizzBuzz` would become `CracklePop`. This was utterly unrelated to the main goal, just a fun thing. I decided to try a query string toggle first. So if a user accesses this site with the query string `?crackle=pop` then this would be a CracklePop page instead.
+
+Luckily I only ever wrote `Fizz` and `Buzz` with capitalized first letters. If I ever wrote them lower case, I'd have to find a better solution or add special cases.
+
+{`
+<pre><code>&lt;script&gt;<script class="block">  if (location.search.match(/crackle=pop/i)) {
+    document.body.innerHTML = document.body.innerHTML
+      .replaceAll('Fizz', 'Crackle')
+      .replaceAll('Buzz', 'Pop')
+  } 
+</script>&lt;/script&gt;</code></pre>
+`}
+
+You can try it yourself! Just put `?crackle=pop` on the end of the current URL and retry.
