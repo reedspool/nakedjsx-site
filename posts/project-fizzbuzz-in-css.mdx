@@ -1,0 +1,198 @@
+# Project: FizzBuzz in CSS
+
+I wanted to try FizzBuzz in CSS. I've written it _insert overestimate_ times in JavaScript so I wanted to try something different.
+
+If by chance you're not familiar, the usual formulation of FizzBuzz is to write a program with these rules:
+
+1. Print the numbers from 1 to 100 (inclusive) except...
+2. Don't print each number which is divisible by 3, instead print "Fizz"
+3. Don't print each number which is divisible by 5, instead print "Buzz"
+4. Print "FizzBuzz" for those numbers which are divisible by both 3 and 5
+
+## Solution
+
+This is my best attempt. The "output" immediately follows this `style` element:
+
+{`
+<pre><code>&lt;style contenteditable&gt;<style class="block" contenteditable>  .solution {
+    counter-reset: solution;
+  }
+  .solution div::before {
+    counter-increment: solution;
+    content: counter(solution) "";
+  }
+  .solution div:nth-child(3n)::before {
+    content: "Fizz";
+  }
+  .solution div:nth-child(5n)::before {
+    content: "Buzz";
+  }
+  .solution div:nth-child(15n)::before {
+    content: "FizzBuzz";
+  }
+  </style>&lt;/style&gt;</code></pre>
+`}
+
+{`
+<pre><code>&lt;div class="solution"&gt;<div class="solution">
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+</div>&lt;/div&gt;</code></pre>
+`}
+
+## Project Log
+
+### Fri Sep 22 07:40:06 PM PDT 2023
+
+My first idea was to create a hundred `<div>`s manually then style them to produce the FizzBuzz output. 
+
+I knew I could print incremental integers by styling those elements as list items. I searched `mdn increment list item number css` and found many useful links. I started with [MDN's "Using CSS Counters](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Counter_Styles/Using_CSS_counters). I tried a short example, first the CSS:
+
+{`
+<pre><code>&lt;style contenteditable&gt;<style class="block" contenteditable>  .example1 {
+    counter-reset: example1;
+  }
+  .example1 span::before {
+    counter-increment: example1;
+    content: counter(example1) "! ";
+  }</style>&lt;/style&gt;</code></pre>
+`}
+
+By the way, the `contenteditable` attribute above means you can edit this to see what happens.
+
+To use the example CSS, I threw 3 spans within this `div`:
+
+{`
+<pre><code>&lt;div class="example1"&gt;<div class="example1">  <span></span><span></span><span></span>
+</div>&lt;/div&gt;</code></pre>
+`}
+
+It worked! I could see the `content` with the incrementing counter from my CSS. Nice. Ostensibly if I were to put 100 `spans` in here, we'd see the numbers 1 to 100. I felt like I had the easy part of FizzBuzz in the bag.
+
+For the next parts, I figured I could use the `nth-child` CSS tools. I hadn't used them in a while so again I had to go to the [MDN page on `:nth-child()`](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-child). It was the ["Functional notation"](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-child#functional_notation) I had in mind specifically, where I could define the polynomial `An+B`. 
+
+For `Fizz`, my rule would be `3n+0`. I needed the `+1` since the `n` count starts at 0, but my list starts at 1. With that, I could override the content from my counter. I made another small example before I tried the whole shebang, to make sure I got it right.
+
+{`
+<pre><code>&lt;style contenteditable&gt;<style class="block" contenteditable>  .example2 {
+    counter-reset: example2;
+  }
+  .example2 div::before {
+    counter-increment: example2;
+    content: counter(example2) "";
+  }
+  .example2 div:nth-child(3n+1)::before {
+    content: "Me%3=0";
+  }</style>&lt;/style&gt;</code></pre>
+`}
+
+This time I used `div`s instead of `span`s so they'd flow downward, and I used more to clarify the effect.
+
+{`
+<pre><code>&lt;div class="example2"&gt;<div class="example2">
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+</div>&lt;/div&gt;</code></pre>
+`}
+
+Okay it _almost_ worked, except I got the polynomial wrong. Of course `3 * 0 + 1` is `4`, but I want it to be `3`, so I actually didn't need the `+1`. You can try messing with the above `style` to see for yourself!
+
+Now I felt ready to try the whole thing: 
+
+{`
+<pre><code>&lt;style contenteditable&gt;<style class="block" contenteditable>  .attempt1 {
+    counter-reset: attempt1;
+  }
+  .attempt1 div::before {
+    counter-increment: attempt1;
+    content: counter(attempt1) "";
+  }
+  .attempt1 div:nth-child(3n)::before {
+    content: "Fizz";
+  }
+  .attempt1 div:nth-child(5n)::before {
+    content: "Buzz";
+  }
+  .attempt1 div:nth-child(15n)::before {
+    content: "FizzBuzz";
+  }
+  </style>&lt;/style&gt;</code></pre>
+`}
+
+{`
+<pre><code>&lt;div class="attempt1"&gt;<div class="attempt1">
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+</div>&lt;/div&gt;</code></pre>
+`}
+
+It worked! I had to make the numerical observation that the only numbers divisible by `5` and `3` would be those divisible by `15`. 
+
+I actually figured that out by looking at the working result. I had gotten the answer before with more CSS tricks, but I felt that was less straightforward. 
+
+If you're interested, the trick was to use `::before` for the `Fizz` numbers and `::after` for the `Buzz` numbers such that if they were both present the `content` rules wouldn't collide. 
+
+This required an extra rule for `Buzz` numbers to clear the `::before` content, in case they weren't `Fizz`. But that rule had to be placed specifically in the CSS document order so that it wouldn't override the `Fizz` rule in the case that it was a `FizzBuzz` number.
+
+Here's a small example:
+
+{`
+<pre><code>&lt;style contenteditable&gt;<style class="block" contenteditable>  .attempt2 {
+    counter-reset: attempt2;
+  }
+  .attempt2 div::before {
+    counter-increment: attempt2;
+    content: counter(attempt2) "";
+  }
+  .attempt2 div:nth-child(5n)::before {
+    content: "";
+  }
+  .attempt2 div:nth-child(3n)::before {
+    content: "Fizz";
+  }
+  .attempt2 div:nth-child(5n)::after {
+    content: "Buzz";
+  }
+</style>&lt;/style&gt;</code></pre>
+`}
+
+{`
+<pre><code>&lt;div class="attempt2"&gt;<div class="attempt2">
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+<div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div> <div></div>
+</div>&lt;/div&gt;</code></pre>
+`}
+
+The way I wrote the output in my examples, `div`s and `span`s within `pre code` containers, had too much line spacing. It was obnoxious on 100 item lists. I wrote some quick CSS to fix it.
+
+{`
+<pre><code>&lt;style contenteditable&gt;<style class="block" contenteditable>  pre code:has(div),
+  pre code:has(span) {
+    line-height: 0.8em; 
+  }
+</style>&lt;/style&gt;</code></pre>
+`}

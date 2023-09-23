@@ -11,6 +11,7 @@ export const slugsToHrefs = {
   "project-add-rss": "project-add-rss.html",
   "rss-feed": "rss.xml",
   feed: "feed.html",
+  "project-fizzbuzz-in-css": "project-fizzbuzz-in-css.html",
 };
 export const Link = ({ slug, children }) => {
   const href = slugsToHrefs[slug];
