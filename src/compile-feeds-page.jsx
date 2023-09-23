@@ -53,6 +53,15 @@ feed.addItem({
   `,
 });
 
+feed.addItem({
+  ...itemDefaults,
+  date: new Date("2023-09-23T07:00:00.000Z"),
+  title: "FizzBuzz in CSS",
+  content: `
+    I made FizzBuzz in CSS. Check it out at ${BASE_URL}/project-fizzbuzz-in-css
+  `,
+});
+
 // Write out all RSS Feeds
 // Must match `feedLinks` in the feed config
 writeFile(`./build/rss.xml`, feed.rss2());
