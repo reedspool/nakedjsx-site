@@ -513,7 +513,7 @@ And here's a button that does this for 5 seconds.
 <script>
   {
     const output = document.querySelector("output.output-8")
-    const averageLoopTime = (seconds) => {
+    window.averageLoopTime = (seconds) => {
       const start = performance.now();
       let now = performance.now();
       let last = now;
@@ -531,7 +531,7 @@ And here's a button that does this for 5 seconds.
       output.innerHTML = "Running..."
       // Have to schedule this for the next loop to see our "Running message"
       setTimeout(() => {
-        const { total, count, average } = averageLoopTime(5);
+        const { total, count, average } = window.averageLoopTime(5);
         output.innerHTML = average + " average milliseconds per loop after "  + count + " loops."
       }, 0)
     }
@@ -581,7 +581,7 @@ And a button to drive it.
 <script>
   {
     const output = document.querySelector("output.output-9")
-    const averageSetTimeoutTime = (seconds) => {
+    window.averageSetTimeoutTime = (seconds) => {
       const start = performance.now();
       let now = performance.now();
       let last = now;
@@ -604,7 +604,7 @@ And a button to drive it.
     };
     window.startCountdown9 = async () => {
       output.innerHTML = "Running..."
-      const { total, count, average } = await averageSetTimeoutTime(5);
+      const { total, count, average } = await window.averageSetTimeoutTime(5);
       output.innerHTML = average + " average milliseconds per loop after "  + count + " loops."
     }
   }
@@ -621,3 +621,90 @@ For this async test, I got numbers on the order of `1000` loops. For the sync te
 I made a space at the top of this page to present my best timer at the moment. I thought someone shouldn't have to read through this entire log to see what my best guess was. And that someone would probably be me when I wanted to use my timer!
 
 <Future>I wanted to see if a smoother timer could be done with CSS animations. I was concerned how closely JavaScript interaction could map to a CSS-based timer.</Future>
+
+I wanted stronger data about the difference I found between synchronous and async code so I wrote a small loop to call the functions above repeatedly and then do some math:
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-A1">Hit Start</output>
+  <button class="cpnt-button" onclick="startCountdownA1()">Start</button>
+</p>
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <table class="output-table-A1">
+    <thead>
+      <tr>
+        <th>Run #</th>
+        <th>Total</th>
+        <th>Count</th>
+        <th>Average</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</p>
+
+{`
+
+<script>
+  {
+    const output = document.querySelector("output.output-A1")
+    const outputTableBody = document.querySelector("table.output-table-A1 tbody")
+    window.startCountdownA1 = async () => {
+      output.innerHTML = "Running..."
+      for (let i = 0; i < 100; i++) {
+        const { total, count, average } = await window.averageSetTimeoutTime(5);
+        const tr = document.createElement('tr')
+        tr.innerHTML = "<tr>" + ([i + 1, total, count, average].map(a => "<td>" + a + "</td>")).join('') + "</tr>";
+        outputTableBody.appendChild(tr)
+      }
+      output.innerHTML = 'Done'
+    }
+  }
+</script>
+
+`}
+
+And the other one
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <output class="output-A2">Hit Start</output>
+  <button class="cpnt-button" onclick="startCountdownA2()">Start</button>
+</p>
+
+<p class="flex flex-row w-full max-w-4xl justify-between gap-4 items-center">
+  <table class="output-table-A2">
+    <thead>
+      <tr>
+        <th>Run #</th>
+        <th>Total</th>
+        <th>Count</th>
+        <th>Average</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</p>
+
+{`
+
+<script>
+  {
+    const output = document.querySelector("output.output-A2")
+    const outputTableBody = document.querySelector("table.output-table-A2 tbody")
+    window.startCountdownA2 = async () => {
+      output.innerHTML = "Running..."
+      for (let i = 0; i < 100; i++) {
+        const { total, count, average } = await window.averageLoopTime(5);
+        const tr = document.createElement('tr')
+        tr.innerHTML = "<tr>" + ([i + 1, total, count, average].map(a => "<td>" + a + "</td>")).join('') + "</tr>";
+        outputTableBody.appendChild(tr)
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+      output.innerHTML = 'Done'
+    }
+  }
+</script>
+
+`}
