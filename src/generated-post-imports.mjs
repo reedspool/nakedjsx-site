@@ -10,10 +10,11 @@ import mdx_1 from ':mdx:../posts/project-add-rss.mdx';
 import mdx_2 from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
 import mdx_3 from ':mdx:../posts/project-improve-this-website.mdx';
 import mdx_4 from ':mdx:../posts/project-precision-timer.mdx';
-import mdx_5 from ':mdx:../posts/project-track-my-projects.mdx';
-import mdx_6 from ':mdx:../posts/project-write-script-and-style-tags.mdx';
-import mdx_7 from ':mdx:../posts/topic-project-index.mdx';
-import mdx_8 from ':mdx:../posts/topic-project-logs.mdx';
+import mdx_5 from ':mdx:../posts/project-symbolic-differentiator.mdx';
+import mdx_6 from ':mdx:../posts/project-track-my-projects.mdx';
+import mdx_7 from ':mdx:../posts/project-write-script-and-style-tags.mdx';
+import mdx_8 from ':mdx:../posts/topic-project-index.mdx';
+import mdx_9 from ':mdx:../posts/topic-project-logs.mdx';
 export default [[{
   "inputFileName": "project-add-popout.mdx",
   "outputFileName": "project-add-popout.html"
@@ -30,15 +31,18 @@ export default [[{
   "inputFileName": "project-precision-timer.mdx",
   "outputFileName": "project-precision-timer.html"
 }, mdx_4],[{
+  "inputFileName": "project-symbolic-differentiator.mdx",
+  "outputFileName": "project-symbolic-differentiator.html"
+}, mdx_5],[{
   "inputFileName": "project-track-my-projects.mdx",
   "outputFileName": "project-track-my-projects.html"
-}, mdx_5],[{
+}, mdx_6],[{
   "inputFileName": "project-write-script-and-style-tags.mdx",
   "outputFileName": "project-write-script-and-style-tags.html"
-}, mdx_6],[{
+}, mdx_7],[{
   "inputFileName": "topic-project-index.mdx",
   "outputFileName": "topic-project-index.html"
-}, mdx_7],[{
+}, mdx_8],[{
   "inputFileName": "topic-project-logs.mdx",
   "outputFileName": "topic-project-logs.html"
-}, mdx_8]];
+}, mdx_9]];
