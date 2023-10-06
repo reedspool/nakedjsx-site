@@ -1,0 +1,38 @@
+# Project: Concrete Programming Language
+
+A programming language.
+
+## Logbook
+
+### Tue Oct 3 18:04:48 PDT 2023
+
+Many years ago, I think no less than 10, I had an idea for a programming language. I had explored Lisp and Factor, prefix and postfix languages respectively. They were both also homoiconic, meaning data and code were represented similarly. I was also infatuated with programming games.
+
+I made the observation that programming games held their atomic values in the same "game universe" in which the player played. I don't have an existing game in mind to explain, so let's try to make up an example.
+
+Take an imaginary game where the player burns a wood resource to produce a charcoal resource. Burning, the action, could be performed manually by the player character and a game controller input. One could also write some code to perform the same burning action. So the result of running this code would be charcoal, a game resource in the same universe as the wood. Now compare that to programming languages.
+
+Let's take JavaScript. I tell you there's a function `burn()` which takes a wood resource as a parameter. The charcoal is the output of that action. Now, to use the charcoal, you'd have to store it somewhere. The simplest place to store it would be a variable, like so:
+
+```js
+var myWood = getWood();
+var myCharcoal = burn(wood);
+```
+
+Notice how the wood, the charcoal, and the burning are elsewhere. They are values on a heap somewhere. The variables we use to reference them are an abstraction. So my idea was to make a language where these values were less abstract. In Concrete, the same process looked something like this:
+
+```
+getWood! _ burn! _
+```
+
+Note the underscores. When this Concrete program was run, those underscores would be replaced by the wood and the charcoal respectively. Less abstract. That was the idea, anyway.
+
+I've been woefully underprepared to actualize this since its conception.
+
+I've tried several times to implement this language to varying degrees of success. I've made a few working interpreters. I've become less enamoured with my initial idea over time but I've never let it go entirely despite many people explaining to me how little sense it made.
+
+I've explained how the language works a bajillion times but I haven't ever written that explanation down in a concise way so I thought I'd do that here.
+
+Like many (most? all?) intepreted languages, any atomic value is valid. So `5`, `"hello"`, and `_` are all valid programs on their own.
+
+That `_` underscore is unusual. Numbers and strings of characters are usual in comparison. The underscore I call a "blank" in Concrete and it represents nothing. Perhaps it would be more accurate to say it represents "nothingness"? It's a space which should be filled. Comparing a blank or using it in any computation is a runtime error. Blanks should all be overwritten before they're used.
