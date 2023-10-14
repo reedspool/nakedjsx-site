@@ -1,5 +1,6 @@
 import { LogoSVG, LogoSVGSymbol } from "../components/LogoSVGSymbol.jsx";
 import { Link } from "../components/Link.jsx";
+import { GITHUB_URL } from "../src/constants.mjs";
 export const GenericPageBody = ({ children }) => (
   <>
     <LogoSVGSymbol />
@@ -33,7 +34,7 @@ export const GenericPageBody = ({ children }) => (
           <i className={`bx bx-calendar align-middle ml-sm inline-block`} />
         </Link>
 
-        <a href="https://www.github.com/reedspool/nakedjsx-site">
+        <a href={GITHUB_URL}>
           GitHub{" "}
           <i className={`bx bxl-github align-middle ml-sm inline-block`} />
         </a>
