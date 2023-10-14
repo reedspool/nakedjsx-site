@@ -5,56 +5,56 @@
  *
  * Run that again to regenerate this file.
  ******************************************************************************/
-import mdx_0 from ':mdx:../posts/project-add-popout.mdx';
-import mdx_1 from ':mdx:../posts/project-add-rss.mdx';
-import mdx_2 from ':mdx:../posts/project-concrete-programming-language.mdx';
-import mdx_3 from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
-import mdx_4 from ':mdx:../posts/project-improve-this-website.mdx';
-import mdx_5 from ':mdx:../posts/project-precision-timer.mdx';
-import mdx_6 from ':mdx:../posts/project-symbolic-differentiator.mdx';
-import mdx_7 from ':mdx:../posts/project-track-my-projects.mdx';
-import mdx_8 from ':mdx:../posts/project-write-script-and-style-tags.mdx';
-import mdx_9 from ':mdx:../posts/topic-operating-this-website.mdx';
-import mdx_10 from ':mdx:../posts/topic-project-index.mdx';
-import mdx_11 from ':mdx:../posts/topic-project-logs.mdx';
-import mdx_12 from ':mdx:../posts/topic-recurse-center.mdx';
+import mdx_project_add_popout from ':mdx:../posts/project-add-popout.mdx';
+import mdx_project_add_rss from ':mdx:../posts/project-add-rss.mdx';
+import mdx_project_concrete_programming_language from ':mdx:../posts/project-concrete-programming-language.mdx';
+import mdx_project_fizzbuzz_in_css from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
+import mdx_project_improve_this_website from ':mdx:../posts/project-improve-this-website.mdx';
+import mdx_project_precision_timer from ':mdx:../posts/project-precision-timer.mdx';
+import mdx_project_symbolic_differentiator from ':mdx:../posts/project-symbolic-differentiator.mdx';
+import mdx_project_track_my_projects from ':mdx:../posts/project-track-my-projects.mdx';
+import mdx_project_write_script_and_style_tags from ':mdx:../posts/project-write-script-and-style-tags.mdx';
+import mdx_topic_operating_this_website from ':mdx:../posts/topic-operating-this-website.mdx';
+import mdx_topic_project_index from ':mdx:../posts/topic-project-index.mdx';
+import mdx_topic_project_logs from ':mdx:../posts/topic-project-logs.mdx';
+import mdx_topic_recurse_center from ':mdx:../posts/topic-recurse-center.mdx';
 export default [[{
   "inputFileName": "project-add-popout.mdx",
   "outputFileName": "project-add-popout.html"
-}, mdx_0],[{
+}, mdx_project_add_popout],[{
   "inputFileName": "project-add-rss.mdx",
   "outputFileName": "project-add-rss.html"
-}, mdx_1],[{
+}, mdx_project_add_rss],[{
   "inputFileName": "project-concrete-programming-language.mdx",
   "outputFileName": "project-concrete-programming-language.html"
-}, mdx_2],[{
+}, mdx_project_concrete_programming_language],[{
   "inputFileName": "project-fizzbuzz-in-css.mdx",
   "outputFileName": "project-fizzbuzz-in-css.html"
-}, mdx_3],[{
+}, mdx_project_fizzbuzz_in_css],[{
   "inputFileName": "project-improve-this-website.mdx",
   "outputFileName": "project-improve-this-website.html"
-}, mdx_4],[{
+}, mdx_project_improve_this_website],[{
   "inputFileName": "project-precision-timer.mdx",
   "outputFileName": "project-precision-timer.html"
-}, mdx_5],[{
+}, mdx_project_precision_timer],[{
   "inputFileName": "project-symbolic-differentiator.mdx",
   "outputFileName": "project-symbolic-differentiator.html"
-}, mdx_6],[{
+}, mdx_project_symbolic_differentiator],[{
   "inputFileName": "project-track-my-projects.mdx",
   "outputFileName": "project-track-my-projects.html"
-}, mdx_7],[{
+}, mdx_project_track_my_projects],[{
   "inputFileName": "project-write-script-and-style-tags.mdx",
   "outputFileName": "project-write-script-and-style-tags.html"
-}, mdx_8],[{
+}, mdx_project_write_script_and_style_tags],[{
   "inputFileName": "topic-operating-this-website.mdx",
   "outputFileName": "topic-operating-this-website.html"
-}, mdx_9],[{
+}, mdx_topic_operating_this_website],[{
   "inputFileName": "topic-project-index.mdx",
   "outputFileName": "topic-project-index.html"
-}, mdx_10],[{
+}, mdx_topic_project_index],[{
   "inputFileName": "topic-project-logs.mdx",
   "outputFileName": "topic-project-logs.html"
-}, mdx_11],[{
+}, mdx_topic_project_logs],[{
   "inputFileName": "topic-recurse-center.mdx",
   "outputFileName": "topic-recurse-center.html"
-}, mdx_12]];
+}, mdx_topic_recurse_center]];

@@ -7,8 +7,7 @@ const OUTPUT_FILE_REL_PATH = "./src/generated-post-imports.mjs"
 
 const mdx = [];
 let js = '';
-let nextImportIndex = 0;
-
+let usedIdentifiers = new Set();
 
 for (const inputFileName of await readdir(POST_DIR_REL_PATH)) {
   if (!inputFileName.endsWith('.mdx'))
@@ -22,7 +21,10 @@ for (const inputFileName of await readdir(POST_DIR_REL_PATH)) {
   const outputFileName = `${fileNameWithoutExtension}.html`
 
   // Import the MDX file via the :mdx: plugin
-  const identifier = `mdx_${nextImportIndex++}`
+  const identifier = `mdx_${fileNameWithoutExtension.replaceAll(/[^A-Za-z_]/g, "_")}`
+  if (usedIdentifiers.has(identifier)) throw new Error(`Duplicate identifier '${identifier}'`)
+  usedIdentifiers.add(identifier)
+
   js += `import ${identifier} from ':mdx:${postPath}';\n`;
 
   // Add the imported result to an array along with some meta information
