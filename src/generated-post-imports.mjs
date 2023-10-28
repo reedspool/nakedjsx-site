@@ -10,6 +10,7 @@ import mdx_project_add_rss from ':mdx:../posts/project-add-rss.mdx';
 import mdx_project_concrete_programming_language from ':mdx:../posts/project-concrete-programming-language.mdx';
 import mdx_project_fizzbuzz_in_css from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
 import mdx_project_improve_this_website from ':mdx:../posts/project-improve-this-website.mdx';
+import mdx_project_log_game from ':mdx:../posts/project-log-game.mdx';
 import mdx_project_precision_timer from ':mdx:../posts/project-precision-timer.mdx';
 import mdx_project_symbolic_differentiator from ':mdx:../posts/project-symbolic-differentiator.mdx';
 import mdx_project_track_my_projects from ':mdx:../posts/project-track-my-projects.mdx';
@@ -34,6 +35,9 @@ export default [[{
   "inputFileName": "project-improve-this-website.mdx",
   "outputFileName": "project-improve-this-website.html"
 }, mdx_project_improve_this_website],[{
+  "inputFileName": "project-log-game.mdx",
+  "outputFileName": "project-log-game.html"
+}, mdx_project_log_game],[{
   "inputFileName": "project-precision-timer.mdx",
   "outputFileName": "project-precision-timer.html"
 }, mdx_project_precision_timer],[{

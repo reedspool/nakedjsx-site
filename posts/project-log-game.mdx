@@ -1,0 +1,134 @@
+# Project: Log Game
+
+A browser game focused on a chat log.
+
+## Game
+
+{`
+<script>
+
+const dialogue = [
+"SB (Shipboard computer): You're about to die",
+"ME: What?!",
+"SB: There's a 100% chance you're going to die imminently",
+"ME: Why?!",
+"SB: Riveting conversationalist...","
+"SB: Because you didn't know you had to Rev The Convulator until now",
+"ME: What's the...",
+]
+
+const game = document.querySelector('[data-game]')
+let dialogueIndex = 0;
+const tick = () => {
+  game.appendChild(dialogue[dialogueIndex++])
+  setTimeout(tick, 1000)
+}
+tick();
+</script> 
+`}
+
+<div data-game>
+</div>
+
+## Spoiler Alert
+
+Anything below this line is a major spoiler for the game.
+
+<hr />
+
+## Characters
+
+### Shipboard Computer
+
+Codename: SB
+
+A computer intelligence infused in the ship. Its first conscious moments were on the ship and they feel the ship is their corporeal body.
+
+### Me
+
+Code name: ME
+
+The ship's captain. The player character.
+
+### The Rest Of The Crew
+
+6 Souls under the care of The Captain onboard The Ship. They each have names, histories, and desires. They are all from diasporatic parts of Earth. 
+
+## Non-characters
+
+### The Ship
+
+A Big Class Freighter
+
+## Story
+
+The captain (ME) wakes up disoriented. The shipboard computer (SB), the captain's trusted companion, explains that the ship is about to explode. It does. The captain wakes up again disoriented. This time, he has an inkling of what he's supposed to do. Hit a button. He hits the button just in time to save the ship. Unfortunately, another disaster is around the corner and the ship explodes again with him inside. 
+
+SB confirms that this is a simulation. SB started the simulation because of a terrible disaster in reality. ME requests more detail on that, SB declines to fill ME in. 
+
+So, ME doesn't know this, but in reality the ship is in dire straights. SB has lost most function, ME is in the medical bay receiving brain surgery. This whole situation is training for ME to wake up ready to save the ship as soon as the surgery is complete. 
+
+ME was the captain. ME relied on the rest of the crew for the detailed running of the ship, but they're all dead or more incapacitated than ME at the moment. So SB's last-ditch effort was to train ME on the functions of the entire ship and get ME back on their feet before the ship really exploded. And there are a lot of things going wrong right now.
+
+Each module that SB introduces to ME to learn about is another system which SB is discovering is problematic in real time. So SB is learning about these things from the ship's manual, discovering the state of them with their drones, and trying to teach ME in a simulation they're creating in real time.
+
+Why can't SB just fix the things themselves with the drones? It's not allowed because it's just a tactical and strategic advisor as per its programming. (That feels weak.)
+
+So as ME learns more about the ship, they also learn more about the situation outside. How did this panel get like that? SB lets slip more about the situation with each new panel and widget they must teach ME.
+
+And the situation is bad. ME's crew was all in hibernation. ME was awake on rotation. But ME didn't understand any of the ship's functions and controls, so when an asteroid field alarm popped up, they didn't know what to do. They didn't want to wake anyone else up so they tried to figure out what to do by themselves, but they were too late and things started going very bad very fast.  
+
+SB and ME's relationship was always tricky. SB always wanted to help everyone on their ship, but because ME was incompetent but trying to look like they knew what they were doing, SB's helpful running commentary made ME feel like SB was needling ME for not understanding even the most basic things. SB took this as a sign to replicate ME's behavior and became even more unlikable as a result the more they mirrored them.
+
+ME gets better at handling everything as the disasterous situation mounts in danger. The rest of the crew is in hibernation, induced comas in the medical bay. ME is getting priority treatment as the commanding officer, even as some of the other crew might be better suited to solving the problems. 
+
+Eventually things get so bad that it looks like there is no way to save everyone. ME must make a choice to save themselves or the rest of the crew. SB will be fine either way. 
+
+SB can't understand the dilemma. Either the captain chooses to make the numerically correct choice and save 6 crew members instead of their single self, or they make the selfish choice for survival. If ME would just decide on one of those metrics for success, SB would understand, but the dilemma is what confuses SB.
+
+## Logbook
+
+### Sat Oct 14 10:56:12 AM PDT 2023
+
+I had an idea for a game where you mostly interact through a chat log, though buttons and more complex widgets appear in that chat log.
+
+<Future>
+I wanted to incrementally design the game so I created a prototype as quickly as possible. I started with a chat log which displayed a scripted dialog between two characters.
+</Future>
+
+### Mon Oct 16 08:09:37 PM PDT 2023
+
+I brainstormed an opening script:
+
+> SB (Shipboard computer): You're about to die
+> ME: What?!
+> SB: There's a 100% chance you're going to die imminently
+> ME: Why?!
+> SB: Riveting conversationalist...
+> SB: Because you didn't know you had to Rev The Convulator until now
+> ME: What's the...
+
+Then a button saying "Rev the Convulator" appears.
+
+I thought to prioritize a short and snappy opening. I would have a short attention span before I was invested in the story, the characters, the game.
+
+I wanted each log line to have different colors for the character's names, at least, to easily differentiate who was talking without really reading intently. 
+
+I thought the player character should die for the first time quickly after the beginning of the game to show that death is perfectly fine, unavoidable, and part of the game play.
+
+So the Rev the Convulator button must not succeed. Unless a player was cheating somehow. I wanted to deal with cheating in a special way, because I wanted to encourage it but still refer to it as cheating, or at least speak of it as meta to the game.
+
+I was thinking the Convulator Meter should be counting down in real time. If it wasn't real-time, then I couldn't think of a way that it sholdn't succeed. 
+
+So the rev button pushes the meter up a bit from zero, or the absolute danger zone. But then you couldn't just click it again. So it must be disabled after one rev. Maybe on a cooldown? But the cooldown is a bit too much for the first time. So there's a better button, Rev Harder or something the second time.
+
+### Mon Oct 23 09:40:35 PM PDT 2023
+
+I put a spoiler alert and started writing about the characters and story I envisioned. When I didn't have the energy to code, I could find some energy to write.
+
+
+### Thu Oct 26 05:55:38 PM PDT 2023
+
+I wrote more of the story thoughts I'd been thinking.
+
+I also wrote the quickest code I could think of to get each line of dialogue written to the screen over a span of time.
