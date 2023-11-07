@@ -1,0 +1,31 @@
+# Project: Authenticate with Supabase
+
+I wanted to experiment with [Supabase](https://supabase.com) authentication on this website. 
+
+## Logbook
+
+### Sun Nov  5 08:51:07 PM PST 2023
+
+I made a new project on Supabase and read some of their helpful Authentication documentation. I wanted to experiment with it hear so I installed their JavaScript library in my website via a CDN 
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+```html
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+```
+
+The text below will change to reflect whether the library is loaded right now.
+
+<span>Checking if Supabase is loaded...</span>
+
+<raw-content content={`
+  <script>
+  {
+  let message = "Supabase is NOT loaded";
+  if (supabase) message = "Supabase is loaded!"
+  document.currentScript.previousElementSibling.innerText = message;
+  }
+  </script>
+`} />
+
+

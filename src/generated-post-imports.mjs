@@ -8,10 +8,12 @@
 import mdx_project_add_popout from ':mdx:../posts/project-add-popout.mdx';
 import mdx_project_add_rss from ':mdx:../posts/project-add-rss.mdx';
 import mdx_project_concrete_programming_language from ':mdx:../posts/project-concrete-programming-language.mdx';
+import mdx_project_dnd_game_____ from ':mdx:../posts/project-dnd-game-2023.mdx';
 import mdx_project_fizzbuzz_in_css from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
 import mdx_project_improve_this_website from ':mdx:../posts/project-improve-this-website.mdx';
 import mdx_project_log_game from ':mdx:../posts/project-log-game.mdx';
 import mdx_project_precision_timer from ':mdx:../posts/project-precision-timer.mdx';
+import mdx_project_supabase_authentication from ':mdx:../posts/project-supabase-authentication.mdx';
 import mdx_project_symbolic_differentiator from ':mdx:../posts/project-symbolic-differentiator.mdx';
 import mdx_project_track_my_projects from ':mdx:../posts/project-track-my-projects.mdx';
 import mdx_project_write_script_and_style_tags from ':mdx:../posts/project-write-script-and-style-tags.mdx';
@@ -29,6 +31,9 @@ export default [[{
   "inputFileName": "project-concrete-programming-language.mdx",
   "outputFileName": "project-concrete-programming-language.html"
 }, mdx_project_concrete_programming_language],[{
+  "inputFileName": "project-dnd-game-2023.mdx",
+  "outputFileName": "project-dnd-game-2023.html"
+}, mdx_project_dnd_game_____],[{
   "inputFileName": "project-fizzbuzz-in-css.mdx",
   "outputFileName": "project-fizzbuzz-in-css.html"
 }, mdx_project_fizzbuzz_in_css],[{
@@ -41,6 +46,9 @@ export default [[{
   "inputFileName": "project-precision-timer.mdx",
   "outputFileName": "project-precision-timer.html"
 }, mdx_project_precision_timer],[{
+  "inputFileName": "project-supabase-authentication.mdx",
+  "outputFileName": "project-supabase-authentication.html"
+}, mdx_project_supabase_authentication],[{
   "inputFileName": "project-symbolic-differentiator.mdx",
   "outputFileName": "project-symbolic-differentiator.html"
 }, mdx_project_symbolic_differentiator],[{

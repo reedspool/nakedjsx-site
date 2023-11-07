@@ -16,6 +16,7 @@ export const slugsToHrefs = {
   "project-fizzbuzz-in-css": "project-fizzbuzz-in-css.html",
   "project-symbolic-differentiator": "project-symbolic-differentiator.html",
   "topic-operating-this-website": "topic-operating-this-website.html",
+  "project-supabase-authentication": "project-supabase-authentication.html",
   "project-dnd-game-2023": "project-dnd-game-2023.html",
 };
 export const Link = ({ slug, children }) => {
