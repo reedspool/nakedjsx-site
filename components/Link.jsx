@@ -18,6 +18,7 @@ export const slugsToHrefs = {
   "topic-operating-this-website": "topic-operating-this-website.html",
   "project-supabase-authentication": "project-supabase-authentication.html",
   "project-dnd-game-2023": "project-dnd-game-2023.html",
+  "project-log-game": "project-log-game.html",
 };
 export const Link = ({ slug, children }) => {
   const href = slugsToHrefs[slug];
