@@ -4,39 +4,7 @@ A browser game focused on a chat log.
 
 ## Game
 
-{`
-<script type="module">
-{
-  const dialogue = [
-    "<Setting: Complete darkness, a voice pierces an otherwise sensory-deprived blank moment>",
-    "SB (Shipboard computer): You're about to die",
-    "ME: What?!",
-    "SB: There's a 100% chance you're going to die imminently",
-    "ME: Why?!",
-    "SB: Riveting conversationalist...",
-    "SB: Because you didn't know you had to Rev The Convulator until now",
-    "ME: What's the...",
-    "<End Scene>"
-  ]
-  
-  const game = document.querySelector('[data-game]')
-  let dialogueIndex = 0;
-  const tick = () => {
-    const line = dialogue[dialogueIndex++];
-    const wordCount = [...line].length;
-    game.append(line)
-    // game.append(' (' + wordCount + ')')
-    if (dialogueIndex === dialogue.length) return;
-    game.appendChild(document.createElement("br"))
-    setTimeout(tick, wordCount * 100)
-  }
-  tick();
-}
-</script> 
-`}
-
-<pre data-game class="whitespace-normal">
-</pre>
+<pre data-game class="whitespace-normal"></pre>
 
 ## Spoiler Alert
 
@@ -144,6 +112,22 @@ I fixed my JavaScript and expanded on it a little bit. I saw my chat log for the
 
 I explored how to write client-side Javascript and JSX with NakedJSX which I wrote about in <Link slug="project-improve-this-website" hash="exploring-client-side-js-in-nakedjsx">my project to improve this website</Link>.
 
-<Future>Now that I had some chat scrolling through, I made my first game mechanic/widget, "the Convulator". I gave it that name for being convoluted. I wanted all my widgets to suggest bonkers sci-fi foolery with names that sounded almost sci-fi-ish until you realized they were nonsense. I imagined the Convulator would be a simple timer counting down to demise and a button to "rev" it, which would increase the remaining time a bit. I imagined the player frustrated that they needed to keep clicking this button lest their ship explode. I didn't know if that was a fun idea, but I was still prototyping.</Future>
-
 I thought about how the game in my imagination had several different interwoven systems. A system for providing dialog, a system for controlling time, tracking real time. Another system for the actual mechanics of the spaceship and their status at any given point in time. I didn't quite know how to write maintainable code with all those systems interacting.
+
+### Sat Nov 18 06:26:07 PM PST 2023
+
+Now that I had some chat scrolling through, I made my first game mechanic/widget, "the Convulator". I gave it that name for being convoluted. I wanted all my widgets to suggest bonkers sci-fi foolery with names that sounded almost sci-fi-ish until you realized they were nonsense. I imagined the Convulator would be a simple timer counting down to demise and a button to "rev" it, which would increase the remaining time a bit. I imagined the player frustrated that they needed to keep clicking this button lest their ship explode. I didn't know if that was a fun idea, but I was still prototyping.
+
+I started with a status indicator counting down. I used a `progress` HTML element, which I'd never used before but it seemed to fit the bill. That went quick so I moved on to a button which "revved" that countdown a bit. Again, quick.
+
+With a working, dynamic widget, my mind went back to the question of systems. The next thing I wanted was for the text of the story to react to the status of the widget. In reacting to the widget, the text would really be reacting to the player's choices and actions. Did they hit the button before it ran out? Did they let the timer expire? If the convulator's value went to zero, the ship exploded and the player character was deceased. After that, the simulation would need to restart. 
+
+As it stood, the text kept going regardless of the state of the widget. So I'd need the widget to inform the text to keep going. This meant two separate systems interacting. The widget system, and the text system. My first thought was to use an event emitter and event listener, pub sub pattern, to communicate between the two systems to keep them decoupled. This aligned well with the browser environment where there was already such a pattern implemented. I was concerned that in the long run this could be slow, but it would be a premature optimization to consider that now.
+
+I wrote a global event listener for the text system and an event emitter on te widget. This also meant rewriting the dialogue system to stop and start and use different text at different times, instead of just one single stream of text. That worked well and went quickly with only one bug that rapidly filled my webpage with blank lines until it nearly crashed. 
+
+And with that, I had a game! I could lose the game by letting the Convulator fall to empty, and I could survive as long as I wanted if I kept Reving it. It was not fun, but it was intriguing. I could feel myself hoping there was more which was a compelling feeling. If I could follow through on that feeling, maybe it would actually be engaging!
+
+<Future>I considered my next moves. The introductory dialogue I had so far explicitly said that the player should not be capable of saving the ship. How would that be? If I wanted to depend on surprising the player, I could just make the Convulator too depleted and too quickly depleting for human reaction speeds to account for. But I wanted the game to be a bit slower-paced than that (at least at these beginning stages). Then I thought this might be a good time to introduce the next mechanic of the game, the next widget, which supplied fuel to the Convulator.</Future>
+
+<Future>Next I added a button to restart the simulation. I thought the repeated text would be boring so I considered a few solutions. I could add some way to fast forward to the action. I could also change the text on the second restart, but that didn't feel good because it might be confusing to someone who expected a verbatim repetition with no memory.</Future>
