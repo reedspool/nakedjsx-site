@@ -183,3 +183,32 @@ I made a new
 ### Wed Nov 15 12:15:25 AM PST 2023
 
 <Future>I wanted to publish password-encrypted pages on my website alongside my public posts. I considered encrypting files in my public site repository on GitHub, via https://github.com/AGWA/git-crypt or similar, but it seemed simpler to pull the files from an external, private source. I could pull the files at build-time on Netlify. Then I still needed a solution to encrypt a webpage's contents there, then decrypt the webpage after one entered a password on the browser. One such option was https://github.com/Greenheart/pagecrypt.</Future> 
+
+### Sat Nov 18 05:49:52 PM PST 2023
+
+I wanted to style and shape my client-side UI and text more easily, so I looked up how to use client-side JSX via NakedJSX, the library my site was built upon. The [documentation](https://nakedjsx.org/documentation/#client-js-jsx) was a little confusing. It proposed there was no special thing I needed to do to use JSX in my client-side JavaScript, but I found that hard to believe. I tried it out right here.
+
+```
+<div client-side-jsx-test></div> 
+<script contenteditable class="block">document.querySelector('[client-side-jsx-test]').appendChild(<div>My div</div>)</script>
+```
+
+It didn't work! I got an error like `undefined token <`, meaning the JSX wasn't converted. I tried following the docs more literally. I made a new `-client.jsx` file to mirror the `-page.jsx` file which compiled this page. Then I added a literal `Page.AppendBody` call exactly as the example in the documentation suggested. That did work. Whew. Then I tried taking the content from that `Page.AppendBody` and put it directly in this MDX file like so:
+
+```
+<p onclick="this.appendChild(<JsxTag count={++clickCounter}/>); console.log(this); console.log({ hello: 'world', self: this })">Click Me!</p>
+```
+
+And again, that worked. Yay! So I suspected this only worked with the `onClick` method. I tried using the `raw-content` tag to test that theory, and it did not work:
+
+```
+<raw-content content='<script type="module">document.body.appendChild(<JsxTag count={++clickCounter}/>)</script>' />
+```
+
+I experimented with the `Page.AppendJs` syntax and I was able to make a global function which appended a JSX element. Nice.
+
+I had a circuitous idea to achieve my goal of writing client-side JSX inline in my MDX articles: export a function from MDX, then import it along with the rest of my MDX file, and finally include it in the compiled page via `Page.AppendJs`. I got close, but the JSX wasn't transformed into JavaScript the way it was in `-client.jsx` and other literal calls to `Page.AppendJs`. 
+
+So I had a way forward, but it unfortunately involved authoring my client-side JavaScript in a separate file. I reported my results to the author of NakedJSX and we had a nice chat about it.
+
+<Future>After chatting with the creator of NakedJSX about my goals of writing more inline JavaScript and JSX for both the client and statically-generated server-side, he helped me understand that I might want to write my own implementation of a static site generator with vanilla JSX. [He gave me some pointers of how I might do that](https://discord.com/channels/1101319012673134614/1101319013285498882/1175275036312092722) and I committed to trying it out sometime in the future.</Future>
