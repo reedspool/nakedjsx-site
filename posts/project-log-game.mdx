@@ -6,31 +6,32 @@ A browser game focused on a chat log.
 
 {`
 <script type="module">
-
-const dialogue = [
-"<Setting: Complete darkness, a voice pierces an otherwise sensory-deprived blank moment>",
-"SB (Shipboard computer): You're about to die",
-"ME: What?!",
-"SB: There's a 100% chance you're going to die imminently",
-"ME: Why?!",
-"SB: Riveting conversationalist...",
-"SB: Because you didn't know you had to Rev The Convulator until now",
-"ME: What's the...",
-"<End Scene>"
-]
-
-const game = document.querySelector('[data-game]')
-let dialogueIndex = 0;
-const tick = () => {
-  const line = dialogue[dialogueIndex++];
-  const wordCount = [...line].length;
-  game.append(line)
-  // game.append(' (' + wordCount + ')')
-  if (dialogueIndex === dialogue.length) return;
-  game.appendChild(document.createElement("br"))
-  setTimeout(tick, wordCount * 100)
+{
+  const dialogue = [
+    "<Setting: Complete darkness, a voice pierces an otherwise sensory-deprived blank moment>",
+    "SB (Shipboard computer): You're about to die",
+    "ME: What?!",
+    "SB: There's a 100% chance you're going to die imminently",
+    "ME: Why?!",
+    "SB: Riveting conversationalist...",
+    "SB: Because you didn't know you had to Rev The Convulator until now",
+    "ME: What's the...",
+    "<End Scene>"
+  ]
+  
+  const game = document.querySelector('[data-game]')
+  let dialogueIndex = 0;
+  const tick = () => {
+    const line = dialogue[dialogueIndex++];
+    const wordCount = [...line].length;
+    game.append(line)
+    // game.append(' (' + wordCount + ')')
+    if (dialogueIndex === dialogue.length) return;
+    game.appendChild(document.createElement("br"))
+    setTimeout(tick, wordCount * 100)
+  }
+  tick();
 }
-tick();
 </script> 
 `}
 
