@@ -20,10 +20,25 @@ export const slugsToHrefs = {
   "project-dnd-game-2023": "project-dnd-game-2023.html",
   "project-log-game": "project-log-game.html",
 };
-export const Link = ({ slug, children }) => {
+
+export const slugsToHashes = {
+  "project-improve-this-website": ["exploring-client-side-js-in-nakedjsx"],
+};
+export const Link = ({ slug, hash, children }) => {
   const href = slugsToHrefs[slug];
   if (!href) throw new Error(`No href found for slug "${slug}"`);
-  return <a href={href}>{children}</a>;
+  if (hash && !slugsToHashes[slug].includes(hash))
+    throw new Error(`Unrecorded hash "${hash}" for slug "${slug}"`);
+  return <a href={href + (hash ? `#${hash}` : "")}>{children}</a>;
+};
+
+export const HashTarget = ({ id, children }) => {
+  // In the future, I'd love to determine the name of the file this is within to
+  // assert that the hash and the slug match up, but I have no clue how
+  if (!Object.values(slugsToHashes).flat().includes(id))
+    throw new Error(`Unused hash target "${id}"`);
+
+  return <div id={id}>Anchor: {children}</div>;
 };
 
 export const GitHubDefaultContent = () => (

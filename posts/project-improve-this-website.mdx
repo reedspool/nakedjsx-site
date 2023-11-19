@@ -126,8 +126,6 @@ My idea was to write a script to generate a JavaScript file which imported all o
 
 To write [this script](https://github.com/reedspool/nakedjsx-site/blob/main/bin/generate-post-imports.mjs#L1) was as easy as copying and pasting the contents of my development server script which essentially did the same thing. I just wrote the result to a file instead of returning it from a dynamic script.
 
-<Future>I used an HTML ID and a link to that ID to anchor within a page. I wanted to formalize that approach across the site with a component.</Future>
-
 <Future>I found that the NakedJSX development server was not correctly rendering this "link" emoji `🔗`. This seemed to be a problem only with the development server because the output HTML looked correct and when I served those files with another server, the emoji looked correct.</Future>
 
 ### Thu Sep 7 09:50:41 PM PDT 2023
@@ -184,6 +182,8 @@ I made a new
 
 <Future>I wanted to publish password-encrypted pages on my website alongside my public posts. I considered encrypting files in my public site repository on GitHub, via https://github.com/AGWA/git-crypt or similar, but it seemed simpler to pull the files from an external, private source. I could pull the files at build-time on Netlify. Then I still needed a solution to encrypt a webpage's contents there, then decrypt the webpage after one entered a password on the browser. One such option was https://github.com/Greenheart/pagecrypt.</Future> 
 
+<HashTarget id="exploring-client-side-js-in-nakedjsx">Exploring client-side JS in NakedJSX</HashTarget>
+
 ### Sat Nov 18 05:49:52 PM PST 2023
 
 I wanted to style and shape my client-side UI and text more easily, so I looked up how to use client-side JSX via NakedJSX, the library my site was built upon. The [documentation](https://nakedjsx.org/documentation/#client-js-jsx) was a little confusing. It proposed there was no special thing I needed to do to use JSX in my client-side JavaScript, but I found that hard to believe. I tried it out right here.
@@ -212,3 +212,5 @@ I had a circuitous idea to achieve my goal of writing client-side JSX inline in 
 So I had a way forward, but it unfortunately involved authoring my client-side JavaScript in a separate file. I reported my results to the author of NakedJSX and we had a nice chat about it.
 
 <Future>After chatting with the creator of NakedJSX about my goals of writing more inline JavaScript and JSX for both the client and statically-generated server-side, he helped me understand that I might want to write my own implementation of a static site generator with vanilla JSX. [He gave me some pointers of how I might do that](https://discord.com/channels/1101319012673134614/1101319013285498882/1175275036312092722) and I committed to trying it out sometime in the future.</Future>
+
+On a different topic, I added the ability to my `Link` component to target an ID on an internal page (`HashTarget`) so that I could track my usage of internal links to specific places. 
