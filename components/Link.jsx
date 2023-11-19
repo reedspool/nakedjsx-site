@@ -2,7 +2,7 @@ import { GITHUB_URL } from "../src/constants.mjs";
 
 export const slugsToHrefs = {
   home: "/",
-  "improve-this-website": "project-improve-this-website.html",
+  "project-improve-this-website": "project-improve-this-website.html",
   "projects-on-this-site": "project-track-my-projects.html",
   "about-project-logs": "topic-project-logs.html",
   "project-index": "topic-project-index.html",
