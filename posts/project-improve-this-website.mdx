@@ -214,3 +214,23 @@ So I had a way forward, but it unfortunately involved authoring my client-side J
 <Future>After chatting with the creator of NakedJSX about my goals of writing more inline JavaScript and JSX for both the client and statically-generated server-side, he helped me understand that I might want to write my own implementation of a static site generator with vanilla JSX. [He gave me some pointers of how I might do that](https://discord.com/channels/1101319012673134614/1101319013285498882/1175275036312092722) and I committed to trying it out sometime in the future.</Future>
 
 On a different topic, I added the ability to my `Link` component to target an ID on an internal page (`HashTarget`) so that I could track my usage of internal links to specific places. 
+
+### Thu Nov 23 15:48:27 PST 2023
+
+<Future>
+
+I made a component to formalize and feel out my use of two links to source files in this ite. One link was local for me to navigate with my text editor's path-following feature. The other link was for someone viewing the website to see my source codes in GitHub. I thought that I would like to only supply the local path, because then my existing text editor path-following would work. Then, the component could derive the appropriate GitHub path from that local path. I didn't know how to solve this technically, because I didn't know how the component could introspect on the name and current path of the file in which the component was used. Maybe the component could be bound to those props at runtime by the compile page, e.g.:
+
+```
+const MyInternalGitHubLink = bindProps(InternalGitHubLink, { filePath: "posts/sub-posts" });
+```
+
+so that my component could convert `../../src/filename.jsx` to `src/filename.jsx` and derive `https://github.com/reedspool/nakedjsx-site/blob/main/src/filename.jsx` by tacking it onto the normal GitHub base link.
+
+Previously, I had been typing both links and both paths in Markdown, like this:
+
+```
+[here (local, won't work on the web)](../src/compile-all-posts-client.jsx) or [here (global, GitHub)](https://github.com/reedspool/nakedjsx-site/blob/main/src/compile-all-posts-client.jsx#L1)
+```
+
+</Future>
