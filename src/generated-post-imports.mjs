@@ -10,6 +10,7 @@ import mdx_project_add_rss from ':mdx:../posts/project-add-rss.mdx';
 import mdx_project_concrete_programming_language from ':mdx:../posts/project-concrete-programming-language.mdx';
 import mdx_project_dnd_game_____ from ':mdx:../posts/project-dnd-game-2023.mdx';
 import mdx_project_fizzbuzz_in_css from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
+import mdx_project_hyperscript_and_vanilla_js from ':mdx:../posts/project-hyperscript-and-vanilla-js.mdx';
 import mdx_project_improve_this_website from ':mdx:../posts/project-improve-this-website.mdx';
 import mdx_project_log_game from ':mdx:../posts/project-log-game.mdx';
 import mdx_project_precision_timer from ':mdx:../posts/project-precision-timer.mdx';
@@ -37,6 +38,9 @@ export default [[{
   "inputFileName": "project-fizzbuzz-in-css.mdx",
   "outputFileName": "project-fizzbuzz-in-css.html"
 }, mdx_project_fizzbuzz_in_css],[{
+  "inputFileName": "project-hyperscript-and-vanilla-js.mdx",
+  "outputFileName": "project-hyperscript-and-vanilla-js.html"
+}, mdx_project_hyperscript_and_vanilla_js],[{
   "inputFileName": "project-improve-this-website.mdx",
   "outputFileName": "project-improve-this-website.html"
 }, mdx_project_improve_this_website],[{

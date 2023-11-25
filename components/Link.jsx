@@ -19,6 +19,8 @@ export const slugsToHrefs = {
   "project-supabase-authentication": "project-supabase-authentication.html",
   "project-dnd-game-2023": "project-dnd-game-2023.html",
   "project-log-game": "project-log-game.html",
+  "project-hyperscript-and-vanilla-js":
+    "project-hyperscript-and-vanilla-js.html",
 };
 
 export const slugsToHashes = {
