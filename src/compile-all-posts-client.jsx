@@ -91,40 +91,38 @@
   const Line = ({ c, children }) => <span>{c}: {children}</span>;
   const Stage = ({ children }) => <span>*{children}*</span>;
 
-  const dialogueIntroduction = [
-    () => <Stage>void</Stage>,
-    () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
-    () => <Line c="ME">Okay... lol</Line>,
-    () => <Line c="SB">There's a 100% chance you're going to die imminently</Line>,
-    () => <Line c="ME">Well, why?</Line>,
-    () => <Line c="SB">Because you didn't know about The Convulator</Line>,
-    () => <Line c="ME">What's the...</Line>,
-    convulator,
-  ];
+  const dialogueSystemInput = {
+    introduction : [
+      () => <Stage>void</Stage>,
+      () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
+      () => <Line c="ME">Okay... lol</Line>,
+      () => <Line c="SB">There's a 101% chance you're going to die imminently</Line>,
+      () => <Line c="ME">Well, why?</Line>,
+      () => <Line c="SB">Because you didn't know about The Convulator</Line>,
+      () => <Line c="ME">What's the...</Line>,
+      convulator,
+    ],
+    nextDayAfterFirstConvulatorImplosion: [
+      () => <Stage>void</Stage>,
+      () => <Line c="ME">What the actual...</Line>,
+      () => <Line c="SB">Sorry, I forgot to tell you how to survive.</Line>,
+      () => <Line c="ME">How do I survive? Please help!</Line>,
+      () => <Line c="SB">Because you didn't know about The Convulator</Line>,
+      () => <Line c="ME">What's the...</Line>,
+      convulator,
+      convulatorRevButton,
+    ],
+    deathByConvulator: [
+      () => <Stage>As soon as the Convulator meter reaches zero, it implodes and you expire</Stage>,
+      restartButton,
+    ],
+    shipboardRestartingSimulation : [
+      () => <Line c="SB">Restarting simulation</Line>
+    ]
+  }
 
-  const dialogueLife2 = [
-    () => <Stage>void</Stage>,
-    () => <Line c="ME">What the actual...</Line>,
-    () => <Line c="SB">Sorry, I forgot to tell you how to survive.</Line>,
-    () => <Line c="ME">How do I survive? Please help!</Line>,
-    () => <Line c="SB">Because you didn't know about The Convulator</Line>,
-    () => <Line c="ME">What's the...</Line>,
-    convulator,
-    convulatorRevButton,
-  ];
-
-  const dialogueWhenConvulatorFails = [
-    () => <Stage>As soon as the Convulator meter reaches zero, it implodes and you expire</Stage>,
-    restartButton,
-  ];
-
-  const dialogueOnRestart = [
-    () => <Line c="SB">Restarting simulation</Line>
-]
-
-  const dialogueQueue = [];
-
-  dialogueQueue.push(...dialogueIntroduction);
+  const dialogueQueue = []
+  dialogueQueue.push(...dialogueSystemInput.introduction);
 
   const game = document.querySelector("[data-game]");
   const allUnmountFns = [];
@@ -158,7 +156,7 @@
 
   document.body.addEventListener("onConvulatorMeterEmpty", () => {
     dialogueQueue.length = 0; // Clear
-    dialogueQueue.push(...dialogueWhenConvulatorFails);
+    dialogueQueue.push(...dialogueSystemInput.deathByConvulator);
   });
   document.body.addEventListener("restart", () => {
     dialogueQueue.length = 0; // Clear the scheduled dialogue entries
@@ -168,7 +166,7 @@
     allUnmountFns.forEach((fn) => fn());
     allUnmountFns.length = [];
     game.innerHTML = "";
-    dialogueQueue.push(...dialogueOnRestart);
-    dialogueQueue.push(...dialogueLife2);
+    dialogueQueue.push(...dialogueSystemInput.shipboardRestartingSimulation);
+    dialogueQueue.push(...dialogueSystemInput.nextDayAfterFirstConvulatorImplosion);
   });
 }
