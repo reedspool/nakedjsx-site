@@ -66,24 +66,29 @@
 
 // # Dialogue system
 {
+  // Character line
+  const Line = ({ c, children }) => <span>{c}: {children}</span>;
+
   const dialogueIntroduction = [
-    "<Setting: Complete darkness, a voice pierces an otherwise sensory-deprived blank moment>",
-    "SB (Shipboard computer): You're about to die",
-    "ME: What?!",
-    "SB: There's a 100% chance you're going to die imminently",
-    "ME: Why?!",
-    "SB: Riveting conversationalist...",
-    "SB: Because you didn't know you had to Rev The Convulator until now",
-    "ME: What's the...",
+    () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
+    () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
+    () => <Line c="ME">What?!</Line>,
+    () => <Line c="SB">There's a 100% chance you're going to die imminently</Line>,
+    () => <Line c="ME">Why?!</Line>,
+    () => <Line c="SB">Riveting conversationalist...</Line>,
+    () => <Line c="SB">Because you didn't know you had to Rev The Convulator until now</Line>,
+    () => <Line c="ME">What's the...</Line>,
     convulator,
   ];
 
   const dialogueWhenShipExplodes = [
-    "<The ship explodes and the entire crew expires in an instant>",
+    () => <Line c="Stage direction">ship explodes and the entire crew expires in an instant</Line>,
     restartButton,
   ];
 
-  const dialogueOnRestart = ["Restarting"];
+  const dialogueOnRestart = [
+    () => <Line c="SB">Restarting</Line>
+]
 
   const dialogueQueue = [];
 
