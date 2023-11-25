@@ -11,7 +11,6 @@
       <label class="block mb-2">
         Convulator:<progress max={max} value={initialValue}></progress>
       </label>
-      <button class="cpnt-button">Rev Convulator</button>
     </div>
   );
 
@@ -25,7 +24,7 @@
       progress.setAttribute("value", value);
 
       if (value <= 0) {
-        document.body.dispatchEvent(new Event("shipExploded"));
+        document.body.dispatchEvent(new Event("onConvulatorMeterEmpty"));
         timeout = null;
       } else {
         timeout = setTimeout(tick, 500);
@@ -33,14 +32,36 @@
     };
     tick();
 
-    const buttonOnClick = () => {
+    const onConvulatorRevved = () => {
       value = Math.min(value + revAmount, max);
       progress.setAttribute("value", value);
+    }
+        document.body.addEventListener("convulatorRevved", onConvulatorRevved)
+
+    return () => {
+      clearTimeout(timeout);
+        document.body.removeEventListener("convulatorRevved", onConvulatorRevved)
+    };
+  };
+}
+
+// Convulator Rev button
+{
+  window.convulatorRevButton = () => (
+    <div class="m-2 px-2">
+      <button class="cpnt-button">Rev Convulator</button>
+    </div>
+  );
+
+  window.convulatorRevButton.onMount = (container) => {
+    let button = container.querySelector("button");
+    const buttonOnClick = () => {
+
+        document.body.dispatchEvent(new Event("convulatorRevved"));
     };
     button.addEventListener("click", buttonOnClick);
 
     return () => {
-      clearTimeout(timeout);
       button.removeEventListener("click", buttonOnClick);
     };
   };
@@ -68,26 +89,37 @@
 {
   // Character line
   const Line = ({ c, children }) => <span>{c}: {children}</span>;
+  const Stage = ({ children }) => <span>*{children}*</span>;
 
   const dialogueIntroduction = [
+    () => <Stage>void</Stage>,
     () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
-    () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
-    () => <Line c="ME">What?!</Line>,
+    () => <Line c="ME">Okay... lol</Line>,
     () => <Line c="SB">There's a 100% chance you're going to die imminently</Line>,
-    () => <Line c="ME">Why?!</Line>,
-    () => <Line c="SB">Riveting conversationalist...</Line>,
-    () => <Line c="SB">Because you didn't know you had to Rev The Convulator until now</Line>,
+    () => <Line c="ME">Well, why?</Line>,
+    () => <Line c="SB">Because you didn't know about The Convulator</Line>,
     () => <Line c="ME">What's the...</Line>,
     convulator,
   ];
 
-  const dialogueWhenShipExplodes = [
-    () => <Line c="Stage direction">ship explodes and the entire crew expires in an instant</Line>,
+  const dialogueLife2 = [
+    () => <Stage>void</Stage>,
+    () => <Line c="ME">What the actual...</Line>,
+    () => <Line c="SB">Sorry, I forgot to tell you how to survive.</Line>,
+    () => <Line c="ME">How do I survive? Please help!</Line>,
+    () => <Line c="SB">Because you didn't know about The Convulator</Line>,
+    () => <Line c="ME">What's the...</Line>,
+    convulator,
+    convulatorRevButton,
+  ];
+
+  const dialogueWhenConvulatorFails = [
+    () => <Stage>As soon as the Convulator meter reaches zero, it implodes and you expire</Stage>,
     restartButton,
   ];
 
   const dialogueOnRestart = [
-    () => <Line c="SB">Restarting</Line>
+    () => <Line c="SB">Restarting simulation</Line>
 ]
 
   const dialogueQueue = [];
@@ -98,6 +130,11 @@
   const allUnmountFns = [];
   let dialogueTickTimerId;
   const tick = () => {
+    if (dialogueQueue.length == 0) {
+
+    dialogueTickTimerId = setTimeout(tick, 100);
+      return;
+    }
     const line = dialogueQueue.shift();
     let wordCount = "?";
     switch (typeof line) {
@@ -111,23 +148,17 @@
         game.appendChild(element);
         if (typeof line.onMount === "function")
           allUnmountFns.push(line.onMount(element));
+        break;
     }
     // game.append(' (' + wordCount + ')')
-    if (dialogueQueue.length === 0) {
-      dialogueTickTimerId = null;
-      return;
-    }
     game.appendChild(document.createElement("br"));
     dialogueTickTimerId = setTimeout(tick, wordCount * 400);
   };
   tick();
 
-  document.body.addEventListener("shipExploded", () => {
+  document.body.addEventListener("onConvulatorMeterEmpty", () => {
     dialogueQueue.length = 0; // Clear
-    dialogueQueue.push(...dialogueWhenShipExplodes);
-    // Note that since we're using dialogueTickTimerId to track whether the
-    // dialogue engine is running, we must always clear it when it stops
-    if (!dialogueTickTimerId) tick();
+    dialogueQueue.push(...dialogueWhenConvulatorFails);
   });
   document.body.addEventListener("restart", () => {
     dialogueQueue.length = 0; // Clear the scheduled dialogue entries
@@ -138,9 +169,6 @@
     allUnmountFns.length = [];
     game.innerHTML = "";
     dialogueQueue.push(...dialogueOnRestart);
-    dialogueQueue.push(...dialogueIntroduction);
-    // Note that since we're using dialogueTickTimerId to track whether the
-    // dialogue engine is running, we must always clear it when it stops
-    if (!dialogueTickTimerId) tick();
+    dialogueQueue.push(...dialogueLife2);
   });
 }
