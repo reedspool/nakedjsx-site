@@ -35,12 +35,12 @@
     const onConvulatorRevved = () => {
       value = Math.min(value + revAmount, max);
       progress.setAttribute("value", value);
-    }
-        document.body.addEventListener("convulatorRevved", onConvulatorRevved)
+    };
+    document.body.addEventListener("convulatorRevved", onConvulatorRevved);
 
     return () => {
       clearTimeout(timeout);
-        document.body.removeEventListener("convulatorRevved", onConvulatorRevved)
+      document.body.removeEventListener("convulatorRevved", onConvulatorRevved);
     };
   };
 }
@@ -53,16 +53,45 @@
     </div>
   );
 
+  let startTimestamp;
+  const amountOfTimeToKeepItUp = 5 * 1000;
+  let hasElapsedAmountOfTimeToKeepItUp = false;
   window.convulatorRevButton.onMount = (container) => {
+    let hasDied = false;
     let button = container.querySelector("button");
     const buttonOnClick = () => {
+      document.body.dispatchEvent(new Event("convulatorRevved"));
 
-        document.body.dispatchEvent(new Event("convulatorRevved"));
+      if (
+        !hasDied &&
+        !hasElapsedAmountOfTimeToKeepItUp &&
+        Date.now() - startTimestamp > 5000
+      ) {
+        hasElapsedAmountOfTimeToKeepItUp = true;
+        document.body.dispatchEvent(
+          new Event("keptUpTheConvulatorForSomeTime")
+        );
+      }
     };
     button.addEventListener("click", buttonOnClick);
+    startTimestamp = Date.now();
+
+    const onConvulatorMeterEmpty = () => {
+      hasDied = true;
+    };
+
+    document.body.addEventListener(
+      "onConvulatorMeterEmpty",
+      onConvulatorMeterEmpty
+    );
 
     return () => {
       button.removeEventListener("click", buttonOnClick);
+      document.body.removeEventListener(
+        "onConvulatorMeterEmpty",
+        onConvulatorMeterEmpty
+      );
+      startTimestamp = null;
     };
   };
 }
@@ -88,15 +117,21 @@
 // # Dialogue system
 {
   // Character line
-  const Line = ({ c, children }) => <span>{c}: {children}</span>;
+  const Line = ({ c, children }) => (
+    <span>
+      {c}: {children}
+    </span>
+  );
   const Stage = ({ children }) => <span>*{children}*</span>;
 
   const dialogueSystemInput = {
-    introduction : [
+    introduction: [
       () => <Stage>void</Stage>,
       () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
       () => <Line c="ME">Okay... lol</Line>,
-      () => <Line c="SB">There's a 101% chance you're going to die imminently</Line>,
+      () => (
+        <Line c="SB">There's a 101% chance you're going to die imminently</Line>
+      ),
       () => <Line c="ME">Well, why?</Line>,
       () => <Line c="SB">Because you didn't know about The Convulator</Line>,
       () => <Line c="ME">What's the...</Line>,
@@ -112,16 +147,28 @@
       convulator,
       convulatorRevButton,
     ],
+
+    keptUpTheConvulatorForSomeTime: [
+      () => <Line c="SB">You finally got it!</Line>,
+      () => <Line c="ME">It's easy...</Line>,
+      () => <Line c="SB">The pile of failed experiments might disagree.</Line>,
+      () => <Line c="SB">But anyway, progress is progress</Line>,
+    ],
     deathByConvulator: [
-      () => <Stage>As soon as the Convulator meter reaches zero, it implodes and you expire</Stage>,
+      () => (
+        <Stage>
+          As soon as the Convulator meter reaches zero, it implodes and you
+          expire
+        </Stage>
+      ),
       restartButton,
     ],
-    shipboardRestartingSimulation : [
-      () => <Line c="SB">Restarting simulation</Line>
-    ]
-  }
+    shipboardRestartingSimulation: [
+      () => <Line c="SB">Restarting simulation</Line>,
+    ],
+  };
 
-  const dialogueQueue = []
+  const dialogueQueue = [];
   dialogueQueue.push(...dialogueSystemInput.introduction);
 
   const game = document.querySelector("[data-game]");
@@ -129,8 +176,7 @@
   let dialogueTickTimerId;
   const tick = () => {
     if (dialogueQueue.length == 0) {
-
-    dialogueTickTimerId = setTimeout(tick, 100);
+      dialogueTickTimerId = setTimeout(tick, 100);
       return;
     }
     const line = dialogueQueue.shift();
@@ -158,6 +204,10 @@
     dialogueQueue.length = 0; // Clear
     dialogueQueue.push(...dialogueSystemInput.deathByConvulator);
   });
+
+  document.body.addEventListener("keptUpTheConvulatorForSomeTime", () => {
+    dialogueQueue.push(...dialogueSystemInput.keptUpTheConvulatorForSomeTime);
+  });
   document.body.addEventListener("restart", () => {
     dialogueQueue.length = 0; // Clear the scheduled dialogue entries
 
@@ -167,6 +217,8 @@
     allUnmountFns.length = [];
     game.innerHTML = "";
     dialogueQueue.push(...dialogueSystemInput.shipboardRestartingSimulation);
-    dialogueQueue.push(...dialogueSystemInput.nextDayAfterFirstConvulatorImplosion);
+    dialogueQueue.push(
+      ...dialogueSystemInput.nextDayAfterFirstConvulatorImplosion
+    );
   });
 }
