@@ -6,71 +6,139 @@
  * Run that again to regenerate this file.
  ******************************************************************************/
 import mdx_project_add_popout from ':mdx:../posts/project-add-popout.mdx';
-import mdx_project_add_rss from ':mdx:../posts/project-add-rss.mdx';
-import mdx_project_concrete_programming_language from ':mdx:../posts/project-concrete-programming-language.mdx';
-import mdx_project_dnd_game_____ from ':mdx:../posts/project-dnd-game-2023.mdx';
-import mdx_project_fizzbuzz_in_css from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
-import mdx_project_hyperscript_and_vanilla_js from ':mdx:../posts/project-hyperscript-and-vanilla-js.mdx';
-import mdx_project_improve_this_website from ':mdx:../posts/project-improve-this-website.mdx';
-import mdx_project_log_game from ':mdx:../posts/project-log-game.mdx';
-import mdx_project_precision_timer from ':mdx:../posts/project-precision-timer.mdx';
-import mdx_project_supabase_authentication from ':mdx:../posts/project-supabase-authentication.mdx';
-import mdx_project_symbolic_differentiator from ':mdx:../posts/project-symbolic-differentiator.mdx';
-import mdx_project_track_my_projects from ':mdx:../posts/project-track-my-projects.mdx';
-import mdx_project_write_script_and_style_tags from ':mdx:../posts/project-write-script-and-style-tags.mdx';
-import mdx_topic_operating_this_website from ':mdx:../posts/topic-operating-this-website.mdx';
-import mdx_topic_project_index from ':mdx:../posts/topic-project-index.mdx';
-import mdx_topic_project_logs from ':mdx:../posts/topic-project-logs.mdx';
-import mdx_topic_recurse_center from ':mdx:../posts/topic-recurse-center.mdx';
-export default [[{
+export const exported_project_add_popout = [
+{
   "inputFileName": "project-add-popout.mdx",
   "outputFileName": "project-add-popout.html"
-}, mdx_project_add_popout],[{
+},
+mdx_project_add_popout
+]
+import mdx_project_add_rss from ':mdx:../posts/project-add-rss.mdx';
+export const exported_project_add_rss = [
+{
   "inputFileName": "project-add-rss.mdx",
   "outputFileName": "project-add-rss.html"
-}, mdx_project_add_rss],[{
+},
+mdx_project_add_rss
+]
+import mdx_project_concrete_programming_language from ':mdx:../posts/project-concrete-programming-language.mdx';
+export const exported_project_concrete_programming_language = [
+{
   "inputFileName": "project-concrete-programming-language.mdx",
   "outputFileName": "project-concrete-programming-language.html"
-}, mdx_project_concrete_programming_language],[{
+},
+mdx_project_concrete_programming_language
+]
+import mdx_project_dnd_game_____ from ':mdx:../posts/project-dnd-game-2023.mdx';
+export const exported_project_dnd_game_____ = [
+{
   "inputFileName": "project-dnd-game-2023.mdx",
   "outputFileName": "project-dnd-game-2023.html"
-}, mdx_project_dnd_game_____],[{
+},
+mdx_project_dnd_game_____
+]
+import mdx_project_fizzbuzz_in_css from ':mdx:../posts/project-fizzbuzz-in-css.mdx';
+export const exported_project_fizzbuzz_in_css = [
+{
   "inputFileName": "project-fizzbuzz-in-css.mdx",
   "outputFileName": "project-fizzbuzz-in-css.html"
-}, mdx_project_fizzbuzz_in_css],[{
+},
+mdx_project_fizzbuzz_in_css
+]
+import mdx_project_hyperscript_and_vanilla_js from ':mdx:../posts/project-hyperscript-and-vanilla-js.mdx';
+export const exported_project_hyperscript_and_vanilla_js = [
+{
   "inputFileName": "project-hyperscript-and-vanilla-js.mdx",
   "outputFileName": "project-hyperscript-and-vanilla-js.html"
-}, mdx_project_hyperscript_and_vanilla_js],[{
+},
+mdx_project_hyperscript_and_vanilla_js
+]
+import mdx_project_improve_this_website from ':mdx:../posts/project-improve-this-website.mdx';
+export const exported_project_improve_this_website = [
+{
   "inputFileName": "project-improve-this-website.mdx",
   "outputFileName": "project-improve-this-website.html"
-}, mdx_project_improve_this_website],[{
+},
+mdx_project_improve_this_website
+]
+import mdx_project_log_game from ':mdx:../posts/project-log-game.mdx';
+export const exported_project_log_game = [
+{
   "inputFileName": "project-log-game.mdx",
   "outputFileName": "project-log-game.html"
-}, mdx_project_log_game],[{
+},
+mdx_project_log_game
+]
+import mdx_project_precision_timer from ':mdx:../posts/project-precision-timer.mdx';
+export const exported_project_precision_timer = [
+{
   "inputFileName": "project-precision-timer.mdx",
   "outputFileName": "project-precision-timer.html"
-}, mdx_project_precision_timer],[{
+},
+mdx_project_precision_timer
+]
+import mdx_project_supabase_authentication from ':mdx:../posts/project-supabase-authentication.mdx';
+export const exported_project_supabase_authentication = [
+{
   "inputFileName": "project-supabase-authentication.mdx",
   "outputFileName": "project-supabase-authentication.html"
-}, mdx_project_supabase_authentication],[{
+},
+mdx_project_supabase_authentication
+]
+import mdx_project_symbolic_differentiator from ':mdx:../posts/project-symbolic-differentiator.mdx';
+export const exported_project_symbolic_differentiator = [
+{
   "inputFileName": "project-symbolic-differentiator.mdx",
   "outputFileName": "project-symbolic-differentiator.html"
-}, mdx_project_symbolic_differentiator],[{
+},
+mdx_project_symbolic_differentiator
+]
+import mdx_project_track_my_projects from ':mdx:../posts/project-track-my-projects.mdx';
+export const exported_project_track_my_projects = [
+{
   "inputFileName": "project-track-my-projects.mdx",
   "outputFileName": "project-track-my-projects.html"
-}, mdx_project_track_my_projects],[{
+},
+mdx_project_track_my_projects
+]
+import mdx_project_write_script_and_style_tags from ':mdx:../posts/project-write-script-and-style-tags.mdx';
+export const exported_project_write_script_and_style_tags = [
+{
   "inputFileName": "project-write-script-and-style-tags.mdx",
   "outputFileName": "project-write-script-and-style-tags.html"
-}, mdx_project_write_script_and_style_tags],[{
+},
+mdx_project_write_script_and_style_tags
+]
+import mdx_topic_operating_this_website from ':mdx:../posts/topic-operating-this-website.mdx';
+export const exported_topic_operating_this_website = [
+{
   "inputFileName": "topic-operating-this-website.mdx",
   "outputFileName": "topic-operating-this-website.html"
-}, mdx_topic_operating_this_website],[{
+},
+mdx_topic_operating_this_website
+]
+import mdx_topic_project_index from ':mdx:../posts/topic-project-index.mdx';
+export const exported_topic_project_index = [
+{
   "inputFileName": "topic-project-index.mdx",
   "outputFileName": "topic-project-index.html"
-}, mdx_topic_project_index],[{
+},
+mdx_topic_project_index
+]
+import mdx_topic_project_logs from ':mdx:../posts/topic-project-logs.mdx';
+export const exported_topic_project_logs = [
+{
   "inputFileName": "topic-project-logs.mdx",
   "outputFileName": "topic-project-logs.html"
-}, mdx_topic_project_logs],[{
+},
+mdx_topic_project_logs
+]
+import mdx_topic_recurse_center from ':mdx:../posts/topic-recurse-center.mdx';
+export const exported_topic_recurse_center = [
+{
   "inputFileName": "topic-recurse-center.mdx",
   "outputFileName": "topic-recurse-center.html"
-}, mdx_topic_recurse_center]];
+},
+mdx_topic_recurse_center
+]
+;

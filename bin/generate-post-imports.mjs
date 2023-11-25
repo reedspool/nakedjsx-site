@@ -5,7 +5,6 @@ console.log(`Running this script from CWD "${process.cwd()}"`)
 const POST_DIR_REL_PATH = './posts'
 const OUTPUT_FILE_REL_PATH = "./src/generated-post-imports.mjs"
 
-const mdx = [];
 let js = '';
 let usedIdentifiers = new Set();
 
@@ -21,14 +20,19 @@ for (const inputFileName of await readdir(POST_DIR_REL_PATH)) {
   const outputFileName = `${fileNameWithoutExtension}.html`
 
   // Import the MDX file via the :mdx: plugin
-  const identifier = `mdx_${fileNameWithoutExtension.replaceAll(/[^A-Za-z_]/g, "_")}`
-  if (usedIdentifiers.has(identifier)) throw new Error(`Duplicate identifier '${identifier}'`)
-  usedIdentifiers.add(identifier)
+  const safeIdentifier = fileNameWithoutExtension.replaceAll(/[^A-Za-z_]/g, "_")
 
-  js += `import ${identifier} from ':mdx:${postPath}';\n`;
+  if (usedIdentifiers.has(safeIdentifier)) throw new Error(`Duplicate identifier '${safeIdentifier}'`)
+  usedIdentifiers.add(safeIdentifier)
 
-  // Add the imported result to an array along with some meta information
-  mdx.push(`[${JSON.stringify({ inputFileName, outputFileName }, null, 2)}, ${identifier}]`);
+  const mdxIdentifier = `mdx_${safeIdentifier}`
+
+  js += `import ${mdxIdentifier} from ':mdx:${postPath}';\n`;
+  js += `export const exported_${safeIdentifier} = [
+${JSON.stringify({ inputFileName, outputFileName }, null, 2)},
+${mdxIdentifier}
+]
+`
 }
 
 
@@ -39,7 +43,7 @@ const result = `/***************************************************************
  *
  * Run that again to regenerate this file.
  ******************************************************************************/
-${js}export default [${mdx.join(",")}];`;
+${js};`
 console.log(`Writing to "${OUTPUT_FILE_REL_PATH}":\n\n`, result)
 
 await writeFile(OUTPUT_FILE_REL_PATH, result)
