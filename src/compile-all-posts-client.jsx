@@ -8,8 +8,8 @@
   let max = 1;
   window.convulator = () => (
     <div class="m-2 px-2">
-      <label class="block mb-2">
-        Convulator:<progress max={max} value={initialValue}></progress>
+      <label class="flex flex-row space-between items-center  mb-2">
+        Convulator&nbsp;<progress max={max} value={initialValue}></progress>
       </label>
     </div>
   );
@@ -122,7 +122,7 @@
       {c}: {children}
     </span>
   );
-  const Stage = ({ children }) => <span>*{children}*</span>;
+  const Stage = ({ children }) => <span class="p-4 block">*{children}*</span>;
 
   const dialogueSystemInput = {
     introduction: [
@@ -142,8 +142,8 @@
       () => <Line c="ME">What the actual...</Line>,
       () => <Line c="SB">Sorry, I forgot to tell you how to survive.</Line>,
       () => <Line c="ME">How do I survive? Please help!</Line>,
-      () => <Line c="SB">Because you didn't know about The Convulator</Line>,
-      () => <Line c="ME">What's the...</Line>,
+      () => <Line c="SB">You have to keep the Convulator Revved</Line>,
+      () => <Line c="ME">And you expect me to just know how to do that?</Line>,
       convulator,
       convulatorRevButton,
     ],
@@ -151,7 +151,11 @@
     keptUpTheConvulatorForSomeTime: [
       () => <Line c="SB">You finally got it!</Line>,
       () => <Line c="ME">It's easy...</Line>,
-      () => <Line c="SB">The pile of failed experiments might disagree.</Line>,
+      () => (
+        <Line c="SB">
+          The pile of failed experiments in your past might disagree.
+        </Line>
+      ),
       () => <Line c="SB">But anyway, progress is progress</Line>,
     ],
     deathByConvulator: [
@@ -196,6 +200,7 @@
     }
     // game.append(' (' + wordCount + ')')
     game.appendChild(document.createElement("br"));
+    game.scrollTo({ top: game.scrollHeight, behavior: "smooth" });
     dialogueTickTimerId = setTimeout(tick, wordCount * 400);
   };
   tick();
