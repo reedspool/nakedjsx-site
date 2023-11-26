@@ -52,11 +52,11 @@
     </div>
   );
 
-  let startTimestamp;
   const amountOfTimeToKeepItUp = 5 * 1000;
   let hasElapsedAmountOfTimeToKeepItUp = false;
   window.convulatorRevButton.onMount = (container) => {
     let button = container.querySelector("button");
+    let startTimestamp = Date.now();
     let enoughMachinatorProduct = true;
     const buttonOnClick = () => {
       if (!enoughMachinatorProduct) {
@@ -78,7 +78,6 @@
       }
     };
     button.addEventListener("click", buttonOnClick);
-    startTimestamp = Date.now();
 
     const onConvulatorMeterEmpty = () => {
       button.removeEventListener("click", buttonOnClick);
@@ -112,7 +111,6 @@
         "machinatorProductValueUpdate",
         onMachinatorProduced
       );
-      startTimestamp = null;
     };
   };
 }
@@ -225,10 +223,23 @@
     </div>
   );
 
+  const amountOfTimeToKeepItUp = 5 * 1000;
+  let hasElapsedAmountOfTimeToKeepItUp = false;
   window.machinatorRevButton.onMount = (container) => {
     let button = container.querySelector("button");
+    let startTimestamp = Date.now();
     const buttonOnClick = () => {
       document.body.dispatchEvent(new Event("machinatorRevved"));
+
+      if (
+        !hasElapsedAmountOfTimeToKeepItUp &&
+        Date.now() - startTimestamp > amountOfTimeToKeepItUp
+      ) {
+        hasElapsedAmountOfTimeToKeepItUp = true;
+        document.body.dispatchEvent(
+          new Event("keptUpTheMachinatorAliveForSomeTime")
+        );
+      }
     };
     button.addEventListener("click", buttonOnClick);
 
@@ -269,44 +280,16 @@
   const dialogueSystemInput = {
     introduction: [
       () => <Stage>void</Stage>,
-      () => <Line c="SB (Shipboard computer)">You're about to die</Line>,
-      () => <Line c="ME">Okay... lol</Line>,
+      () => <Line c="SB">You're about to die</Line>,
+      () => <Line c="ME">Are you the Shipboard Computer?</Line>,
+      () => <Line c="SB">Focus.</Line>,
       () => (
         <Line c="SB">There's a 101% chance you're going to die imminently</Line>
       ),
-      () => <Line c="ME">Well, why?</Line>,
-      () => <Line c="SB">Because you didn't know about The Convulator</Line>,
+      () => <Line c="ME">Fine, I'll bite. Why am I going to die?</Line>,
+      () => <Line c="SB">The Convulator</Line>,
       () => <Line c="ME">What's the...</Line>,
       convulator,
-    ],
-    nextDayAfterFirstConvulatorImplosion: [
-      () => <Stage>void</Stage>,
-      () => <Line c="ME">What the actual...</Line>,
-      () => <Line c="SB">Sorry, I forgot to tell you how to survive.</Line>,
-      () => <Line c="ME">How do I survive? Please help!</Line>,
-      () => <Line c="SB">You have to keep the Convulator Revved</Line>,
-      () => <Line c="ME">And you expect me to just know how to do that?</Line>,
-      convulator,
-      convulatorRevButton,
-    ],
-
-    keptUpTheConvulatorForSomeTime: [
-      () => <Line c="SB">You finally got it!</Line>,
-      () => <Line c="ME">It's easy...</Line>,
-      () => (
-        <Line c="SB">
-          The pile of failed experiments in your past might disagree.
-        </Line>
-      ),
-      () => <Line c="SB">But anyway, progress is progress</Line>,
-      () => (
-        <Line c="SB">
-          Oh, you'll need to keep your Machinator running to produce fuel for
-          the Convulator
-        </Line>
-      ),
-      machinator,
-      machinatorRevButton,
     ],
     deathByConvulator: [
       () => (
@@ -319,6 +302,37 @@
     ],
     shipboardRestartingSimulation: [
       () => <Line c="SB">Restarting simulation</Line>,
+    ],
+    nextDayAfterFirstConvulatorImplosion: [
+      () => <Stage>void</Stage>,
+      () => <Line c="ME">That was unpleasant</Line>,
+      () => <Line c="SB">My bad, I forgot to tell you how to fix it</Line>,
+      () => <Line c="ME">How do I fix it?</Line>,
+      () => <Line c="SB">Keep the Convulator revved</Line>,
+      () => <Line c="ME">You expect me to understand that nonsense?</Line>,
+      convulator,
+      convulatorRevButton,
+    ],
+
+    keptUpTheConvulatorForSomeTime: [
+      () => <Line c="SB">You finally got it!</Line>,
+      () => <Line c="ME">It's easy...</Line>,
+      () => <Line c="SB">It hasn't been a waste, there's a chance!</Line>,
+      () => (
+        <Line c="SB">
+          Now keep the Machinator moving to produce fuel for the Convulator
+        </Line>
+      ),
+      machinator,
+      machinatorRevButton,
+    ],
+    keptUpTheMachinatorAliveForSomeTime: [
+      () => (
+        <Line c="SB">
+          Good. Now I have to go tend to some other issues. You can either die
+          or restart.
+        </Line>
+      ),
     ],
   };
 
@@ -361,6 +375,11 @@
 
   document.body.addEventListener("keptUpTheConvulatorForSomeTime", () => {
     dialogueQueue.push(...dialogueSystemInput.keptUpTheConvulatorForSomeTime);
+  });
+  document.body.addEventListener("keptUpTheMachinatorAliveForSomeTime", () => {
+    dialogueQueue.push(
+      ...dialogueSystemInput.keptUpTheMachinatorAliveForSomeTime
+    );
   });
   document.body.addEventListener("restart", () => {
     dialogueQueue.length = 0; // Clear the scheduled dialogue entries
