@@ -71,15 +71,13 @@ So those were the properties I needed to derive for each post:.
 { url, description, content, date, image }
 ```
 
-Before moving on, I wanted to verify that the code would work, so I added it to [my compilation script](https://github.com/reedspool/nakedjsx-site/blob/6bcaf25e60d2170a5bb9e132d2a93c9878163588/src/compile-all-posts-page.jsx#L1).
+Before moving on, I wanted to verify that the code would work, so I added it to <GitHubLink extraPath="/blob/6bcaf25e60d2170a5bb9e132d2a93c9878163588/src/compile-all-posts-page.jsx">my compilation script</GitHubLink>.
 
 I realized I'd need to export each title from each project file because I'd need to put that in each feed. I'd probably want to export a description as well. I wasn't sure what would go in the `content` field.
 
 Before doing that, I decided just to push the working RSS and try to put it in my own RSS feeder to see what the audience experience is like.
 
 I was easily able to add the feed on my reader app!
-
-<Future>I added links to my page for RSS the feed.</Future>
 
 I made a new page that would be a reverse-chronological change-log from which my RSS feed would be generated. I did this instead of simply adding each new page to my blog because I wanted my site to be filled with long-lived, often-updated project pages. I'd want a place to write about and link to my updates rather than making a brand new page before making a new post to my RSS feed.
 

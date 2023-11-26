@@ -102,7 +102,7 @@ I also tried out the NakedJSX config file with `npm run build -- --config-save`.
 
 ### Thu Aug 24 15:37:02 PDT 2023
 
-I wanted to add links between pages, but I found I was renaming pages frequently in this early stage of development. To lower the friction to name changes, I [made a component](https://github.com/reedspool/nakedjsx-site/blob/main/components/Link.jsx) which would throw an error if I used an incorrect name for another post.
+I wanted to add links between pages, but I found I was renaming pages frequently in this early stage of development. To lower the friction to name changes, I <GitHubLink extraPath="/blob/main/components/Link.jsx">made a component</GitHubLink> which would throw an error if I used an incorrect name for another post.
 
 <Future>I experimented with `ref` to collect all of the links in each post to create backlinks.</Future>
 
@@ -124,7 +124,7 @@ My development server did not automatically rebuild pages because of caching as 
 
 My idea was to write a script to generate a JavaScript file which imported all of my posts and wrote that file to disk. This was basically what the development server was already doing, except it was trying to do it intelligently at run-time. I wanted to do it on demand instead. I'd just have to re-run that script every time I added a new file, which seemed simple enough.
 
-To write [this script](https://github.com/reedspool/nakedjsx-site/blob/main/bin/generate-post-imports.mjs#L1) was as easy as copying and pasting the contents of my development server script which essentially did the same thing. I just wrote the result to a file instead of returning it from a dynamic script.
+To write <GitHubLink extraPath="/blob/main/bin/generate-post-imports.mjs">this script</GitHubLink> was as easy as copying and pasting the contents of my development server script which essentially did the same thing. I just wrote the result to a file instead of returning it from a dynamic script.
 
 <Future>I found that the NakedJSX development server was not correctly rendering this "link" emoji `🔗`. This seemed to be a problem only with the development server because the output HTML looked correct and when I served those files with another server, the emoji looked correct.</Future>
 
@@ -225,12 +225,13 @@ I made a component to formalize and feel out my use of two links to source files
 const MyInternalGitHubLink = bindProps(InternalGitHubLink, { filePath: "posts/sub-posts" });
 ```
 
-so that my component could convert `../../src/filename.jsx` to `src/filename.jsx` and derive `https://github.com/reedspool/nakedjsx-site/blob/main/src/filename.jsx` by tacking it onto the normal GitHub base link.
+so that my component could convert `../../src/filename.jsx` to `src/filename.jsx` and derive `https://github.com/reedspool/reeds-website/blob/main/src/filename.jsx` by tacking it onto the normal GitHub base link.
 
 Previously, I had been typing both links and both paths in Markdown, like this:
 
 ```
-[here (local, won't work on the web)](../src/compile-all-posts-client.jsx) or [here (global, GitHub)](https://github.com/reedspool/nakedjsx-site/blob/main/src/compile-all-posts-client.jsx#L1)
+[here (local, won't work on the web)](../src/compile-all-posts-client.jsx) or [here (global, GitHub)](https://github.com/reedspool/reeds-website/blob/main/src/compile-all-posts-client.jsx#L1)
 ```
 
+Though I had also worked a bit on a component for linking to my GitHub, `GitHubLink`. I'm not sure what I hoped to gain with that component.
 </Future>
