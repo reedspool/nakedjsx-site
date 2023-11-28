@@ -127,9 +127,7 @@ window.differentIndexForArray = function (lastIndex, array) {
         Date.now() - startTimestamp > amountOfTimeToKeepItUp
       ) {
         hasElapsedAmountOfTimeToKeepItUp = true;
-        document.body.dispatchEvent(
-          new Event("keptUpTheConvulatorForSomeTime")
-        );
+        ___`trigger keptUpTheConvulatorForSomeTime`;
       }
     };
     button.addEventListener("click", buttonOnClick);
