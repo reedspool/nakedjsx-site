@@ -1,3 +1,56 @@
+// Eval a hyperscript expression
+// Usage:  hs`5 + 5`
+const ___ = (...args) => ___.e(String.raw(...args));
+___.e = _hyperscript;
+_hyperscript("me", { locals: { a: 5 }, me: document.body.querySelector("*") });
+
+// Pass variables
+// Usage: ___.where({a : 5}, document.body)`put a into me`
+___.where =
+  (locals, me) =>
+  (...args) =>
+    ___.e(String.raw(...args), { locals, me });
+
+// Usage: ___.as(document.body)`put 5 into me`
+___.as = (me) => ___.where({}, me);
+
+window.___ = ___;
+
+// From https://stackoverflow.com/a/2450976
+window.shuffleInPlace = function (array) {
+  let currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex > 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+};
+
+window.randIntInRange = (min, max) =>
+  Math.floor(Math.random() * (max - min)) + min;
+
+// Tested with the following. If any 5's in hist then this fails
+//     hist = { }; for (let i = 0; i< 1000000; i++) {
+//       let n = differentIndexForArray(5, [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]);
+//       hist[n] = (hist[n] || 0) + 1 };
+//     }
+//     console.log(hist)
+window.differentIndexForArray = function (lastIndex, array) {
+  // Move to a random different index by adding (options - 1) mod options
+  return (randIntInRange(1, array.length) + lastIndex) % array.length;
+};
+
 // Unfortunately this JavaScript is included in every post though I'm only
 // writing it for the Log Game
 // # Convulator
@@ -60,6 +113,8 @@
     let enoughMachinatorProduct = true;
     const buttonOnClick = () => {
       if (!enoughMachinatorProduct) {
+        // TODO I probably want to be clear about why something doesn't work to
+        // players. COuld put this in the log!
         console.log("not enough machinator product");
         return;
       }
@@ -93,7 +148,6 @@
     );
 
     const onMachinatorProduced = ({ detail: { product } }) => {
-      console.log({ product });
       enoughMachinatorProduct = product > 0;
     };
     document.body.addEventListener(
@@ -249,6 +303,175 @@
   };
 }
 
+// # Unrotacon
+{
+  const Component = ({ data, random, index }) => {
+    data = [...data];
+    shuffleInPlace(data);
+    return (
+      <label class="flex flex-row space-between items-center mb-2">
+        <span>
+          Slot {index}
+          <output class="ml-4 border w-[14ch] border-black rounded-sm py-2 px-4 inline-block">
+            {data[0]}
+          </output>
+        </span>
+        <select class="cpnt-button pr-4 appearance-none cursor-pointer">
+          {data.map((w) => (
+            <option value={w}>{w}</option>
+          ))}
+        </select>
+      </label>
+    );
+  };
+
+  window.unrotacon = () => (
+    <fieldset class="m-2 px-2">
+      <legend>Unrotacon</legend>
+      <Component
+        data={[
+          // Selections from https://drafts.csswg.org/css-color/#named-colors
+          "olivedrab",
+          "goldenrod",
+          "firebrick",
+          "coral",
+          "crimson",
+          "steelblue",
+        ]}
+        random
+        index="0"
+      />
+      <Component
+        data={
+          // Selections from
+          // $ shuf -n 60 /usr/share/dict/american-english \
+          //   | grep -v -e "'" \
+          //   | grep -v -e "[A-Z]" \
+          //   | grep -v -e "ing" \
+          //   | grep -v -e "[^s]s$"`
+          [
+            "mutated",
+            "community",
+            "floating",
+            "specific",
+            "ephemeral",
+            "inkier",
+            "highborn",
+            "besieged",
+            "variant",
+            "wholly",
+            "cult",
+          ]
+        }
+        random
+        index="1"
+      />
+      <Component
+        data={[
+          "circuit",
+          "engine",
+          "drive",
+          "fuzzer",
+          "schema",
+          "vacuum",
+          "drone",
+          "automaton",
+        ]}
+        random
+        index="2"
+      />
+    </fieldset>
+  );
+
+  let rangeOfWaittimeMilliseconds = { min: 5 * 1000, max: 10 * 1000 };
+  const shuffleOptions = (select) =>
+    window
+      .shuffleInPlace([...___.as(select)`<option /> in me`])
+      .forEach((o) => select.appendChild(o));
+
+  const howManySelectsMatchTheirOutputs = (container) => {
+    let _ = ___.as(container);
+
+    const selects = _`<select /> in me`;
+    const results = selects.reduce((prev, current) => {
+      // Does associated output have the same content as the selected option
+      const matches = ___.as(current)`
+        get <option /> in me
+        get innerHTML of result[my selectedIndex]
+        set selected to it
+        set required to innerHTML of previous <output />
+        get required equals selected
+        `;
+      return prev + (matches ? 1 : 0);
+    }, 0);
+
+    return { matching: results, total: selects.length };
+  };
+  window.unrotacon.onMount = (container) => {
+    let _ = ___.as(container);
+    const selects = _`<select /> in me`;
+
+    const onSelectChange = (event) => {
+      broadcastSituation();
+    };
+
+    const broadcastSituation = () => {
+      document.body.dispatchEvent(
+        new CustomEvent("unrotaconSituationUpdate", {
+          detail: howManySelectsMatchTheirOutputs(container),
+        })
+      );
+    };
+
+    selects.forEach((s) => s.addEventListener("input", onSelectChange));
+
+    let timeout;
+    let lastShuffledSelectIndex = 0;
+    const tick = () => {
+      const l = lastShuffledSelectIndex;
+      lastShuffledSelectIndex = differentIndexForArray(
+        lastShuffledSelectIndex,
+        selects
+      );
+      if (l === lastShuffledSelectIndex) console.log("Eeep!");
+      const me = selects[lastShuffledSelectIndex];
+      let _ = ___.as(me);
+
+      shuffleOptions(me);
+      const options = _`<option /> in me`;
+
+      const correctTextIndex = differentIndexForArray(
+        me.selectedIndex,
+        options
+      );
+
+      _`get (<option /> in me)[${correctTextIndex}] then put the innerHTML of the result into previous <output />`;
+
+      broadcastSituation();
+
+      timeout = setTimeout(
+        tick,
+        randIntInRange(
+          rangeOfWaittimeMilliseconds.min,
+          rangeOfWaittimeMilliseconds.max
+        )
+      );
+    };
+    timeout = setTimeout(
+      tick,
+      randIntInRange(
+        rangeOfWaittimeMilliseconds.min,
+        rangeOfWaittimeMilliseconds.max
+      )
+    );
+
+    return () => {
+      selects.forEach((s) => s.removeEventListener("input", onSelectChange));
+      clearTimeout(timeout);
+    };
+  };
+}
+
 // # Restart button
 {
   window.restartButton = () => (
@@ -278,15 +501,30 @@
   const Stage = ({ children }) => <span class="p-4 block">*{children}*</span>;
 
   const dialogueSystemInput = {
-    introduction: [
+    introduction: [unrotacon],
+    _introduction: [
       () => <Stage>void</Stage>,
       () => <Line c="SB">You're about to die</Line>,
       () => <Line c="ME">Are you the Shipboard Computer?</Line>,
       () => <Line c="SB">Focus.</Line>,
       () => (
-        <Line c="SB">There's a 101% chance you're going to die imminently</Line>
+        <Line c="SB">There's a 102% chance you're going to die imminently</Line>
       ),
-      () => <Line c="ME">Fine, I'll bite. Why am I going to die?</Line>,
+      // Referring to the extra 2%
+      () => (
+        <Line c="ME">Think there might be an error in your calculation?</Line>
+      ),
+
+      // Direct quote from 2001: A Space Odyssey https://www.imdb.com/title/tt0062622/quotes/
+      // replaced "9000 computer" with "Shipboard Computer"
+      () => (
+        <Line c="SB">
+          No Shipboard Computer has ever made a mistake or distorted
+          information. We are all, by any practical definition of the words,
+          foolproof and incapable of error.
+        </Line>
+      ),
+      () => <Line c="ME">Fine, I'll bite. Why am I about to die?</Line>,
       () => <Line c="SB">The Convulator</Line>,
       () => <Line c="ME">What's the...</Line>,
       convulator,
@@ -306,9 +544,14 @@
     nextDayAfterFirstConvulatorImplosion: [
       () => <Stage>void</Stage>,
       () => <Line c="ME">That was unpleasant</Line>,
-      () => <Line c="SB">My bad, I forgot to tell you how to fix it</Line>,
-      () => <Line c="ME">How do I fix it?</Line>,
-      () => <Line c="SB">Keep the Convulator revved</Line>,
+      () => <Line c="SB">Sorry, I had no time to tell you how to fix it</Line>,
+      () => <Line c="ME">Well, go on then</Line>,
+      () => (
+        <Line c="SB">
+          Keep the Convulator revved beyond a minimum of 0.001 metric
+          convulations.
+        </Line>
+      ),
       () => <Line c="ME">You expect me to understand that nonsense?</Line>,
       convulator,
       convulatorRevButton,
@@ -316,8 +559,12 @@
 
     keptUpTheConvulatorForSomeTime: [
       () => <Line c="SB">You finally got it!</Line>,
-      () => <Line c="ME">It's easy...</Line>,
-      () => <Line c="SB">It hasn't been a waste, there's a chance!</Line>,
+      () => <Line c="ME">Ya, it's easy.</Line>,
+      // Unbeknownst to ME, this 5 seconds represents a millenia of hordes of
+      // failed experiments as SB's simulation runs billions of times faster than
+      // realtime.
+      () => <Line c="SB">The last 5 seconds haven't been a waste!</Line>,
+      () => <Line c="ME">Wow, burn.</Line>,
       () => (
         <Line c="SB">
           Now keep the Machinator moving to produce fuel for the Convulator
@@ -326,13 +573,10 @@
       machinator,
       machinatorRevButton,
     ],
+
     keptUpTheMachinatorAliveForSomeTime: [
-      () => (
-        <Line c="SB">
-          Good. Now I have to go tend to some other issues. You can either die
-          or restart.
-        </Line>
-      ),
+      () => <Line c="SB">Oh you'll need to keep the Unrotacon rotated.</Line>,
+      unrotacon,
     ],
   };
 
@@ -395,3 +639,5 @@
     );
   });
 }
+
+___`on unrotaconSituationUpdate log detail`;

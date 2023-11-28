@@ -16,7 +16,7 @@ First thoughts.
 
 ### Thu Nov 16 04:26:10 PM PST 2023
 
-GitHub user `gnat` is always seen in the HTMX discord. His project [Surreal](https://github.com/gnat/surreal) achieves a lot fo what I'm describing here.
+GitHub user `gnat` is always seen in the HTMX discord. His project [Surreal](https://github.com/gnat/surreal) achieves a lot of what I'm describing here.
 
 
 ### Sat Nov 25 01:59:34 PM PST 2023
@@ -62,3 +62,23 @@ Locality of Behavior
 <Future>
 I broke down each of the above aspects with Hyperscript code and a JavaScript example.
 </Future>
+
+### Mon Nov 27 01:22:27 PM PST 2023
+
+I went looking for a way to add sprinkles of Hyperscript to my JavaScript. I already knew I could do the reverse, add bits of JS to Hyperscript, [from the docs](https://hyperscript.org/docs/#js-inline). A while ago I wrote a small utility with the help of the Hyperscript devs:
+
+```js
+// Eval a hyperscript expression
+// Usage:  hs`5 + 5`
+const hs = (...args) => _hyperscript(String.raw(...args));
+```
+
+I also made some functional conveniences around that <GitHubLink extraPath="/blob/main/src/compile-all-posts-client.jsx">here</GitHubLink>. These covered more usecases like supplying local variables and a different `me`, e.g.:
+
+```js
+_hyperscript(
+  "put a into me", {
+    locals: { a: document.createElement("a") },
+    me: document.body.querySelector("*"),
+  });
+```

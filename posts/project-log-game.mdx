@@ -151,3 +151,28 @@ This is an example of an observation I made at work recently: Distinct domains u
 And I'd been rolling around a thought about a solution in my head as well: Keep those distinct domains decoupled and distinct. The idea of keeping a distinct thing distinct reminds me of Making Wrong Things Look Wrong by Spolsky. To keep gameplay code and dialogue decoupled, I wanted to continue to rely on DOM events and listeners.
 
 I built the next mechanic of the game, the next widget, the "Machinator", which supplied fuel to the Convulator. 
+
+### Sun Nov 26 11:44:10 AM PST 2023
+
+<Future>I reviewed my client code and found some distinct domains which were highly coupled. I wanted to take a moment to try a different factoring of the code to see if I could decouple those distinct domains. I knew my game code would have a lot of cross-cutting concerns. There was a lot of life-cycle management of DOM elements-as-actors. There was some confusion about what those DOM elements-as-actors should be handling, because a lot of gameplay code was in those actors' onMount code. Everything, in fact, except for the dialogue system. The dialogue system was global and singular. Thuogh i realized I could have made the "game" container an element and stuffed that "global and singular" code into its onMount code. So that was two domains: gameplay logic and DOM elements (as actors cough). Another domain was "realtime", my game code's relationship to wall clock time. I had several recursive setTimeout engines running. I had explored this a bit in my <Link slug="project-precision-timer">precision timer project</Link>. Another domain was "message passing" between the actors, which seemed almost entirely covered by the DOM event listener system. Yet another domain was "global state". A lot of state was stored in the actor's private variables, (and everything could be, as described above), but there was some state which aligned with global, singular state, e.g. progression points where the player achieved something significant and the story changes from then forward. Some state aligned more with being private on a DOM element actor, such as an input's current value. A proper consistent global state method would help with that. Of course another domain was the dialogue itself, which included widgets at the moment.</Future>
+
+<Future>I explored what I meant by the phrase "DOM elements-as-actors" and what those actors would be good at. I was exploring along with <Link slug="project-hyperscript-and-vanilla-js">lessons JavaScript could learn from Hyperscript</Link></Future>
+
+<Future>
+At this point, I kept pushing forward and made the next section I imagined, where Shipboard reveals all the widgets to you. I envisioned it as the final level, shown to the player early to annoy and bore them. The idea that I would want to bore my kind players reminded me of something I had heard about improv from a comedy podcast recently, "don't choose to be boring, because you might just succeed."
+</Future>
+
+I made the next widget, the Unrotacon. 
+
+### Mon Nov 27 10:41:57 AM PST 2023
+
+<Future>
+
+I decided to lean in to the "log" aspect of the game with some gameplay elements relying on interacting with and interpreting the log. For example, I decided to add lots of debugging information to the actual game log and then filter it out. I thought the player could use the same filtering for important messages. For example, if widgets only ever appeared in the scrolling chat log, then the widgets would roll off the top as new chat rolled in and force the player to scroll back to interact. And then if a new widget came in, then they'd be scrolling back and forth to interact with both. A solution to that would be a filter for "only widgets". 
+
+To further lean in, I thought that instead of clearing/deleting the past log, they could simply be disabled and marked as an archive. So the player could still scroll back to read the words. And also they'd have the problem of avoiding the archives when scrolling back.
+
+Thematically, I wanted to explore the question, "what if in the future, chat logs like this were incredibly interactive and useful instead of the inert block of text we have today."
+</Future>
+
+<Future>I considered the difference between a "chat log"/"text log file" and a "command line"/"terminal"/"shell". I wondered whether I should give the user an ability to type text commands. If I did, I would want to allow them to interact with *everything*, becaues I know how frustrated I am by a limited/incomplete command line.</Future>

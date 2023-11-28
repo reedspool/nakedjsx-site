@@ -13,6 +13,7 @@ for (const [{ inputFileName, outputFileName }, Post] of Object.values(posts)) {
           originFilename={inputFileName}
           components={{ Link, HashTarget, GitHubLink, Future }}
         />
+        <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
       </GenericPageBody>
     ),
   });
