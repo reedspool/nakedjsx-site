@@ -82,3 +82,59 @@ _hyperscript(
     me: document.body.querySelector("*"),
   });
 ```
+
+
+### Tue Nov 28 11:31:44 PM PST 2023
+
+<Future>I explored my utility for cross-pollinating Hyperscript and JavaScript. I tried using the string template function to interpret interpolated complex JS values and splice them in to there resulting Hyperscript by giving them temporary local variables.</Future>
+
+I was writing some ad hoc components in JS, just experimenting. I wrote some JSX for the HTML and an `onMount` function that returned its own `cleanup` function. An example of the interplay between `onMount` and `cleanup` would be if the component wanted to register a global event listener in the `onMount` function, then the `cleanup` function should unregister that listener. 
+
+So my code looked like this:
+
+```
+const C = ()=><div>My component!</div>
+C.onMount = (div) => {
+  
+  const listener = ()=> {
+    console.log("myEvent triggered!")
+  }
+  
+  document.body.addEventListener("myEvent", listener)
+
+  // Cleanup
+  return () => {
+    document.body.removeEventListener("myEvent", listener)
+  }
+}
+```
+
+I realized that I never wrote such cleanup functions when I used Hyperscript, and I wanted to determine if that was because Hyperscript was handling such details behind the scenes for m, or if I was just ignoring a possible memory leak flaw in the past.
+
+So I made a small test where I used some Hyperscript to make a nearly identical component, then delete it from the DOM, and see if it still responded to the global event after that. 
+
+```
+<body 
+  _="init trigger test then set my innerHTML to '' then trigger test">
+  <div 
+    _="on test from body log 'test listener'">
+    Test component
+  </div>
+</body>
+```
+
+This showed that the second event did not fire the listener callback. That suggested to me that Hyperscript was somehow cleaning up the listener. I wanted to understand how Hyperscript was doing that. Were they using a mutation observer? No! I looked through the source code and felt lucky to find [their solution](https://github.com/bigskysoftware/_hyperscript/blob/898345a1753ec365491dd6eedc3ab06873862109/src/_hyperscript.js#L4440):
+
+```js
+if (typeof Node !== 'undefined' 
+    && elt instanceof Node 
+    && target !== elt 
+    && !elt.isConnected) {
+  target.removeEventListener(eventName, listener);
+  return;
+}
+```
+
+The above is the first line of Hyperscript's all-purpose event listener. Without looking deeply, I inferred that if the element was not [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to the DOM, then the event listener would be halted before executing, and immediately removed. 
+
+<Future>I investigated whether the above situation could lead to a listener being applied twice if I added the Node, let Hyperscript process it via `processNode`, then removed it, then repeated the processing.</Future>

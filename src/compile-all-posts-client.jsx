@@ -16,6 +16,14 @@ ___.as = (me) => ___.where({}, me);
 
 window.___ = ___;
 
+const trigger = (window.trigger = (name, detail) => {
+  document.body.dispatchEvent(
+    new CustomEvent(name, {
+      detail,
+    })
+  );
+});
+
 // From https://stackoverflow.com/a/2450976
 window.shuffleInPlace = function (array) {
   let currentIndex = array.length,
@@ -76,7 +84,7 @@ window.differentIndexForArray = function (lastIndex, array) {
       progress.setAttribute("value", value);
 
       if (value <= 0) {
-        document.body.dispatchEvent(new Event("onConvulatorMeterEmpty"));
+        trigger("onConvulatorMeterEmpty");
         timeout = null;
       } else {
         timeout = setTimeout(tick, 500);
@@ -97,6 +105,18 @@ window.differentIndexForArray = function (lastIndex, array) {
   };
 }
 
+{
+  window.testComponent = () => <div id="test">Test Component</div>;
+
+  window.testComponent.onMount = (div) => {
+    // My question is, when this element is removed from the DOM, does this log still occur? Or does this event listener get cleaned up somehow? If so, how? How does Hyperscript manage to unsubscribe and let this be garbage collected? If I could understand that automatic cleanup method, maybe I could trigger it even without trashing the DOM element (since I am exploring "archiving" the widgets when the simulation is reset and allowing them  to remain in the system lifeless and inert.)
+    // To test, send the element a
+    div.setAttribute("_", `on test from body log 'test component gonna test'`);
+    _hyperscript.processNode(div);
+    return () => {};
+  };
+}
+
 // Convulator Rev button
 {
   window.convulatorRevButton = () => (
@@ -111,6 +131,7 @@ window.differentIndexForArray = function (lastIndex, array) {
     let button = container.querySelector("button");
     let startTimestamp = Date.now();
     let enoughMachinatorProduct = true;
+    let unrotaconAligned = true;
     const buttonOnClick = () => {
       if (!enoughMachinatorProduct) {
         // TODO I probably want to be clear about why something doesn't work to
@@ -119,8 +140,13 @@ window.differentIndexForArray = function (lastIndex, array) {
         return;
       }
 
-      document.body.dispatchEvent(new Event("consumedMachinatorProduct"));
-      document.body.dispatchEvent(new Event("convulatorRevved"));
+      if (!unrotaconAligned) {
+        console.log("unrotacon misaligned");
+        return;
+      }
+
+      trigger("consumedMachinatorProduct");
+      trigger("convulatorRevved");
 
       if (
         !hasElapsedAmountOfTimeToKeepItUp &&
@@ -153,6 +179,15 @@ window.differentIndexForArray = function (lastIndex, array) {
       onMachinatorProduced
     );
 
+    const onUnrotaconSituationUpdate = ({ detail: { all } }) => {
+      unrotaconAligned = all;
+    };
+
+    document.body.addEventListener(
+      "unrotaconSituationUpdate",
+      onUnrotaconSituationUpdate
+    );
+
     return () => {
       button.removeEventListener("click", buttonOnClick);
       document.body.removeEventListener(
@@ -162,6 +197,11 @@ window.differentIndexForArray = function (lastIndex, array) {
       document.body.removeEventListener(
         "machinatorProductValueUpdate",
         onMachinatorProduced
+      );
+
+      document.body.removeEventListener(
+        "unrotaconSituationUpdate",
+        onUnrotaconSituationUpdate
       );
     };
   };
@@ -212,11 +252,7 @@ window.differentIndexForArray = function (lastIndex, array) {
 
       if (Math.abs(position) - Math.abs(velocity / 2) < 0.0000001) {
         product += 1;
-        document.body.dispatchEvent(
-          new CustomEvent("machinatorProductValueUpdate", {
-            detail: { product },
-          })
-        );
+        trigger("machinatorProductValueUpdate", { product });
       }
 
       input.value = position;
@@ -231,9 +267,7 @@ window.differentIndexForArray = function (lastIndex, array) {
     const onConsumedMachinatorProduct = () => {
       product = Math.max(0, product - 1);
 
-      document.body.dispatchEvent(
-        new CustomEvent("machinatorProductValueUpdate", { detail: { product } })
-      );
+      trigger("machinatorProductValueUpdate", { product });
     };
 
     document.body.addEventListener(
@@ -277,26 +311,44 @@ window.differentIndexForArray = function (lastIndex, array) {
 
   const amountOfTimeToKeepItUp = 5 * 1000;
   let hasElapsedAmountOfTimeToKeepItUp = false;
+  let unrotaconAligned = true;
   window.machinatorRevButton.onMount = (container) => {
     let button = container.querySelector("button");
     let startTimestamp = Date.now();
     const buttonOnClick = () => {
-      document.body.dispatchEvent(new Event("machinatorRevved"));
+      trigger("machinatorRevved");
+
+      if (!unrotaconAligned) {
+        console.log("unrotacon misaligned, can't rev machinator");
+        return;
+      }
 
       if (
         !hasElapsedAmountOfTimeToKeepItUp &&
         Date.now() - startTimestamp > amountOfTimeToKeepItUp
       ) {
         hasElapsedAmountOfTimeToKeepItUp = true;
-        document.body.dispatchEvent(
-          new Event("keptUpTheMachinatorAliveForSomeTime")
-        );
+        trigger("keptUpTheMachinatorAliveForSomeTime");
       }
     };
     button.addEventListener("click", buttonOnClick);
 
+    const onUnrotaconSituationUpdate = ({ detail: { all } }) => {
+      unrotaconAligned = all;
+    };
+
+    document.body.addEventListener(
+      "unrotaconSituationUpdate",
+      onUnrotaconSituationUpdate
+    );
+
     return () => {
       button.removeEventListener("click", buttonOnClick);
+
+      document.body.removeEventListener(
+        "unrotaconSituationUpdate",
+        onUnrotaconSituationUpdate
+      );
     };
   };
 }
@@ -329,11 +381,11 @@ window.differentIndexForArray = function (lastIndex, array) {
       <Component
         data={[
           // Selections from https://drafts.csswg.org/css-color/#named-colors
+          "thistle",
           "olivedrab",
           "goldenrod",
           "firebrick",
           "coral",
-          "crimson",
           "steelblue",
         ]}
         random
@@ -349,7 +401,6 @@ window.differentIndexForArray = function (lastIndex, array) {
           //   | grep -v -e "[^s]s$"`
           [
             "mutated",
-            "community",
             "floating",
             "specific",
             "ephemeral",
@@ -387,24 +438,7 @@ window.differentIndexForArray = function (lastIndex, array) {
       .shuffleInPlace([...___.as(select)`<option /> in me`])
       .forEach((o) => select.appendChild(o));
 
-  const howManySelectsMatchTheirOutputs = (container) => {
-    let _ = ___.as(container);
-
-    const selects = _`<select /> in me`;
-    const results = selects.reduce((prev, current) => {
-      // Does associated output have the same content as the selected option
-      const matches = ___.as(current)`
-        get <option /> in me
-        get innerHTML of result[my selectedIndex]
-        set selected to it
-        set required to innerHTML of previous <output />
-        get required equals selected
-        `;
-      return prev + (matches ? 1 : 0);
-    }, 0);
-
-    return { matching: results, total: selects.length };
-  };
+  const howManySelectsMatchTheirOutputs = (container) => {};
   window.unrotacon.onMount = (container) => {
     let _ = ___.as(container);
     const selects = _`<select /> in me`;
@@ -414,11 +448,26 @@ window.differentIndexForArray = function (lastIndex, array) {
     };
 
     const broadcastSituation = () => {
-      document.body.dispatchEvent(
-        new CustomEvent("unrotaconSituationUpdate", {
-          detail: howManySelectsMatchTheirOutputs(container),
-        })
-      );
+      let _ = ___.as(container);
+
+      const selects = _`<select /> in me`;
+      const matching = selects.reduce((prev, current) => {
+        // Does associated output have the same content as the selected option
+        const matches = ___.as(current)`
+        get <option /> in me
+        get innerHTML of result[my selectedIndex]
+        set selected to it
+        set required to innerHTML of previous <output />
+        get required equals selected
+        `;
+        return prev + (matches ? 1 : 0);
+      }, 0);
+
+      trigger("unrotaconSituationUpdate", {
+        matching,
+        total: selects.length,
+        all: matching === selects.length,
+      });
     };
 
     selects.forEach((s) => s.addEventListener("input", onSelectChange));
@@ -478,7 +527,7 @@ window.differentIndexForArray = function (lastIndex, array) {
 
   window.restartButton.onMount = (button) => {
     const buttonOnClick = () => {
-      document.body.dispatchEvent(new Event("restart"));
+      trigger("restart");
     };
     button.addEventListener("click", buttonOnClick);
 
@@ -499,8 +548,7 @@ window.differentIndexForArray = function (lastIndex, array) {
   const Stage = ({ children }) => <span class="p-4 block">*{children}*</span>;
 
   const dialogueSystemInput = {
-    introduction: [unrotacon],
-    _introduction: [
+    introduction: [
       () => <Stage>void</Stage>,
       () => <Line c="SB">You're about to die</Line>,
       () => <Line c="ME">Are you the Shipboard Computer?</Line>,
@@ -509,9 +557,7 @@ window.differentIndexForArray = function (lastIndex, array) {
         <Line c="SB">There's a 102% chance you're going to die imminently</Line>
       ),
       // Referring to the extra 2%
-      () => (
-        <Line c="ME">Think there might be an error in your calculation?</Line>
-      ),
+      () => <Line c="ME">You think there's an error in your calculation?</Line>,
 
       // Direct quote from 2001: A Space Odyssey https://www.imdb.com/title/tt0062622/quotes/
       // replaced "9000 computer" with "Shipboard Computer"
@@ -539,7 +585,8 @@ window.differentIndexForArray = function (lastIndex, array) {
     shipboardRestartingSimulation: [
       () => <Line c="SB">Restarting simulation</Line>,
     ],
-    nextDayAfterFirstConvulatorImplosion: [
+    nextDayAfterFirstConvulatorImplosion: [unrotacon, restartButton],
+    _nextDayAfterFirstConvulatorImplosion: [
       () => <Stage>void</Stage>,
       () => <Line c="ME">That was unpleasant</Line>,
       () => <Line c="SB">Sorry, I had no time to tell you how to fix it</Line>,
@@ -603,7 +650,7 @@ window.differentIndexForArray = function (lastIndex, array) {
           allUnmountFns.push(line.onMount(element));
         break;
     }
-    // game.append(' (' + wordCount + ')')
+    game.append(" (" + wordCount + ")");
     game.appendChild(document.createElement("br"));
     game.scrollTo({ top: game.scrollHeight, behavior: "smooth" });
     setTimeout(tick, wordCount * 400);
@@ -638,4 +685,5 @@ window.differentIndexForArray = function (lastIndex, array) {
   });
 }
 
+// How do I unregister such things?
 ___`on unrotaconSituationUpdate log detail`;
