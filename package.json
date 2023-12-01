@@ -1,33 +1,33 @@
 {
-    "name": "blog",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "build": "npm run build:generate-post-imports && npm run build:html && npm run build:css && npm run build:static",
-        "build:html": "npx nakedjsx src",
-        "build:static": "cp -r static/* build/",
-        "start": "npm run build:static && npm run build:css && npm run build:generate-post-imports && npm run build:html -- --dev",
-        "build:css": "postcss css/style.css --output build/build.css",
-        "start:css": "npm run build:css -- --watch --verbose",
-        "build:generate-post-imports": "node bin/generate-post-imports.mjs"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-        "@nakedjsx/plugin-asset-mdx": "^0.14.0",
-        "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
-        "autoprefixer": "^10.4.15",
-        "cssnano": "^6.0.1",
-        "feed": "^4.2.2",
-        "postcss": "^8.4.28",
-        "postcss-cli": "^10.1.0",
-        "postcss-import": "^15.1.0",
-        "postcss-nesting": "^12.0.1",
-        "tailwindcss": "^3.3.3"
-    },
-    "dependencies": {
-        "@nakedjsx/core": "github:reedspool/nakedjsx-core#reed-hacks"
-    }
+  "name": "blog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build:generate-post-imports && npm run build:html && npm run build:css && npm run build:static",
+    "build:html": "npx nakedjsx src",
+    "build:static": "mkdir -p build && cp -r static/* build/",
+    "start": "npm run build:static && npm run build:css && npm run build:generate-post-imports && npm run build:html -- --dev",
+    "build:css": "postcss css/style.css --output build/build.css",
+    "start:css": "npm run build:css -- --watch --verbose",
+    "build:generate-post-imports": "node bin/generate-post-imports.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nakedjsx/plugin-asset-mdx": "^0.14.0",
+    "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
+    "autoprefixer": "^10.4.15",
+    "cssnano": "^6.0.1",
+    "feed": "^4.2.2",
+    "postcss": "^8.4.28",
+    "postcss-cli": "^10.1.0",
+    "postcss-import": "^15.1.0",
+    "postcss-nesting": "^12.0.1",
+    "tailwindcss": "^3.3.3"
+  },
+  "dependencies": {
+    "@nakedjsx/core": "github:reedspool/nakedjsx-core#reed-hacks"
+  }
 }

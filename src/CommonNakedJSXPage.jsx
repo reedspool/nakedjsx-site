@@ -1,5 +1,11 @@
 import { Page } from "@nakedjsx/core/page";
 
+export const BlogLayout = ({ children }) => (
+  <main class="cpnt-blog-article">{children}</main>
+);
+
+export const EmptyLayout = ({ children }) => <>{children}</>;
+
 export const CommonNakedJSXPage = async ({ outputFileName, Body }) => {
   Page.Create("en");
   Page.AppendHead(<title>Reed's Website</title>);
@@ -30,6 +36,9 @@ export const CommonNakedJSXPage = async ({ outputFileName, Body }) => {
   );
 
   Page.AppendBody(<Body />);
+  Page.AppendBody(
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+  );
 
   Page.Render(outputFileName);
 };

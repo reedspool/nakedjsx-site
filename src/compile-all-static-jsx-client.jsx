@@ -650,7 +650,7 @@ window.differentIndexForArray = function (lastIndex, array) {
           allUnmountFns.push(line.onMount(element));
         break;
     }
-    game.append(" (" + wordCount + ")");
+    /* game.append(" (" + wordCount + ")"); */
     game.appendChild(document.createElement("br"));
     game.scrollTo({ top: game.scrollHeight, behavior: "smooth" });
     setTimeout(tick, wordCount * 400);

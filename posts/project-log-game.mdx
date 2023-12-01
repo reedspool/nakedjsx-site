@@ -4,15 +4,13 @@ A browser game focused on a chat log.
 
 ## Game
 
-<div>
-  <button class="cpnt-button">Fast-forward <i class={`bx bx-fast-forward align-middle ml-sm inline-block`} /></button>
-</div>
-
-<pre data-game class="whitespace-normal h-[50vh] overflow-scroll"></pre>
+The game is live <a href="/log-game.html">here</a>.
 
 ## Source
 
-The source code of the game lives in the NakedJSX client JavaScript file for my site's posts, [here (local, won't work on the web)](../src/compile-all-posts-client.jsx) or <GitHubLink extraPath="/blob/main/src/compile-all-posts-client.jsx#L1">here (global, GitHub)</GitHubLink>.
+The JavaScript source code of the game lives in the NakedJSX client JavaScript file for my site's posts, [here (local, won't work on the web)](../src/compile-all-static-jsx-client.jsx) or <GitHubLink extraPath="/blob/main/src/compile-all-static-jsx-client.jsx#L1">here (global, GitHub)</GitHubLink>.
+
+The JSX server generated page source lives [here](../pages/log-game.jsx) or <GitHubLink extraPath="/blob/main/pages/log-game.jsx#L1">here (global, GitHub)</GitHubLink>
 
 ## Spoiler Alert
 
@@ -177,8 +175,6 @@ I made the next widget, the Unrotacon.
 
 <Future>To lean into the "log" aspect of the game, I played with the visuals. I thought every element except a few "settings" could be presented as entries in the log.</Future>
 
-<Future>I moved the game out of this page and into its own page separate from the styles and chrome of the rest of my website.</Future>
-
 <Future>
 I played with some elements of player interaction with and interpretation of the log. For example, I added lots of behind-the-scenes debugging information to game log and added a way to filter it out. Maybe the player could use the same filtering for important messages? If widgets only ever appeared in the scrolling chat log, then the widgets would roll off the top as new chat rolled in and force the player to scroll back to interact. And then if a new widget came in, then they'd be scrolling back and forth to interact with both. A solution to that would be a filter for "only widgets". 
 
@@ -186,3 +182,10 @@ Thematically, I wanted to explore the question, "what if in the future, chat log
 </Future>
 
 I looked at my messy code and tried to make some sense of the different domains interacting. I noticed that a lot of my code was devoted
+
+
+### Thu Nov 30 07:31:04 PM PST 2023
+
+<Future>I fixed my `Link` component so that it could handle links to other directories so that I could use it to link to the live game page.</Future>
+
+I moved the game out of this page and into its own page separate from the styles and chrome of the rest of my website. This took some fixing of my website compilation code.

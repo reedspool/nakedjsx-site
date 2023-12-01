@@ -234,6 +234,8 @@ Previously, I had been typing both links and both paths in Markdown, like this:
 ```
 
 Though I had also worked a bit on a component for linking to my GitHub, `GitHubLink`. I'm not sure what I hoped to gain with that component.
+
+I realized that my `Link` component had a similar issue: at this point, it only accounted for `href`'s in the same directory, with no slashes. To cover the use case of linking to-and-from non-blog pages, it would need to know where it was being used.
 </Future>
 
 ### Tue Nov 28 10:41:46 PM PST 2023
