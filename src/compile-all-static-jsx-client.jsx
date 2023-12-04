@@ -1,23 +1,46 @@
 // Eval a hyperscript expression
-// Usage:  hs`5 + 5`
-const ___ = (...args) => ___.e(String.raw(...args));
-___.e = _hyperscript;
-_hyperscript("me", { locals: { a: 5 }, me: document.body.querySelector("*") });
+// Usage:
+//
+//     // Returns `7` JS value
+//     ___`5 + 2`
+//
+//     // Call arbitrary anonymous JS functions
+//     ___`${(a, b) => a + b}(5, 2)`
+//
+const ___ = (strings, ...substitutions) =>
+  ___.where({}, document.body)(strings, ...substitutions);
 
 // Pass variables
 // Usage: ___.where({a : 5}, document.body)`put a into me`
 ___.where =
-  (locals, me) =>
-  (...args) =>
-    ___.e(String.raw(...args), { locals, me });
+  (locals = {}, me) =>
+  (strings, ...substitutions) => {
+    locals = { ...locals };
+    let uniqueSymbolIndex = 0;
+    return _hyperscript(
+      String.raw(
+        strings,
+        ...substitutions.flat().map((a) => {
+          if (typeof a === "function") {
+            const uniqueSymbol = `____unique_${uniqueSymbolIndex++}`;
+            locals[uniqueSymbol] = a;
+
+            return `${uniqueSymbol}`;
+          }
+          return a;
+        })
+      ),
+      { locals }
+    );
+  };
 
 // Usage: ___.as(document.body)`put 5 into me`
 ___.as = (me) => ___.where({}, me);
 
 window.___ = ___;
 
-const trigger = (window.trigger = (name, detail) => {
-  document.body.dispatchEvent(
+const trigger = (window.trigger = (name, detail, element = document.body) => {
+  element.dispatchEvent(
     new CustomEvent(name, {
       detail,
     })
@@ -67,40 +90,67 @@ window.differentIndexForArray = function (lastIndex, array) {
   let velocity = -0.05;
   let revAmount = 0.5;
   let max = 1;
-  window.convulator = () => (
-    <div class="m-2 px-2">
-      <label class="flex flex-row space-between items-center  mb-2">
-        Convulator <progress max={max} value={initialValue} />
-      </label>
-    </div>
-  );
+  const setElementScopeState = (state, elt) => {
+    // The name `elementScope` is defined here
+    // https://github.com/bigskysoftware/_hyperscript/blob/master/src/_hyperscript.js#L2014
+    // So the basic idea is that we're inserting a JS object from this scope
+    // into the element scope of this element in hyperscript so that I can access
+    // the same values from both places
+    _hyperscript.internals.runtime.getInternalData(elt)["elementScope"] = {
+      ":state": state,
+    };
+
+    return elt;
+  };
+  const Progress = () => {
+    const progress = (
+      <progress
+        _={`
+on tick
+  increment :state.value by :state.velocity
+  set my @value to :state.value
+  if :state.value <= 0 and not :exploded then
+    set :exploded to true
+    trigger onConvulatorMeterEmpty
+  end
+end
+
+on convulatorRevved from body
+  set :state.value to Math.min(:state.value + ${revAmount}, ${max})
+  set my @value to :state.value
+end
+        `}
+        max={max}
+        value={initialValue}
+      />
+    );
+
+    return setElementScopeState({ value: initialValue, velocity }, progress);
+  };
+
+  window.convulator = () => {
+    const elt = (
+      <div class="m-2 px-2">
+        <label class="flex flex-row space-between items-center mb-2">
+          Convulator <Progress />
+        </label>
+      </div>
+    );
+
+    return elt;
+  };
 
   window.convulator.onMount = (container) => {
     let progress = container.querySelector("progress");
-    let value = initialValue;
     let timeout;
     const tick = () => {
-      value += velocity;
-      progress.setAttribute("value", value);
-
-      if (value <= 0) {
-        trigger("onConvulatorMeterEmpty");
-        timeout = null;
-      } else {
-        timeout = setTimeout(tick, 500);
-      }
+      trigger("tick", {}, progress);
+      timeout = setTimeout(tick, 500);
     };
     tick();
 
-    const onConvulatorRevved = () => {
-      value = Math.min(value + revAmount, max);
-      progress.setAttribute("value", value);
-    };
-    document.body.addEventListener("convulatorRevved", onConvulatorRevved);
-
     return () => {
       clearTimeout(timeout);
-      document.body.removeEventListener("convulatorRevved", onConvulatorRevved);
     };
   };
 }
@@ -644,10 +694,12 @@ window.differentIndexForArray = function (lastIndex, array) {
         break;
       case "function":
         const element = line();
-        wordCount = element.innerHTML.split(" ").length;
+
+        wordCount = element.innerText.split(" ").length;
         game.appendChild(element);
         if (typeof line.onMount === "function")
           allUnmountFns.push(line.onMount(element));
+        _hyperscript.processNode(element);
         break;
     }
     /* game.append(" (" + wordCount + ")"); */
