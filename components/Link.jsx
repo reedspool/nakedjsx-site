@@ -1,31 +1,12 @@
 import { GITHUB_URL } from "../src/constants.mjs";
+import { readFile, writeFile } from "node:fs/promises";
 
-export const slugsToHrefs = {
-  home: "/",
-  "project-improve-this-website": "project-improve-this-website.html",
-  "projects-on-this-site": "project-track-my-projects.html",
-  "about-project-logs": "topic-project-logs.html",
-  "project-index": "topic-project-index.html",
-  "project-add-popout": "project-add-popout.html",
-  "project-write-script-and-style-tags":
-    "project-write-script-and-style-tags.html",
-  "project-precision-timer": "project-precision-timer.html",
-  "project-add-rss": "project-add-rss.html",
-  "rss-feed": "rss.xml",
-  feed: "feed.html",
-  "project-fizzbuzz-in-css": "project-fizzbuzz-in-css.html",
-  "project-symbolic-differentiator": "project-symbolic-differentiator.html",
-  "topic-operating-this-website": "topic-operating-this-website.html",
-  "project-supabase-authentication": "project-supabase-authentication.html",
-  "project-dnd-game-2023": "project-dnd-game-2023.html",
-  "project-log-game": "project-log-game.html",
-  "project-hyperscript-and-vanilla-js":
-    "project-hyperscript-and-vanilla-js.html",
-};
+console.log(`Running this script from CWD "${process.cwd()}"`);
+console.log(`Attempting to parse JSON data in Link.json`);
+const { slugsToHrefs, slugsToHashes } = JSON.parse(
+  (await readFile("./components/Link.json")).toString()
+);
 
-export const slugsToHashes = {
-  "project-improve-this-website": ["exploring-client-side-js-in-nakedjsx"],
-};
 export const Link = ({ slug, hash, children }) => {
   const href = slugsToHrefs[slug];
   if (!href) throw new Error(`No href found for slug "${slug}"`);
