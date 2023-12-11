@@ -1,0 +1,175 @@
+# Project: A New Static Site Generator 
+
+I have really enjoyed NakedJSX. I wrote and explored more on the NakedJSX version of my website than I have on any other website in the past. The reason that NakedJSX and the other tools on this version of my site were so effective, I think, is the lack of friction in the repetitive tasks involved to make and maintain a website as well as write some blog posts. 
+
+But almost as soon as I started using NakedJSX, I identified some friction points which were built in. I discussed those thoughts with the creator of NakedJSX and he helped me understand that each of my frustrations were intentional design decisions of his tool. I was grateful for these discussions as they helped me reveal and sharpen my thoughts on what felt wrong. 
+
+So I embarked on a new quest to make my own static site generator with all the tools and design decisions which I desired.
+
+
+## Logbook
+
+### Sun Dec 10 09:44:02 AM PST 2023
+
+Last night I spent a lot of time reading. I began with NakedJSX's codebase. I proceeded to read about Babel and Rollup, the tools which NakedJSX used to compile JSX under the hood. I don't remember why, but my gaze shifted to `esbuild`, a competitor of Rollup. My website before the NakedJSX version was built on Vite which used `esbuild` under the hood. I found that `esbuild` supported JSX as part of its goal for parity with the canonical Typescript compiler. So, I started reading the docs on how the Typescript compiler handles custom JSX. The `esbuild` route looked promising for its speed and Typescript support.
+
+I listed some goals:
+
+1. Get a statically generated MDX site running
+2. Ontop of `esbuild`
+3. With a layout constructed in JSX with Typescript (`.tsx`)
+4. Using no other JSX framework (no React, Preact, etc.)
+
+I figured CSS could come later. I had added Tailwind and PostCSS to many sites and that felt straightforward. 
+
+As for client-side JS, it was a lower priority. 
+
+I started a new repository instead of trying to retrofit the original which so heavily relied on NakedJSX. I then followed a simple example to get `esbuild` saying "Hello World" with some Typescript. That went smoothly after some trouble configuring a basic Typescript project. It turned out that I had added my home directory `~` to my LSP blacklist, and so my new project wasn't automatically starting up an LSP server in Emacs. Luckily that was easy to solve via Emacs's `lsp-workspace-blocklist-remove` function.
+
+My plan was to add on some custom JSX from Typescript. After I had a small amount of JSX working, I wanted to add on MDX quickly in case it had weirdness that informed any architectural decisions. So, I jumped in with a new `.tsx` file. From my reading of the documentation the night before, I couldn't think of a reason to go from a running Typescript file to JSX without Typescript, `.jsx`, instead of with Typescript `.tsx`. My prototyping reflexes told me to go with the simpler one first, but logic told me that would be overcomplicating the path.
+
+As soon as I wrote some JSX in my new `.tsx` file, I saw a helpful error message in my text editor. This was the code:
+
+```jsx
+export const HelloWorld = () => <h1>Hello World!</h1>;
+```
+
+And this was the error my language server (LSP) was displaying:
+
+```
+Cannot find name 'React'.
+```
+
+This made sense based on [the docs](https://www.typescriptlang.org/docs/handbook/jsx.html) I'd read. Typescript defaulted to React for JSX definitions. I'd have to start my own definitions to supply them to the type checker in order to clear the error and avoid installing React.
+
+<Future>I wanted formatting and linting in this project to be consistent, so I tried Prettier and ESLint by following [this guide](https://glebbahmutov.com/blog/configure-prettier-in-vscode/#use-eslint-with-prettier).</Future>
+
+So I added a few settings to my `tsconfig.json` file.
+
+```json
+{
+    // ...
+    "jsx": "react-jsx",
+    "jsxFactory": "myJSXFactory",
+    "jsxFragmentFactory": "myJSXFragmentFactory",
+    "jsxImportSource": "myJSXImportSource"
+}
+```
+
+Curiously, my language server error still remained the same. I thought it would change from `Cannot find name 'React'` to `Cannot find name 'myJSXImportSource'` or `'jsxFactory'`. The lack of change worried me because I feared installing React in this system which I hoped would replace React for my use case.
+
+Up to this point I had forgot to install Typescript as a dependency to the project because my editor's language server had started up immediately. So I installed it and tried checking the types of my fresh JSX configuration.
+
+```bash
+npm install --save-dev typescript;
+npx tsc --noEmit
+```
+
+The error I got was in my `tsconfig.json` file. Typescript couldn't even get to my code. This surprised me again since my language server was reporting an error. I didn't understand the mismatch in Typescript checking between LSP and `tsc`. Maybe the LSP had cached this error from before I modified my `tsconfig.json`? Hopefully it was as simple as that.
+
+Anyway, the error looked like this:
+
+```
+tsconfig.json:34:5 - error TS5089: Option 'jsxFactory' cannot be specified when option 'jsx' is 'react-jsx'.
+
+34     "jsxFactory": "myJSXFactory",
+       ~~~~~~~~~~~~
+```
+
+Huh! I must have read [the documentation](https://www.typescriptlang.org/docs/handbook/jsx.html#basic-usage) incorrectly. It said
+
+> In order to use JSX you must do two things.
+> 
+> 1. Name your files with a `.tsx` extension
+> 2. Enable the `jsx` option [in `tsconfig.json`]
+
+So I must set `jsx`, but I can't set `jsx` to `react-jsx`. I tried `preserve` instead. I got to a new error in Typescript. I then realized it made sense since I was not going to use the `typescript` package to emit JavaScript code. I was going to handle all emitting of code via `esbuild`. It did not matter what I put for the `jsx` option because as the docs said, "These modes only affect the emit stage - type checking is unaffected." And type checking was all I needed this tool to do. 
+
+EDIT: In the course of solving other issues later down the line, I checked back on my `tsconfig.json` file. I tried removing the `"jsxFactory"` and `"jsxFragmentFactory"` entries and switching `jsx` to `"react-jsx"`. I realized why I had gotten the errors above. It's because these two names, `jsxFactory` and `jsxFragmentFactory` provide alternatives to React's versions of the same, hence these particular settings didn't mix.
+
+I got a few type errors next. I'm only pasting the interesting pieces:
+
+```
+1. no interface 'JSX.IntrinsicElements' exists
+2. Cannot find module 'myJSXImportSource/jsx-runtime'
+```
+
+From reading [the docs](https://www.typescriptlang.org/docs/handbook/jsx.html#intrinsic-elements) I knew I'd have to implement `JSX.IntrinsicElements`. I figured I'd tackle that first.
+
+I simply made a new file `JSX.d.ts` and plopped in the example almost verbatim:
+
+```typescript
+declare namespace JSX {
+  interface IntrinsicElements {
+    h1: any;
+  }
+}
+```
+
+And like magic, the error went away. I knew my Intrinsic Elements definition was sparse and useless but since I had a clear path forward and the error went away, I decided to move back to the other present error before yak shaving the perfect Intrinsic Elements experience.
+
+I was confused at the error message, `Cannot find module 'myJSXImportSource/jsx-runtime'`. The first part, `myJSXImportSource`, made sense to me as I'd used that for the `tsconfig.json` entry `"jsxImportSource"`. The [documentation for that entry](https://www.typescriptlang.org/tsconfig#jsxImportSource) confused me more, since it only specified a behavior when `"jsx"` was set to `"react-jsx"`. It didn't say at all what should happen if I ran it with my current setting, `preserve`. 
+
+I thought I'd try solving the type issue as I would with any other type issue, since the documentation was so confusing to me. So I searched the Internet for the generic error text, "cannot find module or its corresponding type declarations". This [SO answer](https://stackoverflow.com/a/64732688) summed up the possible solutions nicely. Since I was building my own thing, the option to `declare module` in a new `.d.ts` file made the most sense. Perhaps as I began building my JSX implementation, I would replace this module declaration with the Typescript of my new code. I wrote:
+
+```typescript
+declare module "myJSXImportSource/jsx-runtime";
+```
+
+And `tsc --noEmit` was clear of errors for the first time! Exciting.
+
+Now that I had the `tsc` tool working to check my types, even in such a fragile and beginner state, I turned my sights back on `esbuild` to emit proper, working JavaScript for my JSX. I wanted to avoid yak shaving as long as there were concrete actionable steps to take.
+
+At this stage, my original `esbuild` CLI command still worked without any errors, `esbuild app.ts --bundle --outfile=out.js`. When I inspected the JavaScript output, I found an unimplemented function, `myJSXFactory("h1", null, "Hello World!")`. I would have to supply an implementation for that function before I could run the code.
+
+I followed the [docs](https://esbuild.github.io/content-types/#auto-import-for-jsx) to add `--jsx=automatic` to my `esbuild` command. That gave me a different error:
+
+```
+Could not resolve "myJSXImportSource/jsx-runtime"
+
+You can mark the path "myJSXImportSource/jsx-runtime" as external to exclude it from the bundle,
+which will remove this error and leave the unresolved path in the bundle.
+```
+
+So I tried a few ways to "mark the path as external" and this one worked, `--external:'myJSXImportSource/jsx-runtime'`. And my build command completed without error. The output simply had a new call to `require`. Running the code failed as expected because there was no code for that `require` call to find. Implementing that was my next step. Here are the relevant contents of the output file before and after I added the `--jsx=automatic` and `--external...` flags. Before:
+
+```js
+// HelloWorld.tsx
+var HelloWorld = () => /* @__PURE__ */ myJSXFactory("h1", null, "Hello World!");
+```
+
+and after:
+
+```js
+// HelloWorld.tsx
+var import_jsx_runtime = require("myJSXImportSource/jsx-runtime");
+var HelloWorld = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { children: "Hello World!" });
+```
+
+So if I implemented a module which resolved to `myJSXImportSource/jsx-runtime` and gave it a `jsx` function which took those arguments and output an HTML string (or string template?), I'd be in business.
+
+<Future>I'd read a post in the past month about Deno improving their JSX generation by converting to string template functions instead of an intermediary AST of data objects. I thought I'd better reread that after getting started to see if it seemed like a good direction for my generator at this early stage.</Future>
+
+I wasn't sure how to write some local code which would resolve the `require` call. The `/` was the new piece for me. I had seen that used to access vendor sub-packages installed in `node_modules`, but I didn't know how to write a bit of JavaScript (let alone Typescript) to resolve to that locally. 
+
+I also considered that maybe I could solve the problem of the undefined global `myJSXFactory` in another way than the `--jsx=automatic` route. That way I wouldn't have to deal with `require.` After some searching, I found this promising sentence in [`esbuild`'s docs](https://esbuild.github.io/getting-started/#bundling-for-the-browser): "Undefined globals can be replaced with either the [define](https://esbuild.github.io/api/#define) feature in simple cases or the [inject](https://esbuild.github.io/api/#inject) feature in more complex cases." So I read over those two suggestions. 
+
+`inject` seemed to fit my usecase over `define`. I added `--inject:myJSXESBuildInjection.js` to my script and got a successful failure on my `esbuild` run: `✘ [ERROR] Could not resolve "myJSXESBuildInjection.js"`. Ya, that made sense, I hadn't written that file yet! 
+
+If I wanted to write that JSX implementation in TypeScript, I'd need a separate `esbuild` script to compile that for inclusion. So I created a TypeScript file with the same name as my JavaScript file. Then something weird happened. As soon as I wrote that file to disk, my `esbuild` script ran successfully. Even though my CLI option specified a `.js` suffix for the injected file, apparently a `.tsx` suffix'd file of the same name otherwise would suffice? Stranger, the JavaScript output was exactly the same as if I didn't have the `inject` statement at all. I tested that with `diff` and got an empty result. I renamed the `.tsx` file to `MyJSXImplementation.tsx` and the build went back to failing as expected. Huh. I tried adding quotes to my `--inject` parameter to see if that helped. No change. I decided to leave this weird name conflict untouched and move on since I had a path forward which worked as expected. Unfortunately, even without the strange name conflict, the same situation occurred. So maybe what I saw had something to do with `esbuild` automatically compiling `tsx` to `js` somewhere? 
+
+To summarize, the issue I saw was that `inject` ran without error, but my implementation for "myJSXFactory" was nowhere to be seen. I realized that my implementation JavaScript file, output by `esbuild` from its associated `tsx` file, had no exports! I realized this was because I'd used the `bundle` esbuild option. I had to remove that just to build my JSX implementation and allow exports. And it worked!
+
+My JavaScript output of my `esbuild` script was running perfectly with my definition for a JSX factory function. I had a lot of messy code which didn't achieve feel solid but I had a working proof of concept for every step of my original goals up to MDX. So, I decided to implement some MDX next.
+
+First I took a moment to make an extremely basic pass at a proper JSX factory function, simply to produce some HTML and see it with my own eyes. For types, I tried to eye the types as described in [the React.createElement reference documentation](https://react.dev/reference/react/createElement#createelement). But that was too vague. 
+
+<Future>I wanted to be more precise so I looked at how React typed their JSX implementation. I found a canonical `React.createElement` element in the [documentation for DefinitelyTyped's React types](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/react/v17/index.d.ts#L243). That seemed much more comprehensive. It was so detailed in fact that I imagined I'd like to steal as much of it as I could instead of trying to suss all of that out myself. I considered using it by reference but then I would be bound to React's design decisions as far as the usage of JSX, like their choice to use `onClick` instead of `onclick`. So I began to implement more comprehensive types. </Future>
+
+MDX had an [`esbuild` integration](https://mdxjs.com/docs/getting-started/#esbuild)! The example was in JavaScript so I switched my CLI-based `esbuild` script to its JavaScript equivalent. I got that working. Then I had some trouble getting the MDX `esbuild` integration to work. I couldn't get around the error `✘ [ERROR] Could not resolve "myJSXImportSource/jsx-runtime"`. However the integration worked, it wasn't respecting my `inject` entry the way the rest of `esbuild` was.
+
+<Future>I circled back to my `esbuild` + `mdx` implementation. I wanted to check out the source code for MDX's `esbuild` integration to see what special sauce it had.</Future>
+
+<Future>I considered whether I could write my `esbuild` script in TypeScript and then compile it to JavaScript before running it? The benefit would be type checking for my `esbuild` script, but maybe it wouldn't change often enough for that to be worthwhile.</Future>
+
+<Future>I made comprehensive unit tests for my JSX engine</Future>

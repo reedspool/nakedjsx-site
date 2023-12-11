@@ -1,0 +1,47 @@
+# Project: Progression Game 
+
+I had an idea for a "game". The idea didn't seem fun in my head. The idea was to just make a way to progress through different screens or states of a minimalist UI. If I could make that, then I'd proceed to make a different minimalist UI with a similar theme, to vary the method of progress. I knew this description was obnoxiously vague, but instead of attempting to describe it I wanted to move forward to programming it.
+
+## Game
+
+<Stage1Button first>Stage 1 - Step 1 (Begin)</Stage1Button>
+<Stage1Button>Stage 1 - Step 2</Stage1Button>
+<Stage1Button>Stage 1 - Step 3</Stage1Button>
+<Stage1Button>Stage 1 - Step 4</Stage1Button>
+<Stage1Button>Stage 1 - Step 5</Stage1Button>
+<Stage1Button>Stage 1 - Step 6</Stage1Button>
+<Stage1Button>Stage 1 - Step 7</Stage1Button>
+<Stage1Button last>Stage 1 - Step 8 (You win!)</Stage1Button>
+
+export const Button = ({ children, className, ...rest }) => 
+  <button 
+    class={`cpnt-button ${className}`} 
+    {...rest}>
+    {children}
+  </button>
+
+
+export const Stage1Button = ({ children, className, first, last, ...rest }) => 
+  <Button 
+    className={`${!first && "hidden"} ${className}`} 
+    _={`${last ? "on click hide me then remove .hidden from next <div />" : "on click hide me then remove .hidden from next <button />"}`}
+    {...rest}>
+    {children}
+  </Button>
+
+<div class="hidden">
+  You made it to State 2 somehow. You'd need a miracle to <Stage2Button>progress</Stage2Button>.
+</div>
+
+<div class="hidden">Whelp, if that's how it was, then that was the way it would have <Stage2Button>to be</Stage2Button>.</div>
+
+<div class="hidden">But who was to be kind who didn't if allow grose</div>
+
+export const Stage2Button = ({ children, ...rest }) => 
+  <Button _={`on click hide the closest <div /> then remove .hidden from next <div />`} {...rest}>{children}</Button>
+
+## Logbook
+
+### Sat Dec  9 08:17:59 PM PST 2023
+
+I played with some ways to progress with the click of a mouse.

@@ -77,6 +77,14 @@ export const exported_project_precision_timer = [
 },
 mdx_project_precision_timer
 ]
+import mdx_project_progression_game from ':mdx:../posts/project-progression-game.mdx';
+export const exported_project_progression_game = [
+{
+  "inputFileName": "project-progression-game.mdx",
+  "outputFileName": "project-progression-game.html"
+},
+mdx_project_progression_game
+]
 import mdx_project_supabase_authentication from ':mdx:../posts/project-supabase-authentication.mdx';
 export const exported_project_supabase_authentication = [
 {

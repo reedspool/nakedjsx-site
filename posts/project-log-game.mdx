@@ -189,3 +189,17 @@ I looked at my messy code and tried to make some sense of the different domains 
 <Future>I fixed my `Link` component so that it could handle links to other directories so that I could use it to link to the live game page.</Future>
 
 I moved the game out of this page and into its own page separate from the styles and chrome of the rest of my website. This took some fixing of my website compilation code.
+
+### Sat Dec  9 08:06:45 PM PST 2023
+
+I found myself repeatedly modifying the game to show me one of my widgets immediately, to isolate the development of the widget. Changing the code in this ephemeral way annoyed me because they mucked up my git diff. It took some energy to commit progress while picking around these unwanted changes.
+
+```diff
+   const dialogueSystemInput = {
+-    introduction: [
++    introduction: [convulator, convulatorRevButton],
++    _introduction: [
+       () => <Stage>void</Stage>,
+```
+
+<Future>So I made myself a way to do this without modifying the game code.</Future>

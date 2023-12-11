@@ -1,8 +1,7 @@
 import { GITHUB_URL } from "../src/constants.mjs";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 
-console.log(`Running this script from CWD "${process.cwd()}"`);
-console.log(`Attempting to parse JSON data in Link.json`);
+console.log(`Parsing JSON data in Link.json`);
 const { slugsToHrefs, slugsToHashes } = JSON.parse(
   (await readFile("./components/Link.json")).toString()
 );

@@ -53,7 +53,7 @@ console.log(
 
   let content = (await readFile(path)).toString();
 
-  content += `\nI started this post <Link slug="${slug}">here</Link>`;
+  content += `\nI started this post <Link slug="${slug}">here</Link>\n`;
 
   console.log(`Writing back the modified project-index.mdx`);
 
