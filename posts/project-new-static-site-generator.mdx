@@ -173,3 +173,50 @@ MDX had an [`esbuild` integration](https://mdxjs.com/docs/getting-started/#esbui
 <Future>I considered whether I could write my `esbuild` script in TypeScript and then compile it to JavaScript before running it? The benefit would be type checking for my `esbuild` script, but maybe it wouldn't change often enough for that to be worthwhile.</Future>
 
 <Future>I made comprehensive unit tests for my JSX engine</Future>
+
+
+### Mon Dec 11 03:42:13 PM PST 2023
+
+I reflected on what I achieved my first day with the project. I went from nothing to a script which outputs HTML for arbitrary JSX and MDX with Typescript support. Pretty cool! `esbuild` is an amazing tool. My next goals were to fully replicate my current website built on NakedJSX, so that I could shift everything over with confidence.
+
+
+### Tue Dec 12 02:03:19 PM PST 2023
+
+
+
+I looked at more of the [MDX compilation options from their docs](https://mdxjs.com/packages/mdx/#fields). I found `elementAttributeNameCase` and set it to `html`. I wanted my output to be as close to HTML as possible. 
+
+<Future>
+I considered how I could drive MDX compilation without writing it out to a file. At the time, I was compiling MDX into JSX, writing that JSX to a file, and then importing that written-out JSX file from another JSX file. The first thing I wanted to test, just out of curiousity, was if I could import the JSX MDN output from a non-JSX (pure JS/TypeScript) file and just call the export like a normal function, instead of invoking it via the `<MDXOutput />` JSX strategy. The output was just a string, so I hoped it would work.
+
+One reason to avoid writing to a file, I thought, was for efficiency. If I could avoid writing the output to a file, that might make large batches of page compilations faster. But that was premature optimization - I didn't yet have all my functionality in place to start making things faster. I also didn't have a large dataset where I could feel or benchmark the changes in speed. I wouldn't know if I made a faster system.
+
+Another reason to avoid writing to a file was because I would have to give each file a unique name on disk, and I'd need a directory to make a mess. I could simply make a `tmp/` directory in the project, but it was some external thing to manage which I might avoid.
+
+I figured I might be able to avoid this by using the `outputFormat` option of the [MDX compiler](https://mdxjs.com/packages/mdx/#fields). I could set that to `function-bod y`, and then use `new Function` to make some executable JavaScript in memory.
+
+If I didn't write out the MDX to a file, where would I describe what I was going to do with the output? Right now, my importing TSX file was my instructions for what to do with the MDX output. Should I put that output as the body of a page template? Probably. And where would I define that page template? JSX! 
+
+There was some friction when I imported the JSX output file from the MDX source. The friction was that I had to write a name in my import. Would I write the same name as the MDX import? If I didn't commit my MDX output files to git, then my imports would all be broken (failing build and failing `tsc`) until I ran a script to compile all my MDX. I could see why the author of NakedJSX had a "dynamic" import system. In NakedjSX, I could use the name of the actual input MDX file (with the `.mdx` extension and all), and not have to decide on a new name for the file and connect that name both in the compilation process and in the import.
+</Future>
+
+<Future>
+I wasn't sure where to write about this so I just started writing right here. I wished I had a place to write stuff like this, a messy inbox of ideas. Probably a private place or even a public self-inbox.html might make sense.
+
+Anyways, the idea which caused me to start writing: I thought about how compilers transform and pass over the same tree multiple times, and I thought that might be useful to apply to HTML and web development. Every language I would ever touch always has tools for parsing and writing HTML written by someone. So what if I wrote small tools which made passes over that HTML instead of writing complicated scripts to wire different processes together? But perhaps my processes weren't so complicated, and it was simply a lack of understanding of the space of static-site-generation on my part. Maybe once I learned all about static site generation, then these scripts would seem simple and straight forward (or I'd be able to rewrite my scripts to be simpler).
+
+Perhaps what I was thinking about might boil down to a static-site-generator-generator. Meaning, a set of tools which is open and extensible and easy to configure together to produce a static site generator which works exactly for you.
+
+And it would do so by focusing on "passes" which take in HTML and output HTML. My first question to myself is, "are we talking about HTML in memory (an AST or a DOM?) or are we talking about a text file containing HTML on a disk?" And the answer is that the very first step would be incredibly important. The first step would be to build the two passes which input and output those exact things, so that tools could be written for both/either. I thought about [UnifiedJS's standard ASTs](https://unifiedjs.com/learn/guide/syntax-trees-typescript/#hast-html).
+
+When I thought about passes, I thought of Gulp and Grunt and streams. I remembered those tools having great answers to plugging in things together. So A) I imagined those would be great as a target for my generator, such that my generator might produce "a static site generator orchestrated by a grunt script." I quickly googled "Grunt JSX" and relearned that Gulp is the successor to Grunt. So after "Gulp JSX", I found [this answer on StackOverflow](https://stackoverflow.com/a/41527310) which uses Babel's React preset to transpile JSX. So I could use that as a road map for using my `esbuild` and custom JSX implementation instead.
+
+Looking at Gulp code again, I lost the plot of this idea: Maybe the "generator" or "toolkit" part of my idea was already precisely present in Gulp, and I just needed to find or write some perfect plugins for myself in it.
+</Future>
+
+I considered some overall design goals of my JSX implementation as opposed to others I'd seen and used:
+
+1. No automatic sanitizing of inputs. If I had user inputs to force sanitization on, that should be enforced in a separate layer. This shold obviate React's `__dangerouslySetInnerHTML` BS or NakedJSX's `raw-content`
+2. No internal usage or management of non-standard HTML attributes such as React's `className` or `onClick` instead of `onclick`. I wanted to write CSS, classes, and client-side JS precisely how I would in vanilla HTML, including custom attributes, script and style tags, and whatever. The canonical Babel JSX implementation as well as HTML are both already incredibly opinionated, please don't add your opinions on top of that.
+
+<Future>I added more frustrations which I had recorded across the projects on this website as I'd tried to use this website for more things.</Future>

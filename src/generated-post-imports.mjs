@@ -21,6 +21,14 @@ export const exported_project_add_rss = [
 },
 mdx_project_add_rss
 ]
+import mdx_project_codeable_shareable_webpage from ':mdx:../posts/project-codeable-shareable-webpage.mdx';
+export const exported_project_codeable_shareable_webpage = [
+{
+  "inputFileName": "project-codeable-shareable-webpage.mdx",
+  "outputFileName": "project-codeable-shareable-webpage.html"
+},
+mdx_project_codeable_shareable_webpage
+]
 import mdx_project_concrete_programming_language from ':mdx:../posts/project-concrete-programming-language.mdx';
 export const exported_project_concrete_programming_language = [
 {
@@ -148,5 +156,13 @@ export const exported_topic_recurse_center = [
   "outputFileName": "topic-recurse-center.html"
 },
 mdx_topic_recurse_center
+]
+import mdx_topic_xstate from ':mdx:../posts/topic-xstate.mdx';
+export const exported_topic_xstate = [
+{
+  "inputFileName": "topic-xstate.mdx",
+  "outputFileName": "topic-xstate.html"
+},
+mdx_topic_xstate
 ]
 ;
