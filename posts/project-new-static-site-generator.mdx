@@ -221,9 +221,7 @@ I considered some overall design goals of my JSX implementation as opposed to ot
 
 <Future>I added more frustrations which I had recorded across the projects on this website as I'd tried to use this website for more things.</Future>
 
-I copied MDX posts and supporting JSX from my old site and began to attempt to replicate my site. I had to unpack a lot of the fundamentals from NakedJSX. Luckily that was straightforward and everything coudl be reused. For example, instead of using the `Page.AppendHead()` API from NakedJSX, I just made a big JSX which represented the entire HTML document. I thought I'd have to insert [DOCTYPE](https://html.spec.whatwg.org/multipage/syntax.html#the-doctype) myself because I'd never seen JSX output a tag like `<!DOCTYPE html>`.
-
-<Future>I added a proper doctype tp my webpage</Future>
+I copied MDX posts and supporting JSX from my old site and began to attempt to replicate my site. I had to unpack a lot of the fundamentals from NakedJSX. Luckily that was straightforward and everything coudl be reused. For example, instead of using the `Page.AppendHead()` API from NakedJSX, I just made a big JSX which represented the entire HTML document.
 
 I made a README with descriptions of the scripts I was using as they solidified.
 
@@ -238,13 +236,55 @@ I decided to move towards the rest of the pages working next. I had an operation
 
 That all worked swimmingly and I quickly found myself with a script that would check the contents of the post directory and collect data to drive a compilation process. I ran into an issue parsing one of my MDX posts, though. Some package, `acorn-jsx`, was failing to parse `class`. I'd changed my MDX post to use `class` instead of `className` hoping that it would just work. But alas, some parser failed on it. I thought that in order for `className` to be usable, I'd have to add support in my JSX implementation. But that wasn't the case. The issue with Acorn seemed only to be when I would use `class` as a prop name and destructure it. E.g. in my MDX I had a component like `export const myButton = ({ class }) => <button class='${class}'>Click here!</button>`. In that case, this Acorn parser would fail on the first instance of `class`, and succeed on the second. So I made a rule for myself to not use `class` as a custom prop name. I chose to use `classes` instead of React's `className` so I wouldn't confuse myself into thinking there was a magic translation going on. 
 
-Next I ran into another way I was relying on NakedJSX's decisions. I had modified the core of NakedJSX to only HTML-escape `code` and `pre` elements. I forgot that I was relying on this behavior. In my new, baby JSX implementation, no HTML escaping occurred. I'd need to do that for my nicely formatted code blocks in MDX to look correct. For the time being, I quickly stole NakedJSX's escape function and implemented the way I had it previously, automatically escaping `code` and `pre` elements. 
+Next I ran into another way I was relying on NakedJSX's decisions. I had modified the core of NakedJSX to only HTML-escape `code` and `pre` elements. I forgot that I was relying on this behavior. In my new, baby JSX implementation, no HTML escaping occurred. I'd need to do that for my nicely formatted code blocks in MDX to look correct. For the time being, I quickly stole NakedJSX's escape function and implemented the way I had it previously, automatically escaping `code` and `pre` elements. (A few days later, I removed escaping `pre` elements, because it would also escape the `code` element beneath them, as they were commonly nested like that on purpose, e.g. in markdown output of code blocks).
 
 <Future>I considered a special declaration attribute/prop, like `@escape` such that `<pre @escape><span></pre>` would escape the `<` and `>` of that center `span` and look how I imagined it should.</Future>
 
 Other than some small issues, most of the pages on the site looked good! Or at least as good as they did before.
 
-<Future>I began to add a watch/live-reload mode to my development environment. I figured it would be difficult because of how complex my generation scheme seemed.</Future>
+### Thu Dec 14 03:05:44 PM PST 2023
 
+I began to add a watch/live-reload mode to my development environment. I figured it would be difficult because of how complex my generation scheme seemed. It was very straightforward! I just had to map the output of `chokidar` events to the data I'd already generated/gathered and redo the exact process I'd done so far.
 
+I cleaned up the README documentation for my new processes.
 
+### Fri Dec 15 05:39:05 PM PST 2023
+
+I had to insert a [DOCTYPE](https://html.spec.whatwg.org/multipage/syntax.html#the-doctype) myself because I'd never seen JSX output a tag like `<!DOCTYPE html>`. Luckily, I had learned the trick in my `script` and `style` tag explorations. I simply used the curly-brace + backtick syntax to insert raw HTML. I tried it quickly with JSX, but `esbuild`'s parser failed on the exclamation point.
+ 
+With so much complex functionality complete, I set out to wrap up this first phase of development by matching all features and output of my previous site.
+
+I wasn't sure what all the missing pieces were. So I made a list:
+
+1. [ ] My log game page with associated client-side JS.
+1. [ ] Click through each page and every single link on the page and look at the source and scour for breaks
+1. [ ] Script to generate a new post
+1. [ ] RSS Feed
+1. [x] Static assets (logo svg used by RSS)
+1. [x] favicon
+1. [x] doctype
+1. [ ] Update Operating this website
+
+<Future>I finished everything on my list above</Future>
+ 
+I was excited to port my game to my new site, but I had a small conundrum. The log game was the only page for which I'd written significant client-side JavaScript in an external file. When I copied it to my new site, my TypeScript alarms went off everywhere. I'd coded it like I was in the middle of a wild west shoot out, tossing code in every direction with sand in my eye. I decided to not waste time translating my sloppy JavaScript to strict TypeScript and just get it in there. So I made my script compile the page and include the client code verbatim. 
+
+That wouldn't work, I realized when I attempted it. My client code wasn't raw Javascript, it was non-TS JSX! I'd have to convert my JSX to runnable JavaScript somehow. 
+
+I wanted to burn this candle at both ends. I imagined what the end goal for my client JavaScript would be. I wanted to be able to choose between writing JavaScript and TypeScript. I wanted my build system to figure out with minimal configuration. Raw JS I could put in my static folder. TypeScript, JSX, or both (`.tsx` files) would have to run through `esbuild`. And after they were run through that, they output would need to be linked to the individual page(s) which relied on that code. Though I could write that link myself in the form of a literal script tag with an Src. 
+
+This latest question was just one example of the set of questions for which I had to make decisions. And as Imade more and more decisions for myself it became more clear why there were so many static site generators like this. Each one was the result of someone not finding the perfect fit for themselves in the existing tools, and that could be for any and all reasons, and then building one for their own needs, and making decisions along the way. And at some point, either from the beginning or at the end, they had decided to share their work and the results of the decisions (rendering, pun-ny) and the labor to implement those decisions. But this is cyclical because those decisions are never a perfect match for everyone, and even as technology grows and changes around us, the decisions of the past or the labor to render those decisions no longer fits the new landscape and someone has to do the process again.
+
+Maybe this shold have been obvious, but it was nice to have a concrete answer for my lingering question, "why hasn't someone made a static generator that achieves exactly *my* goals, yet?"
+
+### Sat Dec 16 01:14:47 PM PST 2023
+
+I decided to just try compiling my JSX and see what happened. I realized I had two use cases for the output of JSX and TSX files: to generate the entire contents of a page, in lieu of any MDX, or to be the client JavaScript code, driving interactions in the browser of those viewing my site. So I started to build two different compilation functions to match those two use cases. I again started with data, adjusting the input data for the 3 use cases: a MDX server generated page, a JSX/TSX server generated page, or JSX/TSX/JS/TS client code. 
+
+The client code was simple, as that was the primary use case of `esbuild`. Just run it through `esbuild` and store the output as the client code.
+
+The server generated page code was more difficult. The parallel path to MDX had been driven by necessity. I did the minimal I could thinik of to get it working. But without MDX in the process, I had more options. Did I want to treat input JSX and TSX just like my input MDX? In that case, it would have to output a function, like a "render" function, which output a string, and to use that as the page body. And I would wrap that in the same common page layout and boilerplate as all my MDX pages. I already had a nice flexible system for swapping in and out pieces of that.
+
+Or I could make a different choice: let the JSX or TSX page drive itself with node. I wondered what the use case would be for anything other than writing the file to the output directory exactly as my MDX process was doing. That is, why support this flexibility without a need? The structure would be nice. I could always keep evolving the system if the need for such flexibility arose. I figured I would be doing that regardless over time.
+
+<Future>So I adjusted my compilation function to be a carbon copy of the MDX, but without needing the extra roundabout step of compiling MDX. Instead, I was able to use a single call to `esbuild`, and include my JSX file somehow, maybe by injecting it?</Future>
