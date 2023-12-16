@@ -102,7 +102,7 @@ I also tried out the NakedJSX config file with `npm run build -- --config-save`.
 
 ### Thu Aug 24 15:37:02 PDT 2023
 
-I wanted to add links between pages, but I found I was renaming pages frequently in this early stage of development. To lower the friction to name changes, I <GitHubLink extraPath="/blob/main/components/Link.jsx">made a component</GitHubLink> which would throw an error if I used an incorrect name for another post.
+I wanted to add links between pages, but I found I was renaming pages frequently in this early stage of development. To lower the friction to name changes, I <GitHubLink extraPath="/blob/main/components/Link.jsx" text="made a component" /> which would throw an error if I used an incorrect name for another post.
 
 <Future>I experimented with `ref` to collect all of the links in each post to create backlinks.</Future>
 
@@ -124,7 +124,7 @@ My development server did not automatically rebuild pages because of caching as 
 
 My idea was to write a script to generate a JavaScript file which imported all of my posts and wrote that file to disk. This was basically what the development server was already doing, except it was trying to do it intelligently at run-time. I wanted to do it on demand instead. I'd just have to re-run that script every time I added a new file, which seemed simple enough.
 
-To write <GitHubLink extraPath="/blob/main/bin/generate-post-imports.mjs">this script</GitHubLink> was as easy as copying and pasting the contents of my development server script which essentially did the same thing. I just wrote the result to a file instead of returning it from a dynamic script.
+To write <GitHubLink extraPath="/blob/main/bin/generate-post-imports.mjs" text="this script" /> was as easy as copying and pasting the contents of my development server script which essentially did the same thing. I just wrote the result to a file instead of returning it from a dynamic script.
 
 <Future>I found that the NakedJSX development server was not correctly rendering this "link" emoji `🔗`. This seemed to be a problem only with the development server because the output HTML looked correct and when I served those files with another server, the emoji looked correct.</Future>
 

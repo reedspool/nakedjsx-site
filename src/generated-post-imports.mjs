@@ -77,6 +77,14 @@ export const exported_project_log_game = [
 },
 mdx_project_log_game
 ]
+import mdx_project_new_static_site_generator from ':mdx:../posts/project-new-static-site-generator.mdx';
+export const exported_project_new_static_site_generator = [
+{
+  "inputFileName": "project-new-static-site-generator.mdx",
+  "outputFileName": "project-new-static-site-generator.html"
+},
+mdx_project_new_static_site_generator
+]
 import mdx_project_precision_timer from ':mdx:../posts/project-precision-timer.mdx';
 export const exported_project_precision_timer = [
 {
