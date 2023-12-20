@@ -13,17 +13,17 @@ I had an idea for a "game". The idea didn't seem fun in my head. The idea was to
 <Stage1Button>Stage 1 - Step 7</Stage1Button>
 <Stage1Button last>Stage 1 - Step 8 (You win!)</Stage1Button>
 
-export const Button = ({ children, className, ...rest }) => 
+export const Button = ({ children, classes, ...rest }) => 
   <button 
-    class={`cpnt-button ${className}`} 
+    class={`cpnt-button ${classes}`} 
     {...rest}>
     {children}
   </button>
 
 
-export const Stage1Button = ({ children, className, first, last, ...rest }) => 
+export const Stage1Button = ({ children, classes, first, last, ...rest }) => 
   <Button 
-    className={`${!first && "hidden"} ${className}`} 
+    classes={`${!first && "hidden"} ${classes}`} 
     _={`${last ? "on click hide me then remove .hidden from next <div />" : "on click hide me then remove .hidden from next <button />"}`}
     {...rest}>
     {children}

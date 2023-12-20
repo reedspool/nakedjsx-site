@@ -1,33 +1,43 @@
 {
-  "name": "blog",
+  "name": "reeds-website-new",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build:generate-post-imports && npm run build:html && npm run build:css && npm run build:static",
-    "build:html": "npx nakedjsx src",
+    "build:css": "postcss css/style.css --output build/build.css --verbose",
+    "build:jsxString": "esbuild MyJSXStringImplementation.tsx --outfile=tmp/MyJSXStringImplementation.js",
+    "build:jsxBrowser": "esbuild MyJSXBrowserImplementation.tsx --outfile=tmp/MyJSXBrowserImplementation.js",
     "build:static": "mkdir -p build && cp -r static/* build/",
-    "start": "npm run build:html -- --dev",
-    "build:css": "postcss css/style.css --output build/build.css",
-    "start:css": "npm run build:css -- --watch --verbose",
-    "build:generate-post-imports": "node bin/generate-post-imports.mjs"
+    "build:buildCompiler": "esbuild esbuild_site.tsx --outfile=tmp/esbuild_site.mjs --format=esm",
+    "dev:generate-new-post": "esbuild scripts/generate-new-post.tsx --outfile=tmp/generate-new-post.mjs --format=esm && node tmp/generate-new-post.mjs",
+    "build:compile": "node tmp/esbuild_site.mjs",
+    "dev:css": "npm run build:css -- --watch --verbose",
+    "dev:compile": "npm run build:compile -- --watch",
+    "dev:serve": "npx serve build/",
+    "build:clean": "rm -rf tmp/* && rm -rf build/*",
+    "checkTypes": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@nakedjsx/plugin-asset-mdx": "^0.14.0",
+    "@mdx-js/mdx": "^3.0.0",
     "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
+    "@types/chokidar": "^2.1.3",
+    "@types/mdx": "^2.0.10",
+    "@types/node": "^20.10.4",
     "autoprefixer": "^10.4.15",
+    "chokidar": "^3.5.3",
     "cssnano": "^6.0.1",
+    "esbuild": "0.19.9",
     "feed": "^4.2.2",
     "postcss": "^8.4.28",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
     "postcss-nesting": "^12.0.1",
-    "tailwindcss": "^3.3.3"
-  },
-  "dependencies": {
-    "@nakedjsx/core": "github:reedspool/nakedjsx-core#reed-hacks"
+    "serve": "^14.2.1",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.3.3",
+    "vfile-reporter": "^8.1.0"
   }
 }

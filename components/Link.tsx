@@ -1,12 +1,20 @@
-import { GITHUB_URL } from "../src/constants.mjs";
+import { GITHUB_URL } from "../src/constants";
 import { readFile } from "node:fs/promises";
 
 console.log(`Parsing JSON data in Link.json`);
 const { slugsToHrefs, slugsToHashes } = JSON.parse(
-  (await readFile("./components/Link.json")).toString()
+  (await readFile("./components/Link.json")).toString(),
 );
 
-export const Link = ({ slug, hash, children }) => {
+export const Link = ({
+  slug,
+  hash,
+  children,
+}: {
+  slug: string;
+  hash?: string;
+  children: JSX.Children;
+}) => {
   const href = slugsToHrefs[slug];
   if (!href) throw new Error(`No href found for slug "${slug}"`);
   if (hash && !slugsToHashes[slug].includes(hash))
@@ -14,7 +22,13 @@ export const Link = ({ slug, hash, children }) => {
   return <a href={href + (hash ? `#${hash}` : "")}>{children}</a>;
 };
 
-export const HashTarget = ({ id, children }) => {
+export const HashTarget = ({
+  id,
+  children,
+}: {
+  id: string;
+  children: JSX.Children;
+}) => {
   // In the future, I'd love to determine the name of the file this is within to
   // assert that the hash and the slug match up, but I have no clue how
   if (!Object.values(slugsToHashes).flat().includes(id))
@@ -39,7 +53,13 @@ export const GitHubLink = ({ extraPath = "", text = "GitHub" }) => (
 
 // I expected this to work but it doesn't because children is a non-null, non-empty
 // array even when we use the self-closing form `<GitHubLink />`. What could children possible be here? I think this is a naked-jsx bug but I confirmed it by testing in create-react-app or my old website.
-export const GitHubLinkBroken = ({ extraPath = "", children }) => (
+export const GitHubLinkBroken = ({
+  extraPath = "",
+  children,
+}: {
+  extraPath: string;
+  children: JSX.Children;
+}) => (
   <a href={GITHUB_URL + extraPath}>
     <ChildrenOrComponent Component={GitHubDefaultContent}>
       {children}
@@ -47,7 +67,13 @@ export const GitHubLinkBroken = ({ extraPath = "", children }) => (
   </a>
 );
 
-export const ChildrenOrComponent = ({ children, Component }) => (
+export const ChildrenOrComponent = ({
+  children,
+  Component,
+}: {
+  children: JSX.Children;
+  Component: () => JSX.Element;
+}) => (
   <>
     {children ? (
       Array.isArray(children) ? (

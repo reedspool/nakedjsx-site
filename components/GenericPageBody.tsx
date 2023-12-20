@@ -1,7 +1,7 @@
-import { LogoSVG, LogoSVGSymbol } from "../components/LogoSVGSymbol.jsx";
-import { Link } from "../components/Link.jsx";
-import { GITHUB_URL } from "../src/constants.mjs";
-export const GenericPageBody = ({ children }) => (
+import { LogoSVG, LogoSVGSymbol } from "./LogoSVGSymbol";
+import { Link } from "./Link";
+import { GITHUB_URL } from "../src/constants";
+export const GenericPageBody = ({ children }: { children: JSX.Element }) => (
   <>
     <LogoSVGSymbol />
     {/*
@@ -26,17 +26,15 @@ export const GenericPageBody = ({ children }) => (
         <Link slug="home">Home</Link>
 
         <Link slug="rss-feed">
-          RSS <i className={`bx bx-rss align-middle ml-sm inline-block`} />
+          RSS <i class={`bx bx-rss align-middle ml-sm inline-block`} />
         </Link>
 
         <Link slug="feed">
-          Updates{" "}
-          <i className={`bx bx-calendar align-middle ml-sm inline-block`} />
+          Updates <i class={`bx bx-calendar align-middle ml-sm inline-block`} />
         </Link>
 
         <a href={GITHUB_URL}>
-          GitHub{" "}
-          <i className={`bx bxl-github align-middle ml-sm inline-block`} />
+          GitHub <i class={`bx bxl-github align-middle ml-sm inline-block`} />
         </a>
       </div>
     </footer>

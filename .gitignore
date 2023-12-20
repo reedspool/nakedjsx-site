@@ -2,6 +2,7 @@
 .idea
 *.log
 tmp/
+build/
 
 *.tern-port
 node_modules/
@@ -11,9 +12,6 @@ yarn-error.log*
 *.tsbuildinfo
 .npm
 .eslintcache
-
-# NakedJSX output
-build/
 
 # SyncThing
 .stignore

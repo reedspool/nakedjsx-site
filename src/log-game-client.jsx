@@ -28,9 +28,9 @@ ___.where =
             return `${uniqueSymbol}`;
           }
           return a;
-        })
+        }),
       ),
-      { locals }
+      { locals },
     );
   };
 
@@ -43,7 +43,7 @@ const trigger = (window.trigger = (name, detail, element = document.body) => {
   element.dispatchEvent(
     new CustomEvent(name, {
       detail,
-    })
+    }),
   );
 });
 
@@ -212,13 +212,13 @@ end
       button.removeEventListener("click", buttonOnClick);
       document.body.removeEventListener(
         "onConvulatorMeterEmpty",
-        onConvulatorMeterEmpty
+        onConvulatorMeterEmpty,
       );
     };
 
     document.body.addEventListener(
       "onConvulatorMeterEmpty",
-      onConvulatorMeterEmpty
+      onConvulatorMeterEmpty,
     );
 
     const onMachinatorProduced = ({ detail: { product } }) => {
@@ -226,7 +226,7 @@ end
     };
     document.body.addEventListener(
       "machinatorProductValueUpdate",
-      onMachinatorProduced
+      onMachinatorProduced,
     );
 
     const onUnrotaconSituationUpdate = ({ detail: { all } }) => {
@@ -235,23 +235,23 @@ end
 
     document.body.addEventListener(
       "unrotaconSituationUpdate",
-      onUnrotaconSituationUpdate
+      onUnrotaconSituationUpdate,
     );
 
     return () => {
       button.removeEventListener("click", buttonOnClick);
       document.body.removeEventListener(
         "onConvulatorMeterEmpty",
-        onConvulatorMeterEmpty
+        onConvulatorMeterEmpty,
       );
       document.body.removeEventListener(
         "machinatorProductValueUpdate",
-        onMachinatorProduced
+        onMachinatorProduced,
       );
 
       document.body.removeEventListener(
         "unrotaconSituationUpdate",
-        onUnrotaconSituationUpdate
+        onUnrotaconSituationUpdate,
       );
     };
   };
@@ -322,7 +322,7 @@ end
 
     document.body.addEventListener(
       "consumedMachinatorProduct",
-      onConsumedMachinatorProduct
+      onConsumedMachinatorProduct,
     );
 
     const onMachinatorRevved = () => {
@@ -330,7 +330,7 @@ end
         Math.sign(velocity) *
         Math.max(
           velocityRange.min,
-          Math.min(Math.abs(velocity) + revAmount, velocityRange.max)
+          Math.min(Math.abs(velocity) + revAmount, velocityRange.max),
         );
     };
 
@@ -340,12 +340,12 @@ end
       clearTimeout(timeout);
       document.body.removeEventListener(
         "onMachinatorRevved",
-        onMachinatorRevved
+        onMachinatorRevved,
       );
 
       document.body.removeEventListener(
         "consumedMachinatorProduct",
-        onConsumedMachinatorProduct
+        onConsumedMachinatorProduct,
       );
     };
   };
@@ -389,7 +389,7 @@ end
 
     document.body.addEventListener(
       "unrotaconSituationUpdate",
-      onUnrotaconSituationUpdate
+      onUnrotaconSituationUpdate,
     );
 
     return () => {
@@ -397,7 +397,7 @@ end
 
       document.body.removeEventListener(
         "unrotaconSituationUpdate",
-        onUnrotaconSituationUpdate
+        onUnrotaconSituationUpdate,
       );
     };
   };
@@ -528,7 +528,7 @@ end
       const l = lastShuffledSelectIndex;
       lastShuffledSelectIndex = differentIndexForArray(
         lastShuffledSelectIndex,
-        selects
+        selects,
       );
       if (l === lastShuffledSelectIndex) console.log("Eeep!");
       const me = selects[lastShuffledSelectIndex];
@@ -539,7 +539,7 @@ end
 
       const correctTextIndex = differentIndexForArray(
         me.selectedIndex,
-        options
+        options,
       );
 
       _`get (<option /> in me)[${correctTextIndex}] then put the innerHTML of the result into previous <output />`;
@@ -550,16 +550,16 @@ end
         tick,
         randIntInRange(
           rangeOfWaittimeMilliseconds.min,
-          rangeOfWaittimeMilliseconds.max
-        )
+          rangeOfWaittimeMilliseconds.max,
+        ),
       );
     };
     timeout = setTimeout(
       tick,
       randIntInRange(
         rangeOfWaittimeMilliseconds.min,
-        rangeOfWaittimeMilliseconds.max
-      )
+        rangeOfWaittimeMilliseconds.max,
+      ),
     );
 
     return () => {
@@ -718,7 +718,7 @@ end
   });
   document.body.addEventListener("keptUpTheMachinatorAliveForSomeTime", () => {
     dialogueQueue.push(
-      ...dialogueSystemInput.keptUpTheMachinatorAliveForSomeTime
+      ...dialogueSystemInput.keptUpTheMachinatorAliveForSomeTime,
     );
   });
   document.body.addEventListener("restart", () => {
@@ -731,7 +731,7 @@ end
     game.innerHTML = "";
     dialogueQueue.push(...dialogueSystemInput.shipboardRestartingSimulation);
     dialogueQueue.push(
-      ...dialogueSystemInput.nextDayAfterFirstConvulatorImplosion
+      ...dialogueSystemInput.nextDayAfterFirstConvulatorImplosion,
     );
   });
 }

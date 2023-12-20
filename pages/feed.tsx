@@ -1,11 +1,13 @@
+/**
+ *
+ * NOTE: importing this file actually writes files! This is different from other
+ * `page` and `post` which are just exports.
+ */
 import { writeFile } from "node:fs/promises";
-import { CommonNakedJSXPage } from "./CommonNakedJSXPage.jsx";
-import { OUT_DIR_REL_PATH } from "./constants.mjs";
-import { GenericPageBody } from "../components/GenericPageBody.jsx";
-import { Link } from "../components/Link.jsx";
 
 import { Feed } from "feed";
-import { BASE_URL } from "./constants.mjs";
+import { BASE_URL } from "../src/constants";
+import { Components } from "./log-game";
 
 const image = `${BASE_URL}/assets/circle_r.svg`;
 const filename = "feed.html";
@@ -68,28 +70,25 @@ writeFile(`./build/rss.xml`, feed.rss2());
 writeFile(`./build/rss.json`, feed.json1());
 writeFile(`./build/atom.xml`, feed.atom1());
 
-const feedItems = [...feed.items].sort((a, b) => b.date - a.date);
+const feedItems = [...feed.items].sort((a, b) => +b.date - +a.date);
 
-await CommonNakedJSXPage({
-  outputFileName: `${OUT_DIR_REL_PATH}/${filename}`,
-  Body: () => (
-    <GenericPageBody>
-      <h1>Updates</h1>
+export const Body = ({ components: { Link } }: { components: Components }) => (
+  <>
+    <h1>Updates</h1>
 
-      <p>
-        This is the same content as my <Link slug="rss-feed">RSS feed</Link>.
-        The newest entries are on top.
-      </p>
+    <p>
+      This is the same content as my <Link slug="rss-feed">RSS feed</Link>. The
+      newest entries are on top.
+    </p>
 
-      {feedItems.map(({ title, date, description, content }) => (
-        <>
-          <h2>
-            {date.toLocaleDateString()} | {title || "Update"}
-          </h2>
-          {description && <blockquote>{description}</blockquote>}
-          <p>{content}</p>
-        </>
-      ))}
-    </GenericPageBody>
-  ),
-});
+    {feedItems.map(({ title, date, description, content }) => (
+      <>
+        <h2>
+          {date.toLocaleDateString()} | {title || "Update"}
+        </h2>
+        {description && <blockquote>{description}</blockquote>}
+        <p>{content}</p>
+      </>
+    ))}
+  </>
+);

@@ -2,7 +2,17 @@ import { readFile, writeFile } from "node:fs/promises";
 import readline from "node:readline/promises";
 console.log(`Running this script from CWD "${process.cwd()}"`);
 
-const [node, scriptName, title, optionalSlug] = process.argv;
+const [_node, _scriptName, title, optionalSlug] = process.argv;
+
+if (!title || !optionalSlug) {
+  console.error(`Usage:
+$ node <script-name> <title> [slug]
+
+Slug is optional. You'll be presented with an automatically generated slug if
+you do not provide one. You will be prompted to proceed before any system edits.
+`);
+  process.exit(128);
+}
 
 const slug =
   optionalSlug ?? title.toLowerCase().replaceAll(/[^a-zA-Z0-9\-]+/g, "-");
@@ -10,7 +20,7 @@ const slug =
 console.log(
   `Will create project page with \n\nTitle:   '${title}'\nSlug:    '${slug}' (${
     slug === optionalSlug ? "specified" : "generated"
-  })\n`
+  })\n`,
 );
 
 {
@@ -25,14 +35,10 @@ console.log(
   if (!answer.match(/^(y|Y|yes)$/)) process.exit(128);
 }
 
-{
-  const POST_FILE_PATH = "posts/";
-
-  await writeFile(`posts/${slug}.mdx`, `# ${title} \n\n`);
-}
+await writeFile(`posts/${slug}.mdx`, `# ${title} \n\n`);
 
 console.log(
-  "Future: I tried retriggering my post listing script generation to see if I could avoid restarting my dev server"
+  "Future: I tried retriggering my post listing script generation to see if I could avoid restarting my dev server",
 );
 
 {
