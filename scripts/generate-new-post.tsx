@@ -4,7 +4,7 @@ console.log(`Running this script from CWD "${process.cwd()}"`);
 
 const [_node, _scriptName, title, optionalSlug] = process.argv;
 
-if (!title || !optionalSlug) {
+if (!title) {
   console.error(`Usage:
 $ node <script-name> <title> [slug]
 
