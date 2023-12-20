@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "npm run build:clean && npm run build:static && npm run build:jsxString && npm run build:jsxBrowser && npm run build:buildCompiler && npm run build:compile && npm run build:css",
     "build:css": "postcss css/style.css --output build/build.css --verbose",
     "build:jsxString": "esbuild MyJSXStringImplementation.tsx --outfile=tmp/MyJSXStringImplementation.js",
     "build:jsxBrowser": "esbuild MyJSXBrowserImplementation.tsx --outfile=tmp/MyJSXBrowserImplementation.js",

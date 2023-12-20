@@ -11,13 +11,7 @@ Still early development, so these operations are not well defined and in flux. T
 tl;dr: For a fresh install run, 
 
 ```sh
-npm run build:clean && \
-  npm run build:static && \
-  npm run build:jsxString && \
-  npm run build:jsxBrowser && \
-  npm run build:buildCompiler && \
-  npm run build:compile && \
-  npm run build:css
+npm run build
 ```
 
 After that, you can run this for a development server:
@@ -46,6 +40,22 @@ npm run dev:generate-new-post -- "Project: This is the title" then-a-slug-here
 ```
 
 Steps explained:
+
+### `npm run build`
+
+This is what Netlify runs to build the site for deployment. 
+
+This may be out of date, but it runs roughly these scripts, described below:
+
+```sh
+npm run build:clean && \
+  npm run build:static && \
+  npm run build:jsxString && \
+  npm run build:jsxBrowser && \
+  npm run build:buildCompiler && \
+  npm run build:compile && \
+  npm run build:css
+```
 
 ### `npm run build:clean`
 
