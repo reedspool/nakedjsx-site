@@ -256,16 +256,14 @@ With so much complex functionality complete, I set out to wrap up this first pha
 
 I wasn't sure what all the missing pieces were. So I made a list:
 
-1. [ ] My log game page with associated client-side JS.
-1. [ ] Click through each page and every single link on the page and look at the source and scour for breaks
-1. [ ] Script to generate a new post
-1. [ ] RSS Feed
+1. [X] My log game page with associated client-side JS.
+1. [x] Click through each page and every single link on the page and look at the source and scour for breaks
+1. [x] Script to generate a new post
+1. [x] RSS Feed
 1. [x] Static assets (logo svg used by RSS)
 1. [x] favicon
 1. [x] doctype
-1. [ ] Update Operating this website
-
-<Future>I finished everything on my list above</Future>
+1. [x] Update Operating this website
  
 I was excited to port my game to my new site, but I had a small conundrum. The log game was the only page for which I'd written significant client-side JavaScript in an external file. When I copied it to my new site, my TypeScript alarms went off everywhere. I'd coded it like I was in the middle of a wild west shoot out, tossing code in every direction with sand in my eye. I decided to not waste time translating my sloppy JavaScript to strict TypeScript and just get it in there. So I made my script compile the page and include the client code verbatim. 
 
@@ -296,4 +294,19 @@ When I implemented separate compilation for client-side JSX, I found a problem. 
 
 To reuse the maximum amount of work, I imported the original string implementation, called it, then used [a trick I found on StackOverflow](https://stackoverflow.com/a/35385518) to transform the output string of HTML into DOM elements. Unfortunately that didn't work so well. It worked great for shallow JSX, but once I tried to use nested HTML elements in my JSX, I got output in my DOM like, `<div class="m-2 px-2">[object HTMLLabelElement]</div>`, which was clearly the result of an HTML element getting stringified as it was stuffed into the children slot of a parent element. And that's exactly what was happening. The inner HTML became DOM Elements as expected, and then were stringified by my string implementation. So this strategy simply wouldn't work. I had to make a second implementation of JSX. I could try to reuse as much code as possible by extracting common patterns to functions.
 
-<Future>So I began to work on reimplementing my JSX implementation for the browser</Future> 
+
+### Mon Dec 18 07:35:48 PM PST 2023
+
+So I reimplemented my JSX implementation for the browser. And it worked. It was straightforward, much to my surprise.
+
+Next I turned to my RSS feed generation. I hoped it would be even simpler. It was! I even found a bug in my JSX implementations caused by fragments of nested arrays.
+
+### Tue Dec 19 05:44:36 PM PST 2023
+
+I quickly ported over the script to generate a new post and all the associated rote changes.
+
+I also did some work to not crash the development server with no information when I had an error in my MDX. Instead, the Dev server now printed out all the information from the MDX parser, and continued to wait for the next file save to try again. Much nicer developer experience.
+
+With that, I finished every item on my check list. I felt ready to switch over to my new system, and get rid of NakedJSX.
+
+To make the switch, I moved all my updated posts to the new directory, and then moved everything from the new project's directory back here, to overwrite everything in my current website's directory. Then I used git to verify that everything was changing as I expected only. I did this circuitous route to avoid changing my Netlify configuration to point to a different repository, and to maintain my git development continuity. Of course, I was ditching the smaller amount of git history in the new project directory.

@@ -635,8 +635,7 @@ end
     shipboardRestartingSimulation: [
       () => <Line c="SB">Restarting simulation</Line>,
     ],
-    nextDayAfterFirstConvulatorImplosion: [unrotacon, restartButton],
-    _nextDayAfterFirstConvulatorImplosion: [
+    nextDayAfterFirstConvulatorImplosion: [
       () => <Stage>void</Stage>,
       () => <Line c="ME">That was unpleasant</Line>,
       () => <Line c="SB">Sorry, I had no time to tell you how to fix it</Line>,
