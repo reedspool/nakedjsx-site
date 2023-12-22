@@ -18,14 +18,18 @@ The text below will change to reflect whether the library is loaded right now.
 
 <span>Checking if Supabase is loaded...</span>
 
-<raw-content content={`
-  <script>
-  {
+{`
+<script>
   let message = "Supabase is NOT loaded";
   if (supabase) message = "Supabase is loaded!"
   document.currentScript.previousElementSibling.innerText = message;
-  }
-  </script>
-`} />
+</script>
+`}
 
 
+### Fri Dec 22 07:24:17 AM PST 2023
+
+I circled back to this finally after my site was on more stable footing with a custom JSX implementation. Many of my future plans relied on a private/controlled-access section of my site. I did not feel time or energy pressure on any of those future plans, so it felt like a good time to work on this, which would enable me to quickly move other things forward in the future.
+
+Since my new JSX implementation handled `script` tags differently, I had to rework the above in a minor way.
+  

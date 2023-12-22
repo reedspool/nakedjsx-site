@@ -67,9 +67,9 @@ async function compilePageFromMdx({
       development: true,
       elementAttributeNameCase: "html",
     },
-  ).then(async (result) => {
+  ).then((result) => {
     console.log("Writing MDX:", reporter(result));
-    await writeFile(
+    writeFile(
       mdxOutputPath,
       "// @ts-nocheck\n" + result.value.toString().replace(/\/\*@jsx.*\n/, ""),
     );
@@ -109,7 +109,7 @@ await writeFile(
 `;
 
   console.log(
-    `Writing dynamic page building TSX script to '${fileBuilderTsxInputName}'`,
+    `Writing dynamic page-building TSX script to '${fileBuilderTsxInputName}'`,
   );
   let promiseForDynamicTsxPageBuilderWritingComplete = writeFile(
     fileBuilderTsxInputName,

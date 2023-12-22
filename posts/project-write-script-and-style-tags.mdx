@@ -194,3 +194,30 @@ On first glance it looked nice and simple.
 <Future>
 I tested out the `raw-content` tag with the orginal NakedJSX core library, instead of my personal fork described above, to see if the new tag would solve some issues I'd had.
 </Future>
+
+
+### Fri Dec 22 07:29:17 AM PST 2023
+
+Now that my site was using a custom JSX implementation via my <Link slug="project-new-static-site-generator">new site generator</Link>, a lot of the above work was now invalid. Up to now, I'd created this page to work on my NakedJSX site. NakedJSX had a lot of choices which made this type of work difficult, which was a big contributing factor to my decision to embark on that new site project. 
+
+I supposed that I could rename this project to be about exploring NakedJSX, but I kept it for now. 
+
+I found on my new site I still had to use the curly-brace-backtick trick to write multi-line `script` tags. For example, this would work
+
+<script class="block">document.currentScript.style.border = '1px dashed blue'</script>
+
+But the multi-line version (even though there's just one line of code, the script tags are on separate lines in the source file) wouldn't work.
+
+<script class="block">
+document.currentScript.style.border = '1px dashed red'
+</script>
+
+Whereas the same thing wrapped in the curly-braces and back-ticks would:
+
+{`
+<script class="block">
+document.currentScript.style.border = '1px dashed re  d'
+</script>
+`}
+
+Seeing the MDX output clarified the reason: With a newline there, MDX wrapped the content of the `script` tag in a paragraph `p` tag. Initially, this surprised me, but I agreed with this decision from the MDX people after I thought about it for a moment. I would like to wrap long passages of Markdown in some tags, and still have MDX parse them as Markdown. An example was my plan to wrap my log book entries in some JSX tags, to add functionality like sorting. So I could deal with using this curly-brace-backtick trick to inform MDX not to parse my contents.
