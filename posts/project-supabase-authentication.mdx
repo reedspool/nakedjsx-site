@@ -10,6 +10,13 @@ I made a new project on Supabase and read some of their helpful Authentication d
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
+{`
+<script type="module">
+  // I describe this on Sat Dec 23
+  window.supabaseClient = supabase.createClient('https://yhuswwhmfuptgznlkdvv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlodXN3d2htZnVwdGd6bmxrZHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTkwNzgyNjksImV4cCI6MjAxNDY1NDI2OX0.vF_fbpeSORP5ve5wVVty4lm5HaOAwGSgQxq4s39udpM')
+  </script>
+`}
+
 ```html
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 ```
@@ -111,7 +118,8 @@ Nothing showed up, visually. The HTML was there but upon a second look, I sawtha
 
 <script>
 async function receiveGoogleLoginCredentialResponse(response) {
-  const { data, error } = await supabase.auth.signInWithIdToken({
+  // Edited later (See Dec 23) to use supabaseClient
+  const { data, error } = await supabaseClient.auth.signInWithIdToken({
     provider: 'google',
     token: response.credential,
     nonce: 'NONCE', // must be the same one as provided in data-nonce (if any)
@@ -143,6 +151,30 @@ Clicking on the button, I got further. I got a prompt to create an account the f
  Cannot read properties of undefined (reading 'signInWithIdToken')
 ```
 
-<Future>
-So `supabase.auth` was not available. I set upon debugging that.
-</Future>
+So `supabase.auth` was not available. 
+
+### Sat Dec 23 10:44:08 AM PST 2023
+
+I looped back to the [Supabase JavaScript library reference](https://supabase.com/docs/reference/javascript/installing) and realized I hadn't initialized the client, I'd simply imported the library. Confusingly, the documentation all used `supabase` to refer to the initialized client, even though the global include from the CDN script was also called `supabase`. So I'd have to create a client, e.g., `const supabaseClient = supabase.createClient(...)` and then replace `supabase` with `supabaseClient` in every cut and pasted command. No problem now that it was clear. I was going to eventually move from testing with HTML script tags here to a separate JavaScript client file with proper imports, and maybe I could switch back then.
+
+```js
+const supabaseClient = supabase.createClient('https://reeds-website.supabase.co', 'public-anon-key')
+```
+
+I got my `public-anon-key` from My Supabase project settings dashboard in the API section.
+
+I edited my Google Sign In code to use my client instead. It still didn't work locally at all so I pushed my code.
+
+I got further. The next error I received was perplexing. My `supabaseClient.auth.signInWithIdToken` function was appropriately called after clicking my user in the Google auth.
+
+```
+POST https://reeds-website.supabase.co/auth/v1/token?grant_type=id_token net::ERR_NAME_NOT_RESOLVED
+```
+
+This was a DNS error. That flumoxed me. I had simply replaced the documentation's URL `'https://xyzcompany.supabase.co'`. Naively, I thought I could replace `xyzcompany` with `reeds-website`, the name of my Supabase project. But it actually wanted my "Project URL" which I found in the Supabase API Settings page, `https://yhuswwhmfuptgznlkdvv.supabase.co`.
+
+I realized this auth stuff was all open-ended. Although there were strong patterns in the documentation, the exact steps I took and decisions I made about auth would rely on decisions of the concrete application I wanted to make. That thought was driven by Supabase's focus on "row level policies". So my auth policies would match exactly to the shape of my database.
+
+To that end, I made a decision of a first goal. I weighed myself just before I began working this morning. I decided to make a table to record my daily body weight records. So I switched gears to create a table for those entries.
+
+Then I added Row Level checks to only allow users to read their own records and write records with their own user ID.
