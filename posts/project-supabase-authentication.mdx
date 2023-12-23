@@ -33,3 +33,116 @@ I circled back to this finally after my site was on more stable footing with a c
 
 Since my new JSX implementation handled `script` tags differently, I had to rework the above in a minor way.
   
+So I had Supabase loading. Now to experiment with authentication. I followed the [docs to setup Google authentication](https://supabase.com/docs/guides/auth/social-login/auth-google). I created a new project in GCP. I used the most basic information and added only my own email as a test user, so if I wanted anyone else to use this, I'd have to flesh out this information.
+
+I used the Google Login HTML code configurator as suggested by the Supabase docs. I named my JavaScript callback function  `receiveGoogleLoginCredentialResponse`. I wasn't sure in the "client ID" field if I should be producing my long random "Client ID" or the "name" I gave to my "OAuth Client ID". Confusing that this ID name was used twice.
+
+That produced this:
+
+```html
+<div id="g_id_onload"
+     data-client_id="903517168563-c69dsl0hhpjfcg634udkh5v1gfpgijnb.apps.googleusercontent.com"
+     data-context="signin"
+     data-ux_mode="popup"
+     data-callback="receiveGoogleLoginCredentialResponse"
+     data-nonce="8688cd9d54532fd0d160e9e8cdc9d82a1b06dedba4cf19a33836bf2d0c58f335"
+     data-auto_select="true"
+     data-itp_support="true">
+</div>
+
+<div class="g_id_signin"
+     data-type="standard"
+     data-shape="rectangular"
+     data-theme="outline"
+     data-text="signin_with"
+     data-size="large"
+     data-logo_alignment="left">
+</div>
+```
+
+I added in the `data-nonce` field which the Supabase documentation suggested, though it didn't come out of Google's generator.
+
+<Future>I implemented a randomized nonce, making sure to use the same random nonce in both the Google HTML and my response function. I followed [Supabase's instructions](https://supabase.com/docs/guides/auth/social-login/auth-google#important-note-on-nonce-validation) on providing a hashed version of the NONCE to Google and the non-hashed version to my function.</Future>
+
+Then I took the basic definition of that function straight from the Supabase docs
+
+```
+async function receiveGoogleLoginCredentialResponse(response) {
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: response.credential,
+    nonce: 'NONCE', // must be the same one as provided in data-nonce (if any)
+  })
+}
+```
+
+
+<Future>I set up my OAuth consent screen's Privacy Policy and Terms of Service links in the GCP console.</Future>
+
+With that, I tried putting the Google HTML and my basic receiving function onto this page and see what happened.
+
+Nothing showed up, visually. The HTML was there but upon a second look, I sawthat there wasn't any content in the HTML which Google provided me. I found [a doc from Google](https://developers.google.com/identity/gsi/web/guides/client-library) which filled me in on the missing piece: a client JS library I'd need to install. That worked!
+
+```html
+<script src="https://accounts.google.com/gsi/client" async></script>
+```
+
+<script src="https://accounts.google.com/gsi/client" async></script>
+
+{`
+<div id="g_id_onload"
+     data-client_id="903517168563-c69dsl0hhpjfcg634udkh5v1gfpgijnb.apps.googleusercontent.com"
+     data-context="signin"
+     data-ux_mode="popup"
+     data-callback="receiveGoogleLoginCredentialResponse"
+     data-nonce="8688cd9d54532fd0d160e9e8cdc9d82a1b06dedba4cf19a33836bf2d0c58f335"
+     data-auto_select="true"
+     data-itp_support="true">
+</div>
+
+<div class="g_id_signin"
+     data-type="standard"
+     data-shape="rectangular"
+     data-theme="outline"
+     data-text="signin_with"
+     data-size="large"
+     data-logo_alignment="left">
+</div>
+
+<script>
+async function receiveGoogleLoginCredentialResponse(response) {
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: response.credential,
+    nonce: 'NONCE', // must be the same one as provided in data-nonce (if any)
+  })
+}
+</script>
+`}
+
+I could see the Google Sign In button above! I looked in the DevTools console and saw several errors:
+
+```text
+button:1 
+ Failed to load resource: the server responded with a status of 403 ()
+m=credential_button_library:48 [GSI_LOGGER]: The given origin is not allowed for the given client ID.
+client:114 
+ GET https://accounts.google.com/gsi/status?client_id=903517168563-c69dsl0hhpjfcg634udkh5v1gfpgijnb.apps.googleusercontent.com&as=MiLYPxkcSkvcIM%2Bb7nwgPQ 403 (Forbidden)
+client:48 [GSI_LOGGER]: The given origin is not allowed for the given client ID.
+```
+
+That sort of made sense since I hadn't added `localhost:3000`, my current domain, as an allowed origin.
+
+<Future>I searched online if it was possible to log into Google OAuth from a local development environment.</Future>
+
+I published this page to my site to see if it would work from my live site with a real URL. I could see the button! Curiously, it looked different. On localhost, the button took up the entire width of the article body, whereas it only took up the space of the words "Sign in with Google" and the logo on my production website.
+
+Clicking on the button, I got further. I got a prompt to create an account the first time and on the second time, just able to select my account. However once the Google sign-in window closed (as expected) I got an error on my site:
+
+```text
+ Cannot read properties of undefined (reading 'signInWithIdToken')
+```
+
+<Future>
+So `supabase.auth` was not available. I set upon debugging that.
+</Future>

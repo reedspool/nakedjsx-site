@@ -312,3 +312,14 @@ I also did some work to not crash the development server with no information whe
 With that, I finished every item on my check list. I felt ready to switch over to my new system, and get rid of NakedJSX.
 
 To make the switch, I moved all my updated posts to the new directory, and then moved everything from the new project's directory back here, to overwrite everything in my current website's directory. Then I used git to verify that everything was changing as I expected only. I did this circuitous route to avoid changing my Netlify configuration to point to a different repository, and to maintain my git development continuity. Of course, I was ditching the smaller amount of git history in the new project directory.
+
+
+### Fri Dec 22 02:54:28 PM PST 2023
+
+The new site worked swimmingly!
+
+I wanted "live reload" such that when I saved an edit to a file while my dev server was running, my browser refreshed. I already had `esbuild` re-building a page after an edit. With that, a more narrow description of my goal was "refresh my browser page if I'm looking at the page which the dev server just rebuilt." First, I searched if `esbuild` already had a canonical solution for this. I found a lot of questionable sources and one entry on [`esbuild`'s API documentation](https://esbuild.github.io/api/#live-reload). Unfortunately, the `esbuild` API required I use `esbuild`'s built-in development server. I wasn't using this because it required one single `esbuild` execution as far as I could tell. My strategy involved one or more separate `esbuild` executions for each output page, as well as a separate PostCSS server for Tailwind styles. 
+
+I did learn from `esbuild`'s strategy. They use "SSE" (server sent events?) to publish an event to each browser whenever a change occurred and some injected JavaScript in the client (in development mode only) to subscribe to those events and drive the reloading.
+
+<Future>I considered writing my own server to watch for changes in my `build` directory and publish my own events</Future>
