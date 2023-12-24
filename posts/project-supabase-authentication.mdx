@@ -173,8 +173,11 @@ POST https://reeds-website.supabase.co/auth/v1/token?grant_type=id_token net::ER
 
 This was a DNS error. That flumoxed me. I had simply replaced the documentation's URL `'https://xyzcompany.supabase.co'`. Naively, I thought I could replace `xyzcompany` with `reeds-website`, the name of my Supabase project. But it actually wanted my "Project URL" which I found in the Supabase API Settings page, `https://yhuswwhmfuptgznlkdvv.supabase.co`.
 
-I realized this auth stuff was all open-ended. Although there were strong patterns in the documentation, the exact steps I took and decisions I made about auth would rely on decisions of the concrete application I wanted to make. That thought was driven by Supabase's focus on "row level policies". So my auth policies would match exactly to the shape of my database.
+After making that correction, it worked! I got no error after I completed the Google login flow. I confirmed that my JS client could access user data via `supabaseClient.auth.getUser()`. Then I looked in the Supabase Database Table Explorer at the `auth` schema and the `users` table within. I saw one new record for my Google user! Success!
 
-To that end, I made a decision of a first goal. I weighed myself just before I began working this morning. I decided to make a table to record my daily body weight records. So I switched gears to create a table for those entries.
+I found Supabase's docs focused on "row level policies". I realized this auth stuff was all open-ended. The exact steps I would need to take and the decisions I made about auth would rely on decisions of the concrete application I wanted to make, because those concrete applications would drive the shape, content, and usage of my database tables. My auth policies needed to match exactly to the shape of my database.
 
-Then I added Row Level checks to only allow users to read their own records and write records with their own user ID.
+To that end, I decided on a small, concrete application. Before I began working this morning, I weighed myself, but didn't write down my measurement anywhere.
+
+So I decided to make a table to record my daily body weight records. I began to work on a <HashTarget id="supabase-auth-starting-body-weight-app"><Link slug="project-body-weight-recording-app">a body weight recording application</Link></HashTarget> in a separate project. I thought I might come back here to explore the Supabase auth related topics.
+

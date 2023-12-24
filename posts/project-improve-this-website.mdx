@@ -260,3 +260,28 @@ I wrote a small script to create a new project file since there were a handful o
 ### Fri Dec 22 08:04:58 AM PST 2023
 
 <Future>I added a keyboard-driven, and mobile friendly quick navigation to my site for myself. During development, I found myself hopping between different pages often. For example, when I was working on a project, I'd make improvements to my site to enable the project, and I'd want to record/explore those site improvements in a separate, more relevant project page.</Future>
+
+### Sat Dec 23 01:57:53 PM PST 2023
+
+<Future>
+I felt it would be nice to put more specific hash targets all over my site. If I did that, I'd have tighter links.
+
+When I tried it, I found it took many steps
+
+1. Write a `HashTarget` component which requires both
+  1. a unique "hash id" (paralelling the browser behavior of IDs )
+  1. some text to write to the page (because invisible elements are bad for accessibility, right?)
+2. Editing my `Link.json` to add the new link between the current article slug and the "hash id" I just created, as a stop-gap to throw an error if I mistype a hash ID or forget to add the target.
+
+So that was a lot of separate steps for something I wanted to do a lot. 
+
+Furthermore, I realized that a lot of the time, I'd want to add a "backlink" as an equal and opposite link back to where I was writing my link. So that would double the steps to do it again.
+
+I saw an opportunity to combine the "Link" and "HashTarget" into one component, thuogh that would only reduce some typing. It wouldn't help me with the mental effort of coming up with an ID like that nor adding it as a check.
+
+I also considered an opportunity to automate a lot of the process of adding hash targets and backlinking them, by analyzing my site's HTML after generating it.
+
+To explain and verify my use of the word "hash," I searched for "scroll to id html spec" on DuckDuckGo. That led me, thankfully, right to the source: the HTML spec. I found what I was looking for in the "navigation" section, under the header ["7.4.6.4 Scrolling to a fragment"](https://html.spec.whatwg.org/multipage/browsing-the-web.html#scrolling-to-a-fragment). The verbiage here was clear and concise, as expected: "[The] indicated part [to scroll to] is the one that its URL's fragment identifies". Then, to further clarify "indicated part," there are instructions to ["find a potential indicated element"](https://html.spec.whatwg.org/multipage/browsing-the-web.html#scrolling-to-a-fragment). That's where it says exactly that an element's ID must be equal to the URL fragment.
+
+So I learned I'd be using the word `hash` where `fragment` was the correct term. Out of curiosity, I searched "what is a URL hash", to see if I'd made up that term and pretended it was jargon for the past decade. First I landed [on MDN](https://developer.mozilla.org/en-US/docs/Web/API/URL/hash). So `hash` is a property on a JavaScript `URL` object! Then I followed the "Specifications" link to [the URL spec](https://url.spec.whatwg.org/#dom-url-hash). There's no sentence in the spec that says "This is what a hash is". It simply describes how to implement that property. So I didn't understand exactly the relationship between the "hash" and the "fragment", but they were heavily related. I searched for both the word "hash" and "fragment" in the URL spec. The first one appears 10 times, and the latter appears 53 times. My guess was that hash was an older description that the URL spec was attempting to phase out of use, but had to keep in for compatibility with the JavaScript spec. One specific confusion I had was whether a hash contains the hash mark `#` or not. Maybe a specific description would say the `hash` includes the `#` and the `fragment` is just the part after that?
+</Future>
