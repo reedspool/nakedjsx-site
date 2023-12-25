@@ -1,0 +1,21 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:jsxString": "esbuild MyJSXStringImplementation.tsx --outfile=tmp/MyJSXStringImplementation.js",
+    "build:buildCompiler": "esbuild compiler.tsx --outfile=tmp/compiler.mjs --format=esm",
+    "build:compile": "node tmp/compiler.mjs",
+    "docker:build": "docker build -t reeds-website-server .",
+    "docker:run": "docker run reeds-website-server",
+    "docker:connect": "docker run -it reeds-website-server sh"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "esbuild": "0.19.9",
+    "typescript": "^5.3.3"
+  },
+  "license": "ISC"
+}

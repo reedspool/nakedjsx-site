@@ -8,8 +8,7 @@ I started this project to branch off from my <Link slug="project-supabase-authen
 
 I wanted to use this website as my application. To begin, I could use this project page as the application. Later, I'd make a dedicated page e.g. `https://reeds.website/fitness`
 
-I began by creating a table in my Supabase database. I made it as simple as possible. It had four columns: An auto-incrementing ID, a `created_at` timestamp, a foreign key `user_id` to connect with Supabase's `auth` system which I had just figured out, and a `kilograms` field for my observed weight. I weigh myself in pounds, but it just felt weird instilling the US system of weights and measures into a database which I wanted to be maintainable. Don't at me
-.
+I began by creating a table in my Supabase database. I made it as simple as possible. It had four columns: An auto-incrementing ID, a `created_at` timestamp, a foreign key `user_id` to connect with Supabase's `auth` system which I had just figured out, and a `kilograms` field for my observed weight. I weigh myself in pounds, but it just felt weird instilling the US system of weights and measures into a database which I wanted to be maintainable. Don't at me.
 
 <Future>I considered adding a "time" column to my weight table, so that people could update the date. I could imagine myself needing override the "created at" property when I forgot to record my observation until the next day, for example. The `created_at` column was modifiable both at insertion and update so I could always edit that. However maybe for tracking it would be good to never edit that property and always update a separate column.</Future>
 
@@ -17,10 +16,115 @@ I began by creating a table in my Supabase database. I made it as simple as poss
 
 <Future>I added a way in my application to detect entries which duplicated the same day, so that users (me) might be prompted and have the proper resources to clean up their own data</Future>
 
-<Future>To get started with the client-side I built a quick form to enter this data. I thought that would be the most straightforward until I realized I didn't know where the data was going. Also would I have to use Supabase's JavaScript API to supply my authentication data? Or would cookies established with my authentication work so far be sufficient? Once I had the form working with a normal, page refreshing action, I set up `htmx` to perform an insert without a page refresh. That took some work to hook up htmx and Supabase's auth token.</Future>
-
 <Future>I needed users to be authenticated on this page, so I made a component which I could import for any page to log in. I didn't want to put it in my generic page shell yet, because I didn't have a complete story for what it meant to be authenticated across the application. I didn't want anyone to get the wrong idea that they should be authenticating just because they see a Sign In button, only to realize absolutely no change in functionality in 99% of my site.</Future>
 
 <Future>Then I added Row Level checks to only allow users to read their own records and write records with their own user ID. I wasn't sure it worked so I had to test it. I decided to create a second email and password user and fill in some data. Then I could insert data via the API for my second user, and run a test to see whether I could query data from my first user at all. If I couldn't figure out a way to get that other data, I'd consider my Row Level policy to be working.</Future>
 
 <Future>Once I had confidence in inserting data into the database table, I made a way to query my data. I decided to throw it all in an HTML table for now. I used htmx to fetch the data on page-load if authenticated. That took some work to hook up htmx and Supabase's auth token. Then I triggered this data to refresh from the server after an insertion.</Future>
+
+To get started with the client-side I began to build a quick form to enter this data. I thought that would be the most straightforward until I realized I didn't know where the data was going. Also would I have to use Supabase's JavaScript API to supply my authentication data? Or would cookies established with my authentication work so far be sufficient? Without having strong answers to those questions, I just threw down a basic HTML form to start.
+
+<form method="post" action="">
+  <ul>
+    <li>
+      <label>Timestamp override <input type="datetime-local" name="created_at_override" /></label>
+    </li>
+    <li>
+      <label>Kilograms <input name="kilograms" type="number" min="0" max="99999" step="0.01" /></label>
+    </li>
+    <li>
+      <label>Submit <input type="submit" /></label>
+    </li>
+  </ul>
+</form>
+
+Then I started looking at options for receiving that form data via Supabase. The only options I saw were "Edge functions" and "database functions." I didn't want to use database functions, because I wanted to return HTML via JSX to the client. When I looked into Edge functions, I found they were implemented in Deno. I didn't want to use Deno because I was afraid (without knowing for sure) that I'd have to reimplement or do extra work for my JSX/MDX implementation to work.
+
+I considered whether I could restrict my usage to Supabase for its authentication, and then access that authentication via a NodeJS call from another server. I began looking at Fly.io, a service I knew I could put up a basic Node server for free. I'd never used Fly.io myself, but I had heard good reviews from developer friends. 
+
+<Future>Once I had the form working with a normal, page refreshing action, I set up `htmx` to perform an insert without a page refresh. That took some work to hook up htmx and Supabase's auth token.</Future>
+
+### Sun Dec 24 10:07:57 AM PST 2023
+
+To get started with Fly.io, I searched for a tutorial of deploying a Docker container NodeJS application with a PostgreSQL database. Fly.io's main documentation had separate articles for each of these! 
+
+While I read [Fly's Docker tutorial](https://fly.io/docs/languages-and-frameworks/dockerfile/) I wondered if I couldn't use a docker-compose file. A quick search told me I couldn't. So I imagined I'd be running two different applications on Fly.io. One Docker container with a database, and one with a custom Node server. And I was going to manage that Node server from the same directory as my website, since my JSX implementation and custom components already existed here, and I'd want to reuse them for both.
+
+I wasn't enthused about my website becoming monolithic having two separate applications. I guess my fear was that because I'd done a messy job with my JSX implementation, I might have cross-polination and different concerns for different parts of the repository, leading to more work differentiating them or accidental mixing of concepts that become harder to separate later. Maybe I could just be wary of those issues moving forward, and that would be enough to prevent some disaster? I hoped so because that was my plan.
+
+I considered not running a Postgres VM on Fly.io, and instead using my existing Postgres VM in Supabase. [Supabase's documentation on connecting to my existing database](https://supabase.com/docs/guides/database/connecting-to-postgres) was solid, so I thought, "why not?" Also in this document I learned about [`Postgres.js`](https://supabase.com/docs/guides/database/connecting-to-postgres#connecting-with-postgresjs), a package for connecting to Postgres from Node. I figured I'd be using that soon.
+
+Fly.io [made me chuckle](https://fly.io/docs/machines/). 
+
+> 🌶️ **But some applications get spicy.** 🌶️ This is our spicy interface!
+```
+
+I finally signed up for Fly.io and installed the `fly` CLI. The docs made it seem so easy to poke around on a brand new VM:
+
+``
+
+```sh
+# install the `fly` CLI
+curl -L https://fly.io/install.sh | sh 
+# Then later (in another shell, after adding to PATH) 
+# Login
+flyctl auth login;
+# After that succeeds
+fly machine run --shell;
+```
+
+Then magically, if I could believe the docs, you'd have a terminal in a brand new machine as if you'd just SSH'd into your oldest-pal server. I tried it out and it was so close to that magical! I ended up having to take a couple detours. First to supply my credit card information to Fly.io (even though I'd only be using free stuff, hopefully). Second, I just had to login twice before the SSH connection took. I think the first time I didn't fully authenticate, perhaps because of the credit card missing? Unsure. Either way, second time was the charm!
+
+I could `pwd`, `ls`, and `env` to my heart's content. I was even able to `apt-get update && apt-install neofetch`!
+
+```text
+            .-/+oossssoo+/-.
+        `:+ssssssssssssssssss+:`
+      -+ssssssssssssssssssyyssss+-
+    .ossssssssssssssssssdMMMNysssso.       root@32874247b51e38 
+   /ssssssssssshdmmNNmmyNMMMMhssssss/      ------------------- 
+  +ssssssssshmydMMMMMMMNddddyssssssss+     OS: Ubuntu 22.04.3 LTS x86_64 
+ /sssssssshNMMMyhhyyyyhmNMMMNhssssssss/    Kernel: 5.15.98-fly 
+.ssssssssdMMMNhsssssssssshNMMMdssssssss.   Uptime: 4 mins 
++sssshhhyNMMNyssssssssssssyNMMMysssssss+   Packages: 231 (dpkg) 
+ossyNMMMNyMMhsssssssssssssshmmmhssssssso   Shell: bash 5.1.16 
+ossyNMMMNyMMhsssssssssssssshmmmhssssssso   Resolution: 1024x768 
++sssshhhyNMMNyssssssssssssyNMMMysssssss+   Terminal: hallpass 
+.ssssssssdMMMNhsssssssssshNMMMdssssssss.   CPU: AMD EPYC (1) @ 2.499GHz 
+ /sssssssshNMMMyhhyyyyhdNMMMNhssssssss/    Memory: 41MiB / 217MiB 
+  +sssssssssdmydMMMMMMMMddddyssssssss+
+   /ssssssssssshdmNNNNmyNMMMMhssssss/                              
+    .ossssssssssssssssssdMMMNysssso.                               
+      -+sssssssssssssssssyyyssss+-
+        `:+ssssssssssssssssss+:`
+            .-/+oossssoo+/-.
+```
+
+The ease to get a shell was highly encouraging, so I pushed on with my plan. 
+
+I set out to make a NodeJS server in a Dockerfile, deploy it on Fly.io, and then
+ping it via an HTTP GET from my site's client-side code.
+
+First step, running that server locally. I searched "docker node server 2023" to refresh my brain, since I hadn't used Docker or worked on a server in over a year. I glanced at some tutorials and  
+
+I learned [this convenient command to build and run from a Dockerfile](https://stackoverflow.com/a/51314059) in one step:
+
+```sh
+docker run --rm -it $(docker build -q .)
+```
+
+Though that was annoying because it only worked by hiding all of `docker build`'s output. I thought I'd probably just use the old fashion way of a named image.
+
+```
+docker build -t reeds-website-server . && docker run -it reeds-website-server
+```
+
+I had a lot to re-learn about Docker and images and containers and combine all of that with what was floating around in my head about TypeScript, custom JSX, and node servers. I wanted to make some smart decisions at this stage about the composition of my Dockerfile. For example, was I going to compile Typescript outside my Dockerfile, to make it simpler? Or include as much operational information in my Dockerfile, to take advantage of Docker's skills at caching operational steps. I realized I just didn't remember enough about Docker at the moment to make a perfect call, so I should just move forward with my best guess. I tried to focus on how easy and fun it could be to make the perfect Docker setup, and that my choices today weren't going to make or break the future. The internal monologue was equal parts quelling my anxiety, and accepting that I had a lot to relearn.
+
+<Future>In my documentation about how to run this site in the README, I included instructions for Supabase and Fly.io, since they were part of my site now.</Future>
+
+<Future>I considered encapsulating my static site in a Dockerfile to parallel the docker strategy of my server. I could run my compile scripts in that Dockerfile, then copy out the static build directory, then use Netlify's "deploy" command. I might be able to do this process through GitHub actions without much effort. And that way, my flow of pushing to GitHub to deploy would be uninterrupted (although I'd have to go somewhere else to track build failures versus deployment questions).</Future>
+
+I completed my first step: a Dockerfile image running a Node Typescript app, logging some HTML text generated from JSX and my custom JSX implementation. It wasn't simple, and unfortunately it wasn't as simple as possible. I had to copy some files into my new `server` directory, because apparently my Dockerfile directives refused to copy from a parent directory. 
+
+<Future>I moved my server Dockerfile up to the root of the project (and renamed it `Dockerfile.server`) so that I could copy from anywhere in the project folder hierarchy and not keep two copies of files.</Future>

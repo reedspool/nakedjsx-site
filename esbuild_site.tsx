@@ -261,6 +261,7 @@ if (!WATCH_MODE) {
 }
 
 console.log("Watching all input files, rebuilding");
+console.log(`\n✔  ✔   ✔   ✔ (${new Date()})`);
 const watcher = chokidar.watch(
   dataForPages
     .map(
@@ -281,15 +282,16 @@ watcher.on("change", async (path) => {
   if (!d)
     throw new Error(`Caught watching a path I can't recompile: '${path}'`);
   console.log(`Rebuilding ${d.mdxSrc}`);
+  const now = new Date();
   try {
     await dispatchCompilation(d);
 
-    console.error(`\n✔  ✔   ✔   ✔`);
+    console.error(`\n✔  ✔   ✔   ✔ (${now})`);
   } catch (error) {
     console.error(
       `Re-compilation failed for '${d.mdxSrc}'. Not exiting. Error:`,
     );
     console.error(error);
-    console.error(`\n❌   ❌   ❌   ❌`);
+    console.error(`\n❌   ❌   ❌   ❌ (${now})`);
   }
 });
