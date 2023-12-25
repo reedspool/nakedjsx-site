@@ -125,6 +125,54 @@ I had a lot to re-learn about Docker and images and containers and combine all o
 
 <Future>I considered encapsulating my static site in a Dockerfile to parallel the docker strategy of my server. I could run my compile scripts in that Dockerfile, then copy out the static build directory, then use Netlify's "deploy" command. I might be able to do this process through GitHub actions without much effort. And that way, my flow of pushing to GitHub to deploy would be uninterrupted (although I'd have to go somewhere else to track build failures versus deployment questions).</Future>
 
-I completed my first step: a Dockerfile image running a Node Typescript app, logging some HTML text generated from JSX and my custom JSX implementation. It wasn't simple, and unfortunately it wasn't as simple as possible. I had to copy some files into my new `server` directory, because apparently my Dockerfile directives refused to copy from a parent directory. 
+I completed my first step: a Dockerfile image running a Node Typescript app, logging some HTML text generated from JSX and my custom JSX implementation. It wasn't simple, and unfortunately it wasn't as simple as possible. I had to copy some files into my new `server` directory, because apparently my Dockerfile directives refused to copy from a parent directory. I tried using symlinks for the files, but that didn't work. It felt wrong to commit two copies of the same two files but I wanted to move forward and fix my Docker setup later.
 
 <Future>I moved my server Dockerfile up to the root of the project (and renamed it `Dockerfile.server`) so that I could copy from anywhere in the project folder hierarchy and not keep two copies of files.</Future>
+
+I quickly deployed my site to Fly.io with `fly launch`. I had to wrestle with the port as Fly's CLI kept writing the port 3000 to the `fly.toml` it created, and I had to overwrite it to 3001 before deploying. I chose 3001 because my static website server `npx serve` already defaulted to 3000. It was just a coincidence that Fly.io also defaulted to 3000.
+
+### Mon Dec 25 09:31:40 AM PST 2023
+
+Next I tried a request to the live server from my website.
+
+<button onclick="fetchLiveRoot(event)">Make request to live site</button>
+
+{`
+<script type="module">
+  window.fetchLiveRoot = async function (event) {
+    const serverUrl = "https://reeds-website-server.fly.dev/";
+    try {
+      const result = await fetch(serverUrl)
+      event.target.innerHTML = await result.text();
+    } catch (error) {
+       event.target.innerHTML = "Error, see console";
+       console.error("Error from fetch", error)
+    }
+  }
+</script>
+`}
+
+That didn't work. I was able to see in Fly.io's monitoring console that my server was throwing a CORS error. I'd set up a CORS middleware intentionally, but I guess I'd have to work a bit more at configuring it. To work on that, I ran the server locally and tried the same request there:
+
+<button onclick="fetchLocalRoot(event)">Make request to local site</button>
+
+{`
+<script type="module">
+  window.fetchLocalRoot = async function (event) {
+    const serverUrl = "http://localhost:3001/";
+    try {
+      const result = await fetch(serverUrl)
+      event.target.innerHTML = await result.text();
+    } catch (error) {
+       event.target.innerHTML = "Error, see console";
+       console.error("Error from fetch", error)
+    }
+  }
+</script>
+`}
+
+That failed for the same CORS reason, so I edited the server to accept my localhost address as a valid origin. I got back a successful result! So I pushed my static site and my server up to see if it would now work there. It worked! Woo!
+
+I now had many more pieces to my puzzle. The big pieces I could see left over were connecting to my Supabase Postgres server from my Fly.io backend and also authorizing via Supabase's auth system from my website login through my Fly.io backend.
+
+<Future>I wasn't sure how my row-level policies would work. How would the auth.id function check if I was doing Postgres operations on behalf of my logged in user via a separate back-end? Somehow I'd have to establish authentication between Supabase's PostGres and Supabase's authentication all the way from my Fly.io backend. I decided to research this before moving forward because it sounded integral to how those other systems worked.</Future>

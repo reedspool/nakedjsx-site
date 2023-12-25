@@ -19,4 +19,6 @@ COPY src/ src/
 
 RUN npm run build:compile
 
+EXPOSE 3001
+
 CMD ["node", "build/index.js"]
