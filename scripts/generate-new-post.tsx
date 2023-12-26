@@ -35,7 +35,30 @@ console.log(
   if (!answer.match(/^(y|Y|yes)$/)) process.exit(128);
 }
 
-await writeFile(`posts/${slug}.mdx`, `# ${title} \n\n`);
+let date = "";
+
+{
+  // Match the format of `date` on my Linux machine
+  const d = new Date();
+  const year = (d.toString().match(/ 20\d{2}/) || [])[0];
+  date =
+    d
+      .toString()
+      .replace(/ 20\d{2}/, "") // Remove ' 2023'
+      .replace("GMT-0800 (Pacific Standard Time)", "PST") + year;
+}
+
+await writeFile(
+  `posts/${slug}.mdx`,
+  `# ${title}
+
+## Logbook
+
+### ${date}
+
+Generated this page with my script.
+`,
+);
 
 console.log(
   "Future: I tried retriggering my post listing script generation to see if I could avoid restarting my dev server",
@@ -59,7 +82,7 @@ console.log(
 
   let content = (await readFile(path)).toString();
 
-  content += `\nI started this post <Link slug="${slug}">here</Link>\n`;
+  content += `\nI started this post <Link slug="${slug}">here</Link>.\n`;
 
   console.log(`Writing back the modified project-index.mdx`);
 

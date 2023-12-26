@@ -25,10 +25,13 @@
     "project-counting-up-party-game": "project-counting-up-party-game.html",
     "project-m-x-ify-evil-macros": "project-m-x-ify-evil-macros.html",
     "project-plant-parenthood": "project-plant-parenthood.html",
-    "project-body-weight-recording-app": "project-body-weight-recording-app.html"
+    "project-body-weight-recording-app": "project-body-weight-recording-app.html",
+    "make-wrong-things-look-wrong": "make-wrong-things-look-wrong.html"
   },
   "slugsToHashes": {
-    "project-improve-this-website": ["exploring-client-side-js-in-nakedjsx"],
+    "project-improve-this-website": [
+      "exploring-client-side-js-in-nakedjsx"
+    ],
     "project-supabase-authentication": [
       "supabase-auth-starting-body-weight-app"
     ]
