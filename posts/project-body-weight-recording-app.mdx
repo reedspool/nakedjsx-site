@@ -177,4 +177,14 @@ I now had many more pieces to my puzzle. The big pieces I could see left over we
 
 <Future>I wasn't sure how my row-level policies would work. How would the auth.id function check if I was doing Postgres operations on behalf of my logged in user via a separate back-end? Somehow I'd have to establish authentication between Supabase's PostGres and Supabase's authentication all the way from my Fly.io backend. I decided to research this before moving forward because it sounded integral to how those other systems worked.</Future>
 
+### Tue Dec 26 17:00:24 PST 2023
+
 <Future>[This pen by Carter Lovelace](https://codepen.io/carterfromsl/pen/QWYMjBW) inspired me to try a neo-brutalist style.</Future>
+
+I took a break from my big questions about auth and backends to play with my mobile computing setup. I was curious if I could operate my fly.io remote server from Termux on my Android device. I started with the same flow I did a couple days ago on my desktop: install the CLI, authenticate, and try their command to spin up a VM and connect via shell.
+
+I immediately ran into an issue with their install script. It attempted to access `/home` and failed, since that didn't exist on Android. So I searched "fly cli termux" before trying to diagnose the issue myself. Lucky me, it turns out some others had already made a `flyctl` package for Termux. So I installed itwith `pkg install flyctl`.
+
+I stumbled again with the next step, authenticating. That one was easier. I had to set a password. I couldn't use the "sign in with google" button. So I used the Forgt My Password flow, and then it succeeded.
+
+I was authenticated, so I tried the last step, "fly machine run --shell;". Unfortunately, it didn't work. Command not found, `fly`. A quick search explained that `flyctl` and `fly` where the same behind the scenes, I just only got the one with the Termux package. `flyctl machine run --shell` worked great, and again I had a shell in some remote, brand new machine! That might never get old.
