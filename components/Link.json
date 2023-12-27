@@ -26,7 +26,8 @@
     "project-m-x-ify-evil-macros": "project-m-x-ify-evil-macros.html",
     "project-plant-parenthood": "project-plant-parenthood.html",
     "project-body-weight-recording-app": "project-body-weight-recording-app.html",
-    "make-wrong-things-look-wrong": "make-wrong-things-look-wrong.html"
+    "make-wrong-things-look-wrong": "make-wrong-things-look-wrong.html",
+    "project-proxies-as-variable-environments": "project-proxies-as-variable-environments.html"
   },
   "slugsToHashes": {
     "project-improve-this-website": [

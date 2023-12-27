@@ -216,8 +216,28 @@ Whereas the same thing wrapped in the curly-braces and back-ticks would:
 
 {`
 <script class="block">
-document.currentScript.style.border = '1px dashed re  d'
+document.currentScript.style.border = '1px dashed red'
 </script>
 `}
 
 Seeing the MDX output clarified the reason: With a newline there, MDX wrapped the content of the `script` tag in a paragraph `p` tag. Initially, this surprised me, but I agreed with this decision from the MDX people after I thought about it for a moment. I would like to wrap long passages of Markdown in some tags, and still have MDX parse them as Markdown. An example was my plan to wrap my log book entries in some JSX tags, to add functionality like sorting. So I could deal with using this curly-brace-backtick trick to inform MDX not to parse my contents.
+
+### Wed Dec 27 10:33:24 AM PST 2023
+
+Later I found that when I used the curly-brace-backtick trick, I was unable to use backticks in my actual code.
+
+And the error wasn't useful. No suggestion of backticks being the cause:
+
+```sh
+Re-compilation failed for './posts/project-write-script-and-style-tags.mdx'. Not exiting. Error:
+[234:4: Could not parse expression with acorn] {
+  ancestors: undefined,
+  cause: Error: Unexpected content after expression
+      at eventsToAcorn (file:///home/human/reeds-website/node_modules/micromark-util-events-to-acorn/index.js:157:7)
+  ...
+```
+
+
+I tried swapping each backtick in my code for `&grave;`, the HTML entity for the same character. That almost worked. It compiled successfully, but the HTML didn't work how I wanted. Because [script tags are special](https://stackoverflow.com/a/4227942), my HTML entities were not converted to their correct characters. But I didn't need the browser to convert my text correctly. I needed my compiler to do so, since it was the one misinterpreting my intentions with nested string templates. So I tried the JavaScript way of escaping special characters like this, unicode escapes. The one for a backtick is `\u0060` (because `60` is hex for `96` decimal, and the backtick is `96` in the ASCII table). I replaced all my internal backticks with that sequence, and voila! Perfect code compiling and running in my browser!
+
+I also ran into a problem where my string interpolations (e.g. `${...}`) were interpreted in the context of the MDX file, whereas I wanted then to not be interpreted until runtime. I solved that easily by escaping the dollar sign with a slash, e.g. `\${...}`.
