@@ -121,8 +121,6 @@ docker build -t reeds-website-server . && docker run -it reeds-website-server
 
 I had a lot to re-learn about Docker and images and containers and combine all of that with what was floating around in my head about TypeScript, custom JSX, and node servers. I wanted to make some smart decisions at this stage about the composition of my Dockerfile. For example, was I going to compile Typescript outside my Dockerfile, to make it simpler? Or include as much operational information in my Dockerfile, to take advantage of Docker's skills at caching operational steps. I realized I just didn't remember enough about Docker at the moment to make a perfect call, so I should just move forward with my best guess. I tried to focus on how easy and fun it could be to make the perfect Docker setup, and that my choices today weren't going to make or break the future. The internal monologue was equal parts quelling my anxiety, and accepting that I had a lot to relearn.
 
-<Future>In my documentation about how to run this site in the README, I included instructions for Supabase and Fly.io, since they were part of my site now.</Future>
-
 <Future>I considered encapsulating my static site in a Dockerfile to parallel the docker strategy of my server. I could run my compile scripts in that Dockerfile, then copy out the static build directory, then use Netlify's "deploy" command. I might be able to do this process through GitHub actions without much effort. And that way, my flow of pushing to GitHub to deploy would be uninterrupted (although I'd have to go somewhere else to track build failures versus deployment questions).</Future>
 
 I completed my first step: a Dockerfile image running a Node Typescript app, logging some HTML text generated from JSX and my custom JSX implementation. It wasn't simple, and unfortunately it wasn't as simple as possible. I had to copy some files into my new `server` directory, because apparently my Dockerfile directives refused to copy from a parent directory. I tried using symlinks for the files, but that didn't work. It felt wrong to commit two copies of the same two files but I wanted to move forward and fix my Docker setup later.
@@ -175,8 +173,6 @@ That failed for the same CORS reason, so I edited the server to accept my localh
 
 I now had many more pieces to my puzzle. The big pieces I could see left over were connecting to my Supabase Postgres server from my Fly.io backend and also authorizing via Supabase's auth system from my website login through my Fly.io backend.
 
-<Future>I wasn't sure how my row-level policies would work. How would the auth.id function check if I was doing Postgres operations on behalf of my logged in user via a separate back-end? Somehow I'd have to establish authentication between Supabase's PostGres and Supabase's authentication all the way from my Fly.io backend. I decided to research this before moving forward because it sounded integral to how those other systems worked.</Future>
-
 ### Tue Dec 26 17:00:24 PST 2023
 
 <Future>[This pen by Carter Lovelace](https://codepen.io/carterfromsl/pen/QWYMjBW) inspired me to try a neo-brutalist style.</Future>
@@ -188,3 +184,22 @@ I immediately ran into an issue with their install script. It attempted to acces
 I stumbled again with the next step, authenticating. That one was easier. I had to set a password. I couldn't use the "sign in with google" button. So I used the Forgt My Password flow, and then it succeeded.
 
 I was authenticated, so I tried the last step, "fly machine run --shell;". Unfortunately, it didn't work. Command not found, `fly`. A quick search explained that `flyctl` and `fly` where the same behind the scenes, I just only got the one with the Termux package. `flyctl machine run --shell` worked great, and again I had a shell in some remote, brand new machine! That might never get old.
+
+### Wed Dec 27 04:38:16 PM PST 2023
+
+I made a new README for my new server work with instructions for how to build, run, and deploy my Dockerfile driven server. Yay, monolith time!
+
+I had authentication working on the front-end, and a server working on the back-end, but I didn't have authentication on the back-end. Somehow I'd have to connect the user identity of the human on the other side of the browser to the Postgres row-level policies on the other side of my server.
+
+I found [some documentation about how Supabase auth portends to achieve this](https://supabase.com/docs/guides/auth/server-side-rendering). I found it funny that their documentation as about Server Side Rendering, when this was what we were doing before that term was coined.
+
+Those docs explained that Supabase returned two important, relative pieces of the auth puzzle after authentication was successful:
+
+> 1. Access token in the form of a JWT.
+> 2. Refresh token which is a randomly generated string.
+
+I successfully observed those values in the Network tab of DevTools, in the response from a POST to `https://<my-special-string>.supabase.co/auth/v1/token?grant_type=id_token` which occurred after I used Google's sign-in button from my <Link slug="project-supabase-authentication" hash="supabase-auth-starting-body-weight-app">exploration of Supabase authentication</Link>. 
+
+I didn't observe them set in my cookies as the docs suggested, but I thought that might be a result of my cookie settings in Chrome, `chrome://settings/cookies`, set to "Block third-party cookies." To test, that, I added my URL `https://<my-special-string>.supabase.co` to the allow list for third-party cookies. No luck.
+
+I was able to access the refresh token and other auth information from the DevTools console with `JSON.parse(localStorage.getItem(supabaseClient.auth.storageKey)).refresh_token`.

@@ -181,3 +181,27 @@ To that end, I decided on a small, concrete application. Before I began working 
 
 So I decided to make a table to record my daily body weight records. I began to work on a <HashTarget id="supabase-auth-starting-body-weight-app"><Link slug="project-body-weight-recording-app">a body weight recording application</Link></HashTarget> in a separate project. I thought I might come back here to explore the Supabase auth related topics.
 
+
+### Wed Dec 27 07:02:31 PM PST 2023
+
+Following [docs on Server-side Rendering Auth with Supabase](https://supabase.com/docs/guides/auth/server-side-rendering).
+
+Got this code to play with state change. I observed the cookies changing after logging in with the Google Sign In button above.
+
+{`
+<script type="module">
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+// delete cookies on sign out
+const expires = new Date(0).toUTCString()
+document.cookie = \u0060my-access-token=; path=/; expires=\${expires}; SameSite=Lax; secure\u0060
+document.cookie = \u0060my-refresh-token=; path=/; expires=\${expires}; SameSite=Lax; secure\u0060
+} else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+const maxAge = 100 * 365 * 24 * 60 * 60 // 100 years, never expires
+document.cookie = \u0060my-access-token=\${session.access_token}; path=/; max-age=\${maxAge}; SameSite=Lax; secure\u0060
+document.cookie = \u0060my-refresh-token=\${session.refresh_token}; path=/; max-age=\${maxAge}; SameSite=Lax; secure\u0060
+}
+})
+</script>
+`}
