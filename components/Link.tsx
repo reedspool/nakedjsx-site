@@ -34,7 +34,7 @@ export const HashTarget = ({
   if (!Object.values(slugsToHashes).flat().includes(id))
     throw new Error(`Unused hash target "${id}"`);
 
-  return <div id={id}>Anchor: {children}</div>;
+  return <span id={id}>Anchor: {children}</span>;
 };
 
 export const GitHubDefaultContent = () => (
