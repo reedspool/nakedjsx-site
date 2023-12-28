@@ -203,3 +203,116 @@ I successfully observed those values in the Network tab of DevTools, in the resp
 I didn't observe them set in my cookies as the docs suggested, but I thought that might be a result of my cookie settings in Chrome, `chrome://settings/cookies`, set to "Block third-party cookies." To test, that, I added my URL `https://<my-special-string>.supabase.co` to the allow list for third-party cookies. No luck.
 
 I was able to access the refresh token and other auth information from the DevTools console with `JSON.parse(localStorage.getItem(supabaseClient.auth.storageKey)).refresh_token`.
+
+Back Following [docs on Server-side Rendering Auth with Supabase](https://supabase.com/docs/guides/auth/server-side-rendering).
+
+Got this code to play with state change. I observed the cookies changing after logging in with the Google Sign In button above.
+
+export const MySpecialScriptCodeBlockRunnable = ({ scriptProps, children }) => 
+<>
+{`
+<pre><code>&lt;script&gt;<script class="block" type="module" {...scriptProps}>
+${children}
+</script>&lt;/script&gt;</code></pre>
+`}
+</>
+
+<details>
+<summary>Code</summary>
+<MySpecialScriptCodeBlockRunnable>{`
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+    // delete cookies on sign out
+    const expires = new Date(0).toUTCString()
+    document.cookie = \u0060my-access-token=; path=/; domain=reeds-website-server.fly.dev; expires=\${expires}; SameSite=Lax; secure\u0060
+    document.cookie = \u0060my-refresh-token=; path=/; domain=reeds-website-server.fly.dev; expires=\${expires}; SameSite=Lax; secure\u0060
+  } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    const maxAge = 100 * 365 * 24 * 60 * 60 // 100 years, never expires
+    document.cookie = \u0060my-access-token=\${session.access_token}; path=/; domain=reeds-website-server.fly.dev; max-age=\${maxAge}; SameSite=Lax; secure\u0060
+    document.cookie = \u0060my-refresh-token=\${session.refresh_token}; path=/; domain=reeds-website-server.fly.dev; max-age=\${maxAge}; SameSite=Lax; secure\u0060
+  }
+})
+`}</MySpecialScriptCodeBlockRunnable>
+</details>
+
+Then I followed their instructions on the server-side as well:
+
+```js
+const refreshToken = req.cookies['my-refresh-token']
+const accessToken = req.cookies['my-access-token']
+
+if (refreshToken && accessToken) {
+  await supabase.auth.setSession({
+    refresh_token: refreshToken,
+    access_token: accessToken,
+    {
+      auth: { persistSession: false },
+    }
+  })
+} else {
+  // make sure you handle this case!
+  throw new Error('User is not authenticated.')
+}
+
+// returns user information
+await supabase.auth.getUser()
+```
+
+I also had to install `supabase` on my server. I didn't see any separate server-side instructions at first glance so I followed their instructions. In the browser, above, I'd used their CDN link. I was doing the other way, via NPM, for the server. I probably would eventually install this way on my client to include via `esbuild`.
+
+```sh
+npm install @supabase/supabase-js
+```
+
+I had to install the `cookie-parser` Express middleware to see cookies. Even then, I wasn't able to see my cookies! I figured it was a cross-domain problem, since my server was live at `https://reeds-website-server.fly.dev/` whereas my titular website served from `https://reeds.website`. So I tried setting my server domain explicitly on the cookie. Unfortunately, I wasn't able to see these cookies from my server. However, I had figured out how to access them from my client JS already, so I could send them explicitly in a post body. And that's exactly what I tried next.
+
+Repeating my button-to-make-a-request strategy from above, I supplied the `request_token` and `access_token` in the POST body of an HTTP request to my server. However, I didn't end up using this button really. Because I had to test this on my live server (auth wasn't working locally at all), I ended up just copying and pasting chunks of this code into the console, instead of pushing to git constantly and waiting for Netlify to deploy my updated static site. Working in the console turned out to be very easy since I had put my `supabaseClient` in the global scope, I didn't have to repeat that initialization. 
+
+<button onclick="fetchWithTokens(event)">Make request to live site</button>
+
+<details>
+<summary>Code</summary>
+<MySpecialScriptCodeBlockRunnable>{`
+  window.fetchWithTokens = async function (event) {
+    const supabaseAuthStorage = JSON.parse(localStorage.getItem(supabaseClient.auth.storageKey))
+    const refreshToken = supabaseAuthStorage.refresh_token;
+    const accessToken = supabaseAuthStorage.access_token;
+    const serverUrl = "https://reeds-website-server.fly.dev/";
+    try {
+      const result = await fetch(serverUrl, {
+        method: "POST",
+        body: JSON.stringify({ 
+          refreshToken,
+          accessToken,
+        })
+      })
+      event.target.innerHTML = await result.text();
+    } catch (error) {
+       event.target.innerHTML = "Error, see console";
+       console.error("Error from fetch", error)
+    }
+  }
+`}</MySpecialScriptCodeBlockRunnable>
+</details>
+
+I played with the server code until I could successfully echo back those values. Then I attempted `supabase.auth.getUser()` on the server. It worked! Next I tried connecting to Supabase Postgres while correctly authenticated, and attempt to test my policies.
+
+<Future>While searching for how to do this, I found [this additional doc on Supabase SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client) which described an additional package and a different method for creating a client on the server. I decided not to try this at that moment, but made a note to try it later.</Future>
+
+I manually added a row to the table I'd already created, `fitness_record_weight`. To do that, I had to use my user ID, which I could get via `supabase.auth.getUser()`. My query on the front-end was successful:
+
+```js
+const { data, error } = await supabaseClient
+  .from('fitness_record_weight')
+  .select('*')
+```
+
+I got one row back! So I tried it on my server. It worked swimmingly.
+
+Now I realized this situation wasn't what I was used to. I was used to a locked-down server. In my experience, only the server had a direct connection to the database, so there was no chance that a user could make a request I hadn't personally crafted. In this case, a user could make any request they want from the browser, as I'd just demonstrated for myself above. I wasn't sure what to make of that. I supposed that I'd have to rely on the Row level policies to ensure that a user could only damage their own personal data if they decided to do such things.
+
+<Future>I circled back to triple check that my security and usage of Row Level Security was safe</Future>
+
+I found the [documentation about using TypeScipt with the JavaScript client](https://supabase.com/docs/reference/javascript/typescript-support). I didn't have the `supabase` CLI installed (yet), so I [downloaded the types from the dashboard](https://supabase.com/dashboard/project/yhuswwhmfuptgznlkdvv/api?page=tables-intro). I moved the file from my downloads into my project and imported it. Worked perfectly.
+
+<Future>I felt like I had everything I needed to start making an HTMX application, so I made a new page and started to solidify the authentication flow and show a table and a form to upload new data.</Future>
