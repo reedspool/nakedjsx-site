@@ -315,4 +315,16 @@ Now I realized this situation wasn't what I was used to. I was used to a locked-
 
 I found the [documentation about using TypeScipt with the JavaScript client](https://supabase.com/docs/reference/javascript/typescript-support). I didn't have the `supabase` CLI installed (yet), so I [downloaded the types from the dashboard](https://supabase.com/dashboard/project/yhuswwhmfuptgznlkdvv/api?page=tables-intro). I moved the file from my downloads into my project and imported it. Worked perfectly.
 
-<Future>I felt like I had everything I needed to start making an HTMX application, so I made a new page and started to solidify the authentication flow and show a table and a form to upload new data.</Future>
+### Thu Dec 28 11:08:04 AM PST 2023
+
+I felt like I had everything I needed to start making an HTMX application, so I made a new page and started on my plan to solidify the authentication flow. I copied and collected my lessons from auth so far from this project and <Link slug="project-supabase-authentication" hash="supabase-auth-starting-body-weight-app">my previous exploration into supabase auth</Link>.
+
+<Future>I corrected my usage of the google sign-in nonce. When I started exploring google sign in, I used a static nonce to get through it, but that eliminated the safety guarantees a nonce provides. At this point, I thought I had two options. Maybe I could set the HTML attribute `data-nonce` via JavaScript, or I could make a backend request which returned the sign-in HTML with the Nonce.</Future>
+
+<Future>Once I had authentication working and feeling relatively nice in my new app page, I made a bunch of fake data and a way to switch on fake-data mode so that I wouldn't have to deploy my site to test.</Future>
+
+<Future>I figured out authentication for my local machine so that I could test with real data/API timing.</Future>
+
+<Future>I made a table to show data</Future>
+
+<Future>I made a form to upload new data.</Future>

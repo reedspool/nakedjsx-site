@@ -14,6 +14,15 @@ const dataForPages = [
     layout: "BlogLayout",
   },
   {
+    pageJsxOrTsxSrc: "pages/record.tsx",
+    output: "build/record.html",
+    layout: "EmptyLayout",
+  },
+  {
+    clientSrc: "src/record.tsx",
+    output: "build/record.js",
+  },
+  {
     pageJsxOrTsxSrc: "pages/log-game.tsx",
     output: "build/log-game.html",
     layout: "EmptyLayout",
@@ -281,7 +290,7 @@ watcher.on("change", async (path) => {
   const d = dataWithResolvedSrc.find((d) => d.resolvedSrc === resolvedPath);
   if (!d)
     throw new Error(`Caught watching a path I can't recompile: '${path}'`);
-  console.log(`Rebuilding ${d.mdxSrc}`);
+  console.log(`Rebuilding ${d.resolvedSrc}`);
   const now = new Date();
   try {
     await dispatchCompilation(d);
@@ -289,7 +298,7 @@ watcher.on("change", async (path) => {
     console.error(`\n✔  ✔   ✔   ✔ (${now})`);
   } catch (error) {
     console.error(
-      `Re-compilation failed for '${d.mdxSrc}'. Not exiting. Error:`,
+      `Re-compilation failed for '${d.resolvedSrc}'. Not exiting. Error:`,
     );
     console.error(error);
     console.error(`\n❌   ❌   ❌   ❌ (${now})`);
