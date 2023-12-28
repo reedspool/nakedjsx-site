@@ -188,20 +188,63 @@ Following [docs on Server-side Rendering Auth with Supabase](https://supabase.co
 
 Got this code to play with state change. I observed the cookies changing after logging in with the Google Sign In button above.
 
+export const MySpecialScriptCodeBlockRunnable = ({ scriptProps, children }) => 
+<>
 {`
-<script type="module">
-
-supabaseClient.auth.onAuthStateChange((event, session) => {
-if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-// delete cookies on sign out
-const expires = new Date(0).toUTCString()
-document.cookie = \u0060my-access-token=; path=/; expires=\${expires}; SameSite=Lax; secure\u0060
-document.cookie = \u0060my-refresh-token=; path=/; expires=\${expires}; SameSite=Lax; secure\u0060
-} else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-const maxAge = 100 * 365 * 24 * 60 * 60 // 100 years, never expires
-document.cookie = \u0060my-access-token=\${session.access_token}; path=/; max-age=\${maxAge}; SameSite=Lax; secure\u0060
-document.cookie = \u0060my-refresh-token=\${session.refresh_token}; path=/; max-age=\${maxAge}; SameSite=Lax; secure\u0060
-}
-})
-</script>
+<pre><code>&lt;script&gt;<script class="block" type="module" {...scriptProps}>
+${children}
+</script>&lt;/script&gt;</code></pre>
 `}
+</>
+
+
+<details>
+<summary>Code</summary>
+<MySpecialScriptCodeBlockRunnable>{`
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+    // delete cookies on sign out
+    const expires = new Date(0).toUTCString()
+    document.cookie = \u0060my-access-token=; path=/; domain=reeds-website-server.fly.dev; expires=\${expires}; SameSite=Lax; secure\u0060
+    document.cookie = \u0060my-refresh-token=; path=/; domain=reeds-website-server.fly.dev; expires=\${expires}; SameSite=Lax; secure\u0060
+  } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    const maxAge = 100 * 365 * 24 * 60 * 60 // 100 years, never expires
+    document.cookie = \u0060my-access-token=\${session.access_token}; path=/; domain=reeds-website-server.fly.dev; max-age=\${maxAge}; SameSite=Lax; secure\u0060
+    document.cookie = \u0060my-refresh-token=\${session.refresh_token}; path=/; domain=reeds-website-server.fly.dev; max-age=\${maxAge}; SameSite=Lax; secure\u0060
+  }
+})
+`}</MySpecialScriptCodeBlockRunnable>
+</details>
+
+Then I followed their instructions on the server-side as well:
+
+```js
+const refreshToken = req.cookies['my-refresh-token']
+const accessToken = req.cookies['my-access-token']
+
+if (refreshToken && accessToken) {
+  await supabase.auth.setSession({
+    refresh_token: refreshToken,
+    access_token: accessToken,
+    {
+      auth: { persistSession: false },
+    }
+  })
+} else {
+  // make sure you handle this case!
+  throw new Error('User is not authenticated.')
+}
+
+// returns user information
+await supabase.auth.getUser()
+```
+
+Oh ya, did I mention I have a server and that's why I'm doing all this stuff? This is confusing to split between these two project files...
+
+I also had to install `supabase` on my server. I didn't see any separate server-side instructions at first glance so I followed their instructions. In the browser, above, I'd used their CDN link. I was doing the other way, via NPM, for the server. I probably would eventually install this way on my client to include via `esbuild`.
+
+```sh
+npm install @supabase/supabase-js
+```
+
+I had to install the `cookie-parser` Express middleware to see cookies. Even then, I wasn't able to see my cookies! I figured it was a cross-domain problem, since my server was live at `https://reeds-website-server.fly.dev/` whereas my titular website served from `https://reeds.website`. So I tried setting my server domain explicitly on the cookie.
