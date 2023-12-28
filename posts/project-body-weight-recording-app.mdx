@@ -319,6 +319,36 @@ I found the [documentation about using TypeScipt with the JavaScript client](htt
 
 I felt like I had everything I needed to start making an HTMX application, so I made a new page and started on my plan to solidify the authentication flow. I copied and collected my lessons from auth so far from this project and <Link slug="project-supabase-authentication" hash="supabase-auth-starting-body-weight-app">my previous exploration into supabase auth</Link>.
 
+I had to install `@supabase/supabase-js` for my client-side JS. When I tried to import it, I got an error:
+
+```
+Uncaught Error: Dynamic require of "stream" is not supported
+```
+
+It took some poking around to discover this was due to `stream` being a Node library. I had an inkling that it was due to Supabase's `fetch` implementation, which they described [here](https://github.com/supabase/supabase-js?tab=readme-ov-file#custom-fetch-implementation), so I tried their instructions for using the browser's built-in fetch implementation. That didn't fix anything. I saw there were [other similar issues](https://github.com/supabase/supabase-js/issues/845) which indicated a recent change in `fetch` usage. 
+
+I decided to just use the CDN link until these things were resolved. But unfortunately I lost all TypeScript information about the client then. I tried using `import type` from the Supabase NPM package, and manually constructing a `window.supabase` type. It worked! These were the two necessary ingredients: 
+
+```js
+import type { createClient as sbCreateClient } from "@supabase/supabase-js";
+
+declare global {
+  interface Window {
+    supabase: { createClient: typeof sbCreateClient };
+  }
+}
+
+window.supabase.createClient // Typed correctly!
+```
+
+Then I just installed the same Supabase script tag in my page as I'd used before:
+
+```html
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+```
+
+And everything worked!
+
 <Future>I corrected my usage of the google sign-in nonce. When I started exploring google sign in, I used a static nonce to get through it, but that eliminated the safety guarantees a nonce provides. At this point, I thought I had two options. Maybe I could set the HTML attribute `data-nonce` via JavaScript, or I could make a backend request which returned the sign-in HTML with the Nonce.</Future>
 
 <Future>Once I had authentication working and feeling relatively nice in my new app page, I made a bunch of fake data and a way to switch on fake-data mode so that I wouldn't have to deploy my site to test.</Future>

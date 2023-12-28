@@ -1,11 +1,11 @@
 export const Body = () => (
   <div class="w-full h-full flex flex-col gap-4 justify-center items-center">
+    <script
+      src="https://unpkg.com/@supabase/supabase-js@2"
+      type="module"
+    ></script>
     <script src="./record.js" type="module"></script>
     <script src="https://accounts.google.com/gsi/client" async></script>
-    {`<script>
-        // This will be overridden when client code loads
-        window.receiveGoogleLoginCredentialResponse = () => {}
-    </script>`}
 
     <p>Please log in.</p>
 
