@@ -4,6 +4,8 @@ Git repository for [Reed's Website](https://reeds.website)
 
 See [Topic: Operating This Website](./posts/topic-operating-this-website.mdx) for deployment operations explanation and other information.
 
+See [Server README](server/README.md) for instructions on building, running, and deploying the server.
+
 ## Usage
 
 Still early development, so these operations are not well defined and in flux. This document may already be out of date. 

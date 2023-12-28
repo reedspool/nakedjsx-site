@@ -9,7 +9,8 @@
     "build:compile": "node tmp/compiler.mjs",
     "docker:build": "docker build -t reeds-website-server .",
     "docker:run": "docker run -p 3001:3001 reeds-website-server",
-    "docker:connect": "docker run -p 3001:3001 -it reeds-website-server sh"
+    "docker:connect": "docker run -p 3001:3001 -it reeds-website-server sh",
+    "deploy": "flyctl deploy"
   },
   "keywords": [],
   "author": "",
