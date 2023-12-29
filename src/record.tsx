@@ -19,7 +19,33 @@ window.receiveGoogleLoginCredentialResponse = async function (response) {
     nonce: "NONCE", // must be the same one as provided in data-nonce (if any)
   });
 
+  if (error) {
+    throw error;
+  }
+
   console.log("Supabase auth complete", { data, error });
+  const refreshToken = data.session.refresh_token;
+  const accessToken = data.session.access_token;
+  const serverUrl =
+    "https://reeds-website-server.fly.dev/record/cpnt-body-weight-history.html";
+  try {
+    const result = await fetch(
+      serverUrl + "?" + new URLSearchParams({ refreshToken, accessToken }),
+      {
+        method: "GET",
+
+        /* method: "POST",
+         * body: JSON.stringify({
+         *   refreshToken,
+         *   accessToken,
+         * }),
+         * headers: { "Content-Type": "application/json; charset=utf-8" }, */
+      },
+    );
+    console.log(await result.text());
+  } catch (error) {
+    console.error("Error from fetch", error);
+  }
 };
 
 declare global {
@@ -32,3 +58,15 @@ declare global {
     supabaseClient: ReturnType<typeof supabaseCreateClient<Database>>;
   }
 }
+
+window.addEventListener("load", () => {
+  const div = document.body.querySelector("div");
+  if (!div) throw new Error("Missing target");
+
+  const elements: Element[] = [];
+  if (Array.isArray(elements)) {
+    elements.forEach((e) => div.appendChild(e));
+  } else {
+    div.appendChild(elements);
+  }
+});

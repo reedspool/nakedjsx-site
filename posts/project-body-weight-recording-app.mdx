@@ -347,7 +347,11 @@ Then I just installed the same Supabase script tag in my page as I'd used before
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 ```
 
-And everything worked!
+And everything worked! Well, first I had to reorder my `script` tags so that my page script came before the Google Sign In script. Google checked for the global function by the name in `data-callback` on the Google tag, and it just errored out if that function didn't exist yet. So I just had to make sure my page script loaded and provided that global function before the Google script loaded. Then everything worked!
+
+So that was my login page working. Next I wanted to go to a page which showed all my entries in a table. To do that, I made an endpoint on my server which served that table, populated via server-side authentication.
+
+<Future>I figured out how to use cookies for my authentication correctly, since using only POST body was annoying. I could put it in the query parameters as well, [since HTTPS hides those as well](https://stackoverflow.com/a/61043479). But cookies definitely seemed like the industry standard.</Future>
 
 <Future>I corrected my usage of the google sign-in nonce. When I started exploring google sign in, I used a static nonce to get through it, but that eliminated the safety guarantees a nonce provides. At this point, I thought I had two options. Maybe I could set the HTML attribute `data-nonce` via JavaScript, or I could make a backend request which returned the sign-in HTML with the Nonce.</Future>
 
