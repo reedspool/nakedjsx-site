@@ -125,8 +125,6 @@ I had a lot to re-learn about Docker and images and containers and combine all o
 
 I completed my first step: a Dockerfile image running a Node Typescript app, logging some HTML text generated from JSX and my custom JSX implementation. It wasn't simple, and unfortunately it wasn't as simple as possible. I had to copy some files into my new `server` directory, because apparently my Dockerfile directives refused to copy from a parent directory. I tried using symlinks for the files, but that didn't work. It felt wrong to commit two copies of the same two files but I wanted to move forward and fix my Docker setup later.
 
-<Future>I moved my server Dockerfile up to the root of the project (and renamed it `Dockerfile.server`) so that I could copy from anywhere in the project folder hierarchy and not keep two copies of files.</Future>
-
 I quickly deployed my site to Fly.io with `fly launch`. I had to wrestle with the port as Fly's CLI kept writing the port 3000 to the `fly.toml` it created, and I had to overwrite it to 3001 before deploying. I chose 3001 because my static website server `npx serve` already defaulted to 3000. It was just a coincidence that Fly.io also defaulted to 3000.
 
 ### Mon Dec 25 09:31:40 AM PST 2023
@@ -349,7 +347,9 @@ Then I just installed the same Supabase script tag in my page as I'd used before
 
 And everything worked! Well, first I had to reorder my `script` tags so that my page script came before the Google Sign In script. Google checked for the global function by the name in `data-callback` on the Google tag, and it just errored out if that function didn't exist yet. So I just had to make sure my page script loaded and provided that global function before the Google script loaded. Then everything worked!
 
-So that was my login page working. Next I wanted to go to a page which showed all my entries in a table. To do that, I made an endpoint on my server which served that table, populated via server-side authentication.
+So that was my login page working. Next I wanted to go to a page which showed all my entries in a table. To do that, I made an endpoint on my server which served that table, populated via server-side authentication. This took a lot more fiddling than I had hoped, but eventually the endpoint worked flawlessly. 
+
+I learned a valuable lesson from this fiddling. When I was playing in the DevTools console the day before, I'd made some discoveries, but I hadn't recorded the detailed differences anywhere. This is exactly what I hoped the strength of my note-taking would be, so it was frustrating. The lesson was - if you're playing somewhere outside your notes and you're learning useful things, maybe take a note!
 
 <Future>I figured out how to use cookies for my authentication correctly, since using only POST body was annoying. I could put it in the query parameters as well, [since HTTPS hides those as well](https://stackoverflow.com/a/61043479). But cookies definitely seemed like the industry standard.</Future>
 
@@ -362,3 +362,11 @@ So that was my login page working. Next I wanted to go to a page which showed al
 <Future>I made a table to show data</Future>
 
 <Future>I made a form to upload new data.</Future>
+
+### Fri Dec 29 09:13:59 AM PST 2023
+
+Now that I had an endpoint which returned a table with live data for my real authenticated user, I could go a couple directions. I could use HTMX or similar JS to just insert the table into the DOM. But I wanted to go a little farther than that. I wanted to start with as little JavaScript as possible. I know I already used a lot of JS to do the Google Sign In, but I didn't have to. There were other auth strategies to replace that with which used little or no JS. I thought if I could keep the mindset of serving a population of minimal JS, kind of like a squint test, I could serve a basic level of need to start, and then fancy it up with JS as I went forward.
+
+To that end, I needed my back-end to serve an entire page. So far it was only serving the table as an HTML fragment. For my back-end to serve the same page as my static site, I'd need to shuffle things around so that my back-end and front-end could read from the same files. So I started shuffling. 
+
+I moved my server Dockerfile up to the root of the project (and renamed it `Dockerfile.server`) so that I could copy from anywhere in the project folder hierarchy and not keep two copies of files.

@@ -1,26 +1,17 @@
 {
-  "name": "server",
+  "name": "reeds-website-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.mjs",
   "scripts": {
-    "build:jsxString": "esbuild MyJSXStringImplementation.tsx --outfile=tmp/MyJSXStringImplementation.js",
-    "build:buildCompiler": "esbuild compiler.tsx --outfile=tmp/compiler.mjs --format=esm",
-    "build:compile": "node tmp/compiler.mjs",
-    "docker:build": "docker build -t reeds-website-server .",
-    "docker:run": "docker run -p 3001:3001 reeds-website-server",
-    "docker:connect": "docker run -p 3001:3001 -it reeds-website-server sh",
-    "deploy": "flyctl deploy"
+    "server:build:jsxString": "esbuild MyJSXStringImplementation.tsx --outfile=tmp/MyJSXStringImplementation.js",
+    "server:build:buildCompiler": "esbuild compiler.tsx --outfile=tmp/compiler.mjs --format=esm",
+    "server:build:compile": "node tmp/compiler.mjs"
   },
   "keywords": [],
   "author": "",
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.6",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.10.5",
-    "esbuild": "0.19.9",
-    "typescript": "^5.3.3"
+    "esbuild": "0.19.9"
   },
   "license": "ISC",
   "dependencies": {

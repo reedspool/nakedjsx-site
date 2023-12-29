@@ -140,7 +140,7 @@ await writeFile(
     format: "esm",
     platform: "node",
     outfile: fileBuilderTsxOutputName,
-    inject: ["tmp/MyJSXStringImplementation.js"],
+    inject: ["tmp/jsx/MyJSXStringImplementation.js"],
     plugins: [],
   });
 
@@ -162,7 +162,7 @@ async function compileClientJs({
     format: "esm",
     platform: "node",
     outfile: output,
-    inject: ["tmp/MyJSXBrowserImplementation.js"],
+    inject: ["tmp/jsx/MyJSXBrowserImplementation.js"],
     plugins: [],
   });
 }
@@ -231,7 +231,7 @@ await writeFile(
     format: "esm",
     platform: "node",
     outfile: fileBuilderTsxOutputName,
-    inject: ["tmp/MyJSXStringImplementation.js"],
+    inject: ["tmp/jsx/MyJSXStringImplementation.js"],
     plugins: [],
   });
 

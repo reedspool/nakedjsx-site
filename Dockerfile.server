@@ -1,0 +1,24 @@
+FROM node:20-alpine
+    MAINTAINER Reed Spool <reedwith2es@gmail.com>
+
+WORKDIR /home/node/myApp
+
+COPY ./server/package*.json ./
+
+RUN npm install
+
+COPY ./jsx/MyJSXStringImplementation.tsx ./tsconfig.json ./
+
+RUN npm run server:build:jsxString
+
+COPY ./server/compiler.tsx ./
+
+RUN npm run server:build:buildCompiler
+
+COPY ./server/src/ src/
+
+RUN npm run server:build:compile
+
+EXPOSE 3001
+
+CMD ["node", "build/index.js"]
