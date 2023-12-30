@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
-import { createClient } from "@supabase/supabase-js";
 import cookieParser from "cookie-parser";
 import { Database } from "./supabaseGeneratedTypes";
+
+import { createServerClient } from "@supabase/ssr";
 import morgan from "morgan";
 
 const app = express();
@@ -11,14 +12,36 @@ const port = process.env.PORT || 3001;
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://reeds.website");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Origin, Cookie",
+  );
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  return next();
+});
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true); // Allow
-      if (["https://reeds.website", "http://localhost:3000"].includes(origin)) {
+      if (
+        [
+          "https://reeds.website",
+          "https://reeds-website-server.fly.dev",
+          "http://localhost:3000",
+          "http://localhost:3001",
+        ].includes(origin)
+      ) {
         return callback(null, true); // Allow
       }
-
       console.error(`Rejecting origin '${origin}'`);
       callback(new Error("Not allowed by CORS (bad origin)"));
       return;
@@ -30,20 +53,44 @@ app.use(
 // Endpoints
 //
 
-app.get("/", async (_, res) => {
-  res.send("You found an API 🧐 Please be kind.");
-});
-
 type AuthBody = { refreshToken?: string; accessToken?: string };
 
-// TODO I'm reusing these clients and setting the session - is that right? Seems likely
-// that I've got a race condition where an async thing is expecting the session to still exist but it doesn't
-const supabase = createClient<Database>(
-  "https://yhuswwhmfuptgznlkdvv.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlodXN3d2htZnVwdGd6bmxrZHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTkwNzgyNjksImV4cCI6MjAxNDY1NDI2OX0.vF_fbpeSORP5ve5wVVty4lm5HaOAwGSgQxq4s39udpM",
-);
+const createClient = ({
+  req,
+  res,
+}: {
+  req: express.Request<{}, {}, AuthBody>;
+  res: express.Response;
+}) => {
+  return createServerClient<Database>(
+    "https://yhuswwhmfuptgznlkdvv.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlodXN3d2htZnVwdGd6bmxrZHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTkwNzgyNjksImV4cCI6MjAxNDY1NDI2OX0.vF_fbpeSORP5ve5wVVty4lm5HaOAwGSgQxq4s39udpM",
+    {
+      cookies: {
+        get: (key) => {
+          const cookies = req.cookies;
+          const cookie = cookies[key] ?? "";
+          return decodeURIComponent(cookie);
+        },
+        set: (key, value, options) => {
+          if (!res) return;
+          res.cookie(key, encodeURIComponent(value), {
+            ...options,
+            sameSite: "Lax",
+            httpOnly: true,
+          });
+        },
+        remove: (key, options) => {
+          if (!res) return;
+          res.cookie(key, "", { ...options, httpOnly: true });
+        },
+      },
+    },
+  );
+};
 const giveMeAnAuthenticatedSupabaseClient = async (
   req: express.Request<{}, {}, AuthBody>,
+  res: express.Response,
 ) => {
   const startTime = process.hrtime();
   {
@@ -51,35 +98,15 @@ const giveMeAnAuthenticatedSupabaseClient = async (
     const durationInMillis = (seconds * 1000000000 + nanos) / 1000000; // convert first to ns then to ms
     console.log(`Start: ${durationInMillis}`);
   }
-  let refreshToken = req.query.refreshToken;
-  let accessToken = req.query.accessToken;
-  if (req.method === "POST") {
-    refreshToken = req.body.refreshToken;
-    accessToken = req.body.accessToken;
-  }
 
-  if (
-    !refreshToken ||
-    !accessToken ||
-    typeof refreshToken !== "string" ||
-    typeof accessToken !== "string"
-  ) {
-    console.error("Missing refresh token and/or access token", {
-      accessToken,
-      refreshToken,
-    });
-    throw new Error("User is not authenticated.");
-  }
+  const supabase = createClient({ req, res });
 
   {
     const [seconds, nanos] = process.hrtime(startTime);
     const durationInMillis = (seconds * 1000000000 + nanos) / 1000000; // convert first to ns then to ms
     console.log(`Before set session: ${durationInMillis}`);
   }
-  await supabase.auth.setSession({
-    refresh_token: refreshToken,
-    access_token: accessToken,
-  });
+
   {
     const [seconds, nanos] = process.hrtime(startTime);
     const durationInMillis = (seconds * 1000000000 + nanos) / 1000000; // convert first to ns then to ms
@@ -101,33 +128,44 @@ const giveMeAnAuthenticatedSupabaseClient = async (
   return supabase;
 };
 
-app.post("/", async (req: express.Request<{}, {}, AuthBody>, res, next) => {
-  let supabase;
-  try {
-    supabase = await giveMeAnAuthenticatedSupabaseClient(req);
-  } catch (error) {
-    return next(error);
-  }
-  const { data: user } = await supabase.auth.getUser();
+app.post(
+  "/",
+  async (
+    req: express.Request<{}, {}, AuthBody>,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+    const { data: user } = await supabase.auth.getUser();
 
-  const { data: records, error } = await supabase
-    .from("fitness_record_weight")
-    .select("*");
+    const { data: records, error } = await supabase
+      .from("fitness_record_weight")
+      .select("*");
 
-  if (error) {
-    console.error(error);
-    return next(new Error("Problem fetching data"));
-  }
+    if (error) {
+      console.error(error);
+      return next(new Error("Problem fetching data"));
+    }
 
-  res.json({ records, user });
-});
+    res.json({ records, user });
+  },
+);
 
 app.get(
   "/record/cpnt-body-weight-history.html",
-  async (req: express.Request<{}, {}, AuthBody>, res, next) => {
+  async (
+    req: express.Request<{}, {}, AuthBody>,
+    res: express.Response,
+    next,
+  ) => {
     let supabase;
     try {
-      supabase = await giveMeAnAuthenticatedSupabaseClient(req);
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
     } catch (error) {
       return next(error);
     }
@@ -162,6 +200,8 @@ app.get(
     );
   },
 );
+
+app.use(express.static("static-site"));
 
 const listener = app.listen(port, () => {
   console.log(`Server is available at http://localhost:${port}`);

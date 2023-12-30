@@ -1,5 +1,7 @@
 # Project: Body Weight Recording App 
 
+Live at https://reeds-website-server.fly.dev/
+
 ## Logbook
 
 ### Sat Dec 23 03:02:52 PM PST 2023
@@ -295,8 +297,6 @@ Repeating my button-to-make-a-request strategy from above, I supplied the `reque
 
 I played with the server code until I could successfully echo back those values. Then I attempted `supabase.auth.getUser()` on the server. It worked! Next I tried connecting to Supabase Postgres while correctly authenticated, and attempt to test my policies.
 
-<Future>While searching for how to do this, I found [this additional doc on Supabase SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client) which described an additional package and a different method for creating a client on the server. I decided not to try this at that moment, but made a note to try it later.</Future>
-
 I manually added a row to the table I'd already created, `fitness_record_weight`. To do that, I had to use my user ID, which I could get via `supabase.auth.getUser()`. My query on the front-end was successful:
 
 ```js
@@ -375,4 +375,18 @@ My face when I find that my server was taking a half second to respond: Shocked 
 
 I suspected the long times were due to the supabase client I'd been using for the server and that it was actually built for the browser environment. It was probably hitting supabase via REST instead of maintaining a live connection to the database. I felt like I should be connecting manually to the database, maintaining my own live connection on the server, instead of using the Supabase client library that a browser would use, where that type of long-lived connection wouldn't make much sense. But then if I managed my own connection to the database, I didn't know how to authenticate user requests coming in from the client. I knew how to get the JWT access token and refresh tokens, but I didn't know how to use that to authenticate directly via a Postgres live connection. 
 
-I remembered I'd previously found a different supabase client focused on SSR. I figured it was time to try that.
+I remembered I'd previously found a [different supabase client focused on SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client). I figured it was time to try that. Unfortunately, that required the base package I was already using, via `@supabase/supabase-js` and thus ran into the same issues I had a couple days ago with this error:
+
+```text
+Dynamic require of "stream" is not supported
+```
+
+That led me to discover that I'd been using `esbuild` incorrectly to compile my browser code this whole time. I wanted `format: "browser"`, but I'd copied `format: "node"` straight from the static page JSX compiler. That fixed the error! I pushed to the server, since I still didn't have Google auth working locally, to test out if I saw the authentication in the cookies as I expected.
+
+<Future>
+I got rid of my CDN import of supabase, now that I'd figured out how to compile properly for the frontend
+</Future>
+
+I did not see those cookies. And I got quite frustrated in my attempts to send those cookies to my server. Then I realized, I could just host my front-end on my fly.io machine. At least for this application, then the front-end and back-end will be on the same origin, and no more issues. 
+
+I simply had to build the page the exact same way as I had on my front-end as on my back-end, including all of the assets. I thought maybe an easy way to test if this solved the issue first before committing to rebuilding everything would be just to copy the result of the front-end build. So I set my Dockerfile to copy some chunks of the result of my front-end build, and voila! Everything worked! My cookies were set and read on the backend.

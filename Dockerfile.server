@@ -19,6 +19,10 @@ COPY ./server/src/ src/
 
 RUN npm run server:build:compile
 
+COPY ./build/build.css ./build/record.js ./build/favicon.png static-site/
+
+COPY ./build/record.html static-site/index.html
+
 EXPOSE 3001
 
 CMD ["node", "build/index.js"]

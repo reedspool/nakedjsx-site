@@ -1,13 +1,29 @@
 import type { createClient as supabaseCreateClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import { Database } from "../server/src/supabaseGeneratedTypes";
 
-const supabaseClient = window.supabase.createClient<Database>(
+// What to do once authenticated cookies are established
+const next = () =>
+  (location.pathname = "/record/cpnt-body-weight-history.html");
+
+const supabaseClient = createBrowserClient<Database>(
   "https://yhuswwhmfuptgznlkdvv.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlodXN3d2htZnVwdGd6bmxrZHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTkwNzgyNjksImV4cCI6MjAxNDY1NDI2OX0.vF_fbpeSORP5ve5wVVty4lm5HaOAwGSgQxq4s39udpM",
   {
     global: {
-      fetch: (...args) => fetch(...args),
+      fetch: (url, options) =>
+        fetch(url, {
+          ...options,
+          credentials: url
+            .toString()
+            .match(/^https:\/\/reeds-website-server.fly.dev/)
+            ? "include"
+            : undefined,
+        }),
     },
+    // Empty object here makes supabase use `document.cookies`
+    cookies: {},
+    cookieOptions: {},
   },
 );
 
@@ -24,28 +40,8 @@ window.receiveGoogleLoginCredentialResponse = async function (response) {
   }
 
   console.log("Supabase auth complete", { data, error });
-  const refreshToken = data.session.refresh_token;
-  const accessToken = data.session.access_token;
-  const serverUrl =
-    "https://reeds-website-server.fly.dev/record/cpnt-body-weight-history.html";
-  try {
-    const result = await fetch(
-      serverUrl + "?" + new URLSearchParams({ refreshToken, accessToken }),
-      {
-        method: "GET",
 
-        /* method: "POST",
-         * body: JSON.stringify({
-         *   refreshToken,
-         *   accessToken,
-         * }),
-         * headers: { "Content-Type": "application/json; charset=utf-8" }, */
-      },
-    );
-    console.log(await result.text());
-  } catch (error) {
-    console.error("Error from fetch", error);
-  }
+  next();
 };
 
 declare global {
@@ -55,18 +51,16 @@ declare global {
       credential: string;
     }) => Promise<void>;
     supabase: { createClient: typeof supabaseCreateClient };
-    supabaseClient: ReturnType<typeof supabaseCreateClient<Database>>;
+    supabaseClient: ReturnType<typeof createBrowserClient<Database>>;
   }
 }
 
-window.addEventListener("load", () => {
-  const div = document.body.querySelector("div");
-  if (!div) throw new Error("Missing target");
-
-  const elements: Element[] = [];
-  if (Array.isArray(elements)) {
-    elements.forEach((e) => div.appendChild(e));
+window.addEventListener("load", async () => {
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (!error && data) {
+    console.log("Instant reauthentication succeeded", { data, error });
+    next();
   } else {
-    div.appendChild(elements);
+    console.log("Instant reauthentication failed", { data, error });
   }
 });

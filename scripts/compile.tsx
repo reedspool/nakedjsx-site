@@ -160,7 +160,7 @@ async function compileClientJs({
     bundle: true,
     target: "esnext",
     format: "esm",
-    platform: "node",
+    platform: "browser",
     outfile: output,
     inject: ["tmp/jsx/MyJSXBrowserImplementation.js"],
     plugins: [],
