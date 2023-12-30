@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import type { Database } from "./supabaseGeneratedTypes";
-import { Components } from "components/Record";
+import { Components, Layout } from "components/Record";
 import { CommonPage } from "components/CommonPage";
 
 import { createServerClient } from "@supabase/ssr";
@@ -14,6 +14,7 @@ const port = process.env.PORT || 3001;
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.urlencoded());
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "https://reeds.website");
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -55,7 +56,8 @@ app.use(
 // Endpoints
 //
 
-type AuthBody = { refreshToken?: string; accessToken?: string };
+// Defunct, remove
+type AuthBody = {};
 
 const createClient = ({
   req,
@@ -185,6 +187,52 @@ app.get(
   },
 );
 
+app.post(
+  "/entry",
+  async (
+    req: express.Request<
+      {},
+      {},
+      {
+        kilograms: number;
+      }
+    >,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+
+    const { data } = await supabase.auth.getUser();
+
+    await supabase
+      .from("fitness_record_weight")
+      .insert([{ kilograms: req.body.kilograms, user_id: data.user!.id }]);
+
+    res.redirect("/history");
+  },
+);
+
+app.get(
+  "/entry",
+  async (_: express.Request<{}, {}, AuthBody>, res: express.Response) => {
+    const Component = Components["cpnt-body-weight-entry"];
+    res.send(
+      <CommonPage>
+        <Layout>
+          <div class="dashboard">
+            <Component />
+          </div>
+        </Layout>
+      </CommonPage>,
+    );
+  },
+);
+
 app.get(
   "/history",
   async (
@@ -200,7 +248,8 @@ app.get(
     }
     const { data: records, error } = await supabase
       .from("fitness_record_weight")
-      .select("*");
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error(error);
@@ -210,7 +259,11 @@ app.get(
     const Component = Components["cpnt-body-weight-history"];
     res.send(
       <CommonPage>
-        <Component records={records} />
+        <Layout>
+          <div class="dashboard">
+            <Component records={records} />
+          </div>
+        </Layout>
       </CommonPage>,
     );
   },

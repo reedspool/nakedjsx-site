@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@supabase/ssr": "^0.0.10",
-    "@supabase/supabase-js": "^2.39.1"
+    "@supabase/supabase-js": "^2.39.1",
+    "dayjs": "^1.11.10"
   }
 }

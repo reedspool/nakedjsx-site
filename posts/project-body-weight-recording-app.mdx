@@ -18,11 +18,7 @@ I began by creating a table in my Supabase database. I made it as simple as poss
 
 <Future>I added a way in my application to detect entries which duplicated the same day, so that users (me) might be prompted and have the proper resources to clean up their own data</Future>
 
-<Future>I needed users to be authenticated on this page, so I made a component which I could import for any page to log in. I didn't want to put it in my generic page shell yet, because I didn't have a complete story for what it meant to be authenticated across the application. I didn't want anyone to get the wrong idea that they should be authenticating just because they see a Sign In button, only to realize absolutely no change in functionality in 99% of my site.</Future>
-
 <Future>Then I added Row Level checks to only allow users to read their own records and write records with their own user ID. I wasn't sure it worked so I had to test it. I decided to create a second email and password user and fill in some data. Then I could insert data via the API for my second user, and run a test to see whether I could query data from my first user at all. If I couldn't figure out a way to get that other data, I'd consider my Row Level policy to be working.</Future>
-
-<Future>Once I had confidence in inserting data into the database table, I made a way to query my data. I decided to throw it all in an HTML table for now. I used htmx to fetch the data on page-load if authenticated. That took some work to hook up htmx and Supabase's auth token. Then I triggered this data to refresh from the server after an insertion.</Future>
 
 To get started with the client-side I began to build a quick form to enter this data. I thought that would be the most straightforward until I realized I didn't know where the data was going. Also would I have to use Supabase's JavaScript API to supply my authentication data? Or would cookies established with my authentication work so far be sufficient? Without having strong answers to those questions, I just threw down a basic HTML form to start.
 
@@ -174,8 +170,6 @@ That failed for the same CORS reason, so I edited the server to accept my localh
 I now had many more pieces to my puzzle. The big pieces I could see left over were connecting to my Supabase Postgres server from my Fly.io backend and also authorizing via Supabase's auth system from my website login through my Fly.io backend.
 
 ### Tue Dec 26 17:00:24 PST 2023
-
-<Future>[This pen by Carter Lovelace](https://codepen.io/carterfromsl/pen/QWYMjBW) inspired me to try a neo-brutalist style.</Future>
 
 I took a break from my big questions about auth and backends to play with my mobile computing setup. I was curious if I could operate my fly.io remote server from Termux on my Android device. I started with the same flow I did a couple days ago on my desktop: install the CLI, authenticate, and try their command to spin up a VM and connect via shell.
 
@@ -359,10 +353,6 @@ I learned a valuable lesson from this fiddling. When I was playing in the DevToo
 
 <Future>I figured out authentication for my local machine so that I could test with real data/API timing.</Future>
 
-<Future>I made a table to show data</Future>
-
-<Future>I made a form to upload new data.</Future>
-
 ### Fri Dec 29 09:13:59 AM PST 2023
 
 Now that I had an endpoint which returned a table with live data for my real authenticated user, I could go a couple directions. I could use HTMX or similar JS to just insert the table into the DOM. But I wanted to go a little farther than that. I wanted to start with as little JavaScript as possible. I know I already used a lot of JS to do the Google Sign In, but I didn't have to. There were other auth strategies to replace that with which used little or no JS. I thought if I could keep the mindset of serving a population of minimal JS, kind of like a squint test, I could serve a basic level of need to start, and then fancy it up with JS as I went forward.
@@ -390,3 +380,23 @@ I got rid of my CDN import of supabase, now that I'd figured out how to compile 
 I did not see those cookies. And I got quite frustrated in my attempts to send those cookies to my server. Then I realized, I could just host my front-end on my fly.io machine. At least for this application, then the front-end and back-end will be on the same origin, and no more issues. 
 
 I simply had to build the page the exact same way as I had on my front-end as on my back-end, including all of the assets. I thought maybe an easy way to test if this solved the issue first before committing to rebuilding everything would be just to copy the result of the front-end build. So I set my Dockerfile to copy some chunks of the result of my front-end build, and voila! Everything worked! My cookies were set and read on the backend.
+
+Now that I had working, reliable, sensible authentication with cookies, I could focus on other things. I wanted to start building the HTML and CSS and add the functionality of a form.
+
+[This pen by Carter Lovelace](https://codepen.io/carterfromsl/pen/QWYMjBW) inspired me to try a neo-brutalist style. I had a direct adaptation of the pen looking nice quickly. I realized that the gray-scale might not be the most exciting for an encouraging health habit tool.
+
+I quickly had a table and a form working, with pretty printing of the timestamps. I could enter new rows and see them immediately in my table! Things didn't look great, especially on mobile, but it was encouraging.
+
+<Future>I played with adding some bright colors to the theme</Future>
+
+<Future>I added a chart to track my weight over the last 30 days</Future>
+
+<Future>I added a chart to track my weight over a dynamic time range, where I can choose all the way back since I started entering data to now, or any interval in between</Future>
+
+<Future>I limited the history table to the last 30 days entry, and added a method to load more on demand/scroll.</Future>
+
+<Future>I added delete and edit buttons to the history table. The delete button had a confirmation.</Future>
+
+<Future>Now that I had a no-JS multi-page application working, I added htmx to fetch the data on page-load if authenticated. I hoped cookies would still take care of auth with no change</Future>
+
+<Future>I tried recording my weight for a week</Future>

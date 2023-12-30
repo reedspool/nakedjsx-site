@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 @config "./tailwind.config.js";
 @tailwind base;
 @tailwind components;
@@ -16,13 +17,13 @@ html {
   font-size: 20px;
   line-height: 1.65em;
 
-  --primaryfg-rgb: 20 20 20;
-  --primarybg-rgb: 240 240 240;
-  --flashyfg-rgb: 20 20 20;
-  --flashybg-rgb: 240 240 240;
+  --primaryfg-rgb: 51 51 51;
+  --primarybg-rgb: 221 221 221;
+  --flashyfg-rgb: 51 51 51;
+  --flashybg-rgb: 221 221 221;
 
-  --flashy-font: "Jost", sans-serif;
-  --prose-font: "Karla", sans-serif;
+  --flashy-font: "IBM Plex Mono", monospace;
+  --prose-font: "IBM Plex Mono", monospace;
 
   @apply flex flex-col items-center;
   @apply text-primaryfg bg-primarybg;
@@ -72,7 +73,7 @@ footer {
 header {
   justify-content: flex-start;
   @apply bg-primarybg;
-  box-shadow: 0px -0.2rem 1rem rgb(var(--primaryfg-rgb));
+  border-bottom: 2px solid;
 }
 
 header.sticky {
@@ -133,63 +134,6 @@ input[type="submit"] {
   cursor: pointer;
 }
 
-textarea,
-input {
-  @apply bg-primarybg;
-  @apply py-sm px-md;
-}
-
-input {
-  @apply border border-black;
-  &[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-  }
-}
-
-label {
-  @apply w-full flex flex-row justify-between items-center;
-}
-
-label input {
-  @apply ml-md flex-grow;
-}
-
-blockquote {
-  @apply bg-gray-300 text-gray-700 p-md mx-md my-xl italic;
-
-  & p {
-    @apply mb-0 mx-0 mt-md p-0;
-  }
-
-  & p:nth-of-type(1) {
-    @apply mt-0;
-  }
-}
-
-/* Components */
-
-.cpnt-logo {
-  --logo-size: 1.4rem;
-  display: inline-block;
-
-  height: var(--logo-size);
-  width: var(--logo-size);
-  fill: rgb(var(--primaryfg-rgb));
-  margin-block-start: calc(var(--logo-size) - 1.7rem);
-}
-
-a:hover .cpnt-logo {
-  text-decoration: underline;
-}
-
-.cpnt-comment-start {
-  position: fixed;
-  top: 0;
-  left: 0;
-
-  @apply bg-primaryfg text-primarybg cpnt-button;
-}
-
 /**
  * This component is taken almost verbatim from Ryan Mulligan's
  * See https://ryanmulligan.dev/blog/layout-breakouts/
@@ -242,7 +186,7 @@ a:hover .cpnt-logo {
   grid-column: full;
 }
 
-.cpnt-blog-article {
+.cpnt-record-page {
   @apply layout-full cpnt-bleed-layout;
   @apply py-sm;
 
@@ -310,14 +254,170 @@ a:hover .cpnt-logo {
   vertical-align: middle;
 }
 
-.cpnt-hover-unhide:hover .invisible.cpnt-hover-unhide__target {
-  visibility: visible;
+/* Neo-Brutalist Style - Because beauty is overrated. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-.cpnt-button {
-  @apply py-xs px-md tracking-widest;
+::selection {
+  background: #333;
+  color: #eee;
+}
 
-  @apply text-flashybg bg-flashyfg;
+body {
+  font-family: "IBM Plex Mono", monospace;
+  color: #333;
+  margin: 0;
+  position: relative;
+  line-height: 1.5em;
+  font-size: 15px;
+  background: repeating-linear-gradient(
+    45deg,
+    #aaa,
+    #aaa 2px,
+    #ccc 2px,
+    #ccc 6px
+  );
+  background-attachment: fixed;
+}
+
+.dashboard {
+  @apply mt-4;
+  padding: 20px;
+  border: 2px solid;
+  max-width: calc(100% - 40px);
+  background: #ddd;
+  box-shadow:
+    1px 1px,
+    2px 2px,
+    3px 3px,
+    4px 4px;
+}
+
+.dashboard > div {
+  background-color: #f7f7f7;
+  border: 2px solid;
+  box-shadow: inherit;
+}
+
+.dashboard > div:hover {
+  background: #fff;
+  color: black;
+}
+
+.dashboard > div:last-of-type {
+  margin-bottom: 5px;
+}
+
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+h2 {
+  font-size: 1.5em;
+  line-height: 1.1em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0;
+  padding: 5px 10px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid;
+  position: relative;
+}
+
+h2::before,
+h2::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  width: 15px;
+  height: 100%;
+  left: -15px;
+  border: 2px solid;
+  border-left: none;
+  vertical-align: text-bottom;
+}
+
+h2::after {
+  left: unset;
+  right: -15px;
+  border-right: none;
+  border-left: 2px solid;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 2px solid #333;
+  padding: 8px;
+  text-align: left;
+}
+
+tr:hover td {
+  background: #eee;
+}
+
+th {
+  background-color: #666;
+  color: #fff;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 5px 0;
+  border-bottom: 2px solid;
+}
+
+.dashboard a {
+  appearance: none;
+  border: inherit;
+  color: inherit;
+  font-family: arial;
+  font-size: 24px;
+  line-height: 1.1em;
+  width: 1.2em;
+  height: 1.2em;
+  padding: 0;
+  text-align: center;
+  float: right;
+  z-index: 9;
+  position: relative;
+  background: #eee;
+}
+
+.dashboard button {
+  appearance: none;
+  border: inherit;
+  color: inherit;
+  font-family: arial;
+  font-size: 24px;
+  line-height: 1.1em;
+  width: 1.2em;
+  height: 1.2em;
+  padding: 0;
+  text-align: center;
+  float: right;
+  z-index: 9;
+  position: relative;
+  background: #eee;
+}
+
+.dashboard button:hover {
+  background: #666;
+  border-color: #666;
+  color: white;
 }
 
 /* Utility */

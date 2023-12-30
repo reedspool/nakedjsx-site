@@ -4,6 +4,7 @@ import { Database } from "../server/src/supabaseGeneratedTypes";
 
 // What to do once authenticated cookies are established
 const next = () => (location.pathname = "/history");
+/* const next = () => {}; */
 
 const supabaseClient = createBrowserClient<Database>(
   "https://yhuswwhmfuptgznlkdvv.supabase.co",
