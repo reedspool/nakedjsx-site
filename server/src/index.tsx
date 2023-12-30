@@ -1,7 +1,9 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { Database } from "./supabaseGeneratedTypes";
+import type { Database } from "./supabaseGeneratedTypes";
+import { Components } from "components/Record";
+import { CommonPage } from "components/CommonPage";
 
 import { createServerClient } from "@supabase/ssr";
 import morgan from "morgan";
@@ -178,25 +180,38 @@ app.get(
       return next(new Error("Problem fetching data"));
     }
 
+    const Component = Components["cpnt-body-weight-history"];
+    res.send(<Component records={records} />);
+  },
+);
+
+app.get(
+  "/history",
+  async (
+    req: express.Request<{}, {}, AuthBody>,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+    const { data: records, error } = await supabase
+      .from("fitness_record_weight")
+      .select("*");
+
+    if (error) {
+      console.error(error);
+      return next(new Error("Problem fetching data"));
+    }
+
+    const Component = Components["cpnt-body-weight-history"];
     res.send(
-      <table>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Kilograms</th>
-          </tr>
-        </thead>
-        <tbody>
-          {records.map(({ created_at, kilograms }) => {
-            return (
-              <tr>
-                <td>{created_at}</td>
-                <td>{kilograms}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>,
+      <CommonPage>
+        <Component records={records} />
+      </CommonPage>,
     );
   },
 );

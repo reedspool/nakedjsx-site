@@ -3,8 +3,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Database } from "../server/src/supabaseGeneratedTypes";
 
 // What to do once authenticated cookies are established
-const next = () =>
-  (location.pathname = "/record/cpnt-body-weight-history.html");
+const next = () => (location.pathname = "/history");
 
 const supabaseClient = createBrowserClient<Database>(
   "https://yhuswwhmfuptgznlkdvv.supabase.co",

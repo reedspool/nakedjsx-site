@@ -17,11 +17,17 @@ RUN npm run server:build:buildCompiler
 
 COPY ./server/src/ src/
 
+COPY  ./components/Record.tsx ./components/CommonPage.tsx ./components/
+
 RUN npm run server:build:compile
 
-COPY ./build/build.css ./build/record.js ./build/favicon.png static-site/
+COPY ./build/record.js ./build/favicon.png static-site/
 
 COPY ./build/record.html static-site/index.html
+
+COPY ./server/css ./css
+
+RUN npm run server:build:css
 
 EXPOSE 3001
 

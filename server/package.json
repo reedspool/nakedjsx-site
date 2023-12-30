@@ -4,6 +4,7 @@
   "description": "",
   "main": "build/index.mjs",
   "scripts": {
+    "server:build:css": "postcss css/style.css --output static-site/build.css --verbose",
     "server:build:jsxString": "esbuild MyJSXStringImplementation.tsx --outfile=tmp/MyJSXStringImplementation.js",
     "server:build:buildCompiler": "esbuild compiler.tsx --outfile=tmp/compiler.mjs --format=esm",
     "server:build:compile": "node tmp/compiler.mjs"
@@ -17,9 +18,17 @@
   "dependencies": {
     "@supabase/ssr": "^0.0.10",
     "@supabase/supabase-js": "^2.39.1",
+    "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
+    "autoprefixer": "^10.4.15",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "cssnano": "^6.0.1",
     "express": "^4.18.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "postcss": "^8.4.28",
+    "postcss-cli": "^10.1.0",
+    "postcss-import": "^15.1.0",
+    "postcss-nesting": "^12.0.1",
+    "tailwindcss": "^3.3.3"
   }
 }

@@ -1,0 +1,329 @@
+@config "./tailwind.config.js";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply flex flex-col w-full;
+}
+
+html {
+  font-size: 20px;
+  line-height: 1.65em;
+
+  --primaryfg-rgb: 20 20 20;
+  --primarybg-rgb: 240 240 240;
+  --flashyfg-rgb: 20 20 20;
+  --flashybg-rgb: 240 240 240;
+
+  --flashy-font: "Jost", sans-serif;
+  --prose-font: "Karla", sans-serif;
+
+  @apply flex flex-col items-center;
+  @apply text-primaryfg bg-primarybg;
+  @apply font-prose;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-flashy;
+}
+
+h1 {
+  @apply text-3xl;
+}
+
+h2 {
+  @apply text-2xl;
+}
+
+h3 {
+  @apply text-xl;
+}
+
+a {
+  @apply underline decoration-gray-500;
+
+  &[href^="http"],
+  &[href^="mailto"] {
+    @apply decoration-blue-600 text-blue-600;
+  }
+}
+
+header,
+footer {
+  /* The translate on the box titlebar covers the navbar unless this */
+  z-index: 1;
+
+  @apply py-sm;
+
+  @apply layout-full cpnt-bleed-layout;
+}
+
+header {
+  justify-content: flex-start;
+  @apply bg-primarybg;
+  box-shadow: 0px -0.2rem 1rem rgb(var(--primaryfg-rgb));
+}
+
+header.sticky {
+  top: 0px;
+}
+
+footer {
+  position: static;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-block-end: none;
+
+  margin-block-start: calc(var(--gap));
+  margin-block-end: 0;
+
+  @apply bg-primarybg;
+}
+
+nav ul,
+nav ol {
+  list-style: none;
+  padding-left: 0;
+}
+
+ol,
+ul {
+  padding-left: 0.2rem;
+}
+
+ul {
+  @apply list-disc;
+
+  padding-left: 1.4rem;
+}
+
+ol {
+  list-style: none;
+  counter-reset: counter-function;
+}
+
+ol li {
+  counter-increment: counter-function;
+  margin: 0.1rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+ol li::before {
+  content: counter(counter-function) ".";
+  flex: 0 0 1.8rem;
+  text-align: left;
+  margin-right: 0rem; /* adjust as needed */
+}
+
+button,
+input[type="submit"] {
+  cursor: pointer;
+}
+
+textarea,
+input {
+  @apply bg-primarybg;
+  @apply py-sm px-md;
+}
+
+input {
+  @apply border border-black;
+  &[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+}
+
+label {
+  @apply w-full flex flex-row justify-between items-center;
+}
+
+label input {
+  @apply ml-md flex-grow;
+}
+
+blockquote {
+  @apply bg-gray-300 text-gray-700 p-md mx-md my-xl italic;
+
+  & p {
+    @apply mb-0 mx-0 mt-md p-0;
+  }
+
+  & p:nth-of-type(1) {
+    @apply mt-0;
+  }
+}
+
+/* Components */
+
+.cpnt-logo {
+  --logo-size: 1.4rem;
+  display: inline-block;
+
+  height: var(--logo-size);
+  width: var(--logo-size);
+  fill: rgb(var(--primaryfg-rgb));
+  margin-block-start: calc(var(--logo-size) - 1.7rem);
+}
+
+a:hover .cpnt-logo {
+  text-decoration: underline;
+}
+
+.cpnt-comment-start {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  @apply bg-primaryfg text-primarybg cpnt-button;
+}
+
+/**
+ * This component is taken almost verbatim from Ryan Mulligan's
+ * See https://ryanmulligan.dev/blog/layout-breakouts/
+ **/
+.cpnt-bleed-layout {
+  /* Gap is the gutter/alleys size  */
+  --cpnt-bleed-layout-gap: clamp(1rem, 6vw, 3rem);
+  --cpnt-bleed-layout-full: minmax(var(--cpnt-bleed-layout-gap), 1fr);
+  --cpnt-bleed-layout-content: min(
+    50ch,
+    100% - var(--cpnt-bleed-layout-gap) * 2
+  );
+  --cpnt-bleed-layout-popout: minmax(0, 2rem);
+  --cpnt-bleed-layout-feature: minmax(0, 5rem);
+
+  display: grid;
+  /**
+   * Note each pair of -start/-end line names creates the track name without the suffix
+   * E.g. "full-start" and "full-end" means there is a track name "full"
+   **/
+  grid-template-columns:
+    [full-start]
+    var(--cpnt-bleed-layout-full)
+    [feature-start]
+    var(--cpnt-bleed-layout-feature)
+    [popout-start]
+    var(--cpnt-bleed-layout-popout)
+    [content-start]
+    var(--cpnt-bleed-layout-content)
+    [content-end]
+    var(--cpnt-bleed-layout-popout)
+    [popout-end]
+    var(--cpnt-bleed-layout-feature)
+    [feature-end]
+    var(--cpnt-bleed-layout-full)
+    [full-end];
+}
+
+/* Default all top-level content to the content column */
+.cpnt-bleed-layout > * {
+  grid-column: content;
+}
+.cpnt-bleed-layout .layout-popout {
+  grid-column: popout;
+}
+.cpnt-bleed-layout .layout-feature {
+  grid-column: feature;
+}
+.cpnt-bleed-layout .layout-full {
+  grid-column: full;
+}
+
+.cpnt-blog-article {
+  @apply layout-full cpnt-bleed-layout;
+  @apply py-sm;
+
+  & p,
+  & ul,
+  & ol {
+    @apply mb-lg;
+    @apply no-boost;
+  }
+
+  & blockquote {
+    @apply layout-popout m-0 mb-lg p-xl;
+
+    & p {
+      @apply mb-0 mx-0 mt-md p-0;
+    }
+
+    & p:nth-of-type(1) {
+      @apply mt-0;
+    }
+
+    & pre {
+      @apply mt-md;
+    }
+  }
+
+  & pre {
+    @apply text-xs;
+    line-height: 1.4em;
+
+    @apply layout-popout bg-primaryfg/10 text-primaryfg px-lg py-sm rounded-md overflow-x-auto mb-md;
+  }
+
+  & figure {
+    @apply bg-primaryfg/40 p-xl rounded-md;
+
+    & figcaption {
+      @apply mb-xs;
+    }
+
+    & pre {
+      @apply bg-primaryfg/10 text-primaryfg px-md py-sm rounded-md overflow-x-auto mb-md;
+    }
+
+    & output pre {
+      @apply p-md overflow-y-auto;
+      max-height: 10rem;
+    }
+  }
+
+  & h1 {
+    @apply my-lg;
+  }
+
+  & h2,
+  & h3,
+  & h4,
+  & h6 {
+    @apply my-md;
+  }
+}
+
+/* Override boxicons */
+.bx {
+  vertical-align: middle;
+}
+
+.cpnt-hover-unhide:hover .invisible.cpnt-hover-unhide__target {
+  visibility: visible;
+}
+
+.cpnt-button {
+  @apply py-xs px-md tracking-widest;
+
+  @apply text-flashybg bg-flashyfg;
+}
+
+/* Utility */
+
+/* See https://stackoverflow.com/questions/11289166/chrome-on-android-resizes-font */
+/* Also, for more details, https://jwir3.wordpress.com/2012/07/30/font-inflation-fennec-and-you/ */
+.no-boost {
+  max-height: 999999px;
+}
