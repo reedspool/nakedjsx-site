@@ -234,6 +234,193 @@ app.get(
 );
 
 app.get(
+  "/entries/:id/delete",
+  async (
+    req: express.Request<{ id?: FitnessRecordWeightRow["id"] }, {}, {}>,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+
+    const { data, error: userError } = await supabase.auth.getUser();
+
+    if (!data || userError || !data.user.id) {
+      return next(userError || new Error("Auth failure"));
+    }
+
+    if (!req.params.id) {
+      return next(new Error("Entry ID Required"));
+    }
+
+    const { data: records, error } = await supabase
+      .from("fitness_record_weight")
+      .select("*")
+      .eq("user_id", data.user?.id)
+      .eq("id", req.params.id)
+      .limit(1);
+
+    if (error || !records[0]) {
+      console.error(error, records);
+      return next(new Error("Problem fetching data"));
+    }
+
+    const Component = Components["cpnt-body-weight-entry-delete"];
+    res.send(
+      <CommonPage>
+        <Layout>
+          <div class="dashboard">
+            <Component entry={records[0]} />
+          </div>
+        </Layout>
+      </CommonPage>,
+    );
+  },
+);
+
+app.post(
+  "/entries/:id/delete",
+  async (
+    req: express.Request<{ id?: FitnessRecordWeightRow["id"] }, {}, {}>,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+
+    const { data, error: userError } = await supabase.auth.getUser();
+
+    if (!data || userError || !data.user.id) {
+      return next(userError || new Error("Auth failure"));
+    }
+
+    if (!req.params.id) {
+      return next(new Error("Entry ID Required"));
+    }
+
+    const { error } = await supabase
+      .from("fitness_record_weight")
+      .delete()
+      .eq("user_id", data.user?.id)
+      .eq("id", req.params.id);
+
+    if (error) {
+      console.error(error);
+      return next(new Error("Problem fetching data"));
+    }
+    res.redirect("/history");
+  },
+);
+
+app.get(
+  "/entries/:id/edit",
+  async (
+    req: express.Request<{ id?: FitnessRecordWeightRow["id"] }, {}, {}>,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+
+    const { data, error: userError } = await supabase.auth.getUser();
+
+    if (!data || userError || !data.user.id) {
+      return next(userError || new Error("Auth failure"));
+    }
+
+    if (!req.params.id) {
+      return next(new Error("Entry ID Required"));
+    }
+
+    const { data: records, error } = await supabase
+      .from("fitness_record_weight")
+      .select("*")
+      .eq("user_id", data.user?.id)
+      .eq("id", req.params.id)
+      .limit(1);
+
+    if (error || !records[0]) {
+      console.error(error, records);
+      return next(new Error("Problem fetching data"));
+    }
+
+    const Component = Components["cpnt-body-weight-entry-edit"];
+    res.send(
+      <CommonPage>
+        <Layout>
+          <div class="dashboard">
+            <Component entry={records[0]} />
+          </div>
+        </Layout>
+      </CommonPage>,
+    );
+  },
+);
+
+app.post(
+  "/entries/:id/edit",
+  async (
+    req: express.Request<
+      { id?: FitnessRecordWeightRow["id"] },
+      {},
+      Partial<FitnessRecordWeightRow>
+    >,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+
+    const { data, error: userError } = await supabase.auth.getUser();
+
+    if (!data || userError || !data.user.id) {
+      return next(userError || new Error("Auth failure"));
+    }
+
+    if (!req.params.id) {
+      return next(new Error("Entry ID Required"));
+    }
+
+    const update: Partial<FitnessRecordWeightRow> = {};
+
+    if (req.body.created_at) {
+      update.created_at = req.body.created_at;
+    }
+    if (req.body.kilograms) {
+      update.kilograms = req.body.kilograms;
+    }
+    const { error } = await supabase
+      .from("fitness_record_weight")
+      .update(update)
+      .eq("user_id", data.user?.id)
+      .eq("id", req.params.id);
+
+    if (error) {
+      console.error(error);
+      return next(new Error("Problem updating data"));
+    }
+
+    res.redirect(303, `/entries/${req.params.id}/edit`);
+  },
+);
+
+app.get(
   "/history",
   async (
     req: express.Request<{}, {}, AuthBody>,

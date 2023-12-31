@@ -6,6 +6,10 @@ import {
 } from "server/src/types";
 dayjs.extend(relativeTime);
 
+function serverDateTimeStringToInputDateTimeLocalValueString(date: string) {
+  return dayjs(date).format("YYYY-MM-DDTHH:mm:ss.SSS");
+}
+
 export const Layout = ({ children }: { children: JSX.Children }) => {
   return (
     <main class="cpnt-bleed-layout">
@@ -27,15 +31,72 @@ export const Layout = ({ children }: { children: JSX.Children }) => {
 };
 
 export const Components = {
-  "cpnt-body-weight-entry": () => (
-    <form class="cpnt-bleed-layout items-start" method="POST" action="/entry">
+  "cpnt-body-weight-entry-edit": ({
+    entry: { id, kilograms, created_at },
+  }: {
+    entry: FitnessRecordWeightRow;
+  }) => (
+    <form
+      class="cpnt-bleed-layout items-start"
+      method="POST"
+      action={`/entries/${id}/edit`}
+    >
       <label>
-        Kilograms
+        Time{" "}
+        <input
+          type="datetime-local"
+          name="created_at"
+          value={serverDateTimeStringToInputDateTimeLocalValueString(
+            created_at,
+          )}
+        />
+      </label>
+      <label>
+        Kilograms{" "}
         <input
           autofocus
           type="number"
           name="kilograms"
-          value="255"
+          value={kilograms}
+          min="0"
+          max="99999"
+          step="0.01"
+        />
+      </label>
+
+      <a href={`/entries/${id}/delete`}>Delete?</a>
+
+      <input type="submit" value="Submit" />
+    </form>
+  ),
+  "cpnt-body-weight-entry-delete": ({
+    entry: { id, kilograms, created_at },
+  }: {
+    entry: FitnessRecordWeightRow;
+  }) => (
+    <form
+      class="cpnt-bleed-layout items-start"
+      method="POST"
+      action={`/entries/${id}/delete`}
+    >
+      <p>
+        You are about to delete the entry from
+        {serverDateTimeStringToInputDateTimeLocalValueString(created_at)} with
+        the measurement {kilograms}kg. You cannot undo this. Continue?
+      </p>
+
+      <input type="submit" value="Delete" class="bg-red-800 text-flashybg" />
+      <a href={`/entries/${id}/edit`}>Back to edit</a>
+    </form>
+  ),
+  "cpnt-body-weight-entry": () => (
+    <form class="cpnt-bleed-layout items-start" method="POST" action="/entry">
+      <label>
+        Kilograms{" "}
+        <input
+          autofocus
+          type="number"
+          name="kilograms"
           min="0"
           max="99999"
           step="0.01"
@@ -55,6 +116,7 @@ export const Components = {
         <tr>
           <th>Time</th>
           <th>Kilograms</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -62,16 +124,14 @@ export const Components = {
           return (
             <tr>
               <td>{dayjs().to(dayjs(created_at), false)}</td>
+              <td>{kilograms}</td>
               <td>
-                <span class="flex flex-row justify-between items-baseline">
-                  <span>{kilograms}</span>
-                  <a href={`/entries/${id}/edit?id=${id}`} class="no-underline">
-                    Edit{" "}
-                    <i
-                      class={`bx bx-edit align-middle ml-sm inline-block font-[1.25em]`}
-                    />
-                  </a>
-                </span>
+                <a href={`/entries/${id}/edit?id=${id}`} class="no-underline">
+                  Edit{" "}
+                  <i
+                    class={`bx bx-edit align-middle ml-sm inline-block font-[1.25em]`}
+                  />
+                </a>
               </td>
             </tr>
           );

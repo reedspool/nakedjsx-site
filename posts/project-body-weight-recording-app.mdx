@@ -373,9 +373,7 @@ Dynamic require of "stream" is not supported
 
 That led me to discover that I'd been using `esbuild` incorrectly to compile my browser code this whole time. I wanted `format: "browser"`, but I'd copied `format: "node"` straight from the static page JSX compiler. That fixed the error! I pushed to the server, since I still didn't have Google auth working locally, to test out if I saw the authentication in the cookies as I expected.
 
-<Future>
-I got rid of my CDN import of supabase, now that I'd figured out how to compile properly for the frontend
-</Future>
+<Future>I got rid of my CDN import of supabase, now that I'd figured out how to compile properly for the frontend</Future>
 
 I did not see those cookies. And I got quite frustrated in my attempts to send those cookies to my server. Then I realized, I could just host my front-end on my fly.io machine. At least for this application, then the front-end and back-end will be on the same origin, and no more issues. 
 
@@ -403,6 +401,16 @@ I quickly had a table and a form working, with pretty printing of the timestamps
 
 ### Sat Dec 30 10:58:04 AM PST 2023
 
-I recorded my first entry today. And it was easy! Since I had a bunch of test data in the table, I decided to clear it out. I could clear it out manually, or I could implement one of my desired features to delete such data from the site. I considered between putting "row action" buttons into a column on the table, or making a page to edit all the data from an entry, including deleting it, or updating the kg, or changing the time. The latter sounded like something I'd want to have either way. So I decided to make a button on each row to take you to this magical place.
+I recorded my first entry today. And it was easy! Since I had a bunch of test data in the table, I decided to clear it out. I could clear it out manually, or I could implement one of my desired features to delete such data from the site. I considered between putting "row action" buttons into a column on the table, or making a page to edit all the data from an entry, including deleting it, or updating the kg, or changing the time. The latter sounded like something I'd want to have either way. So I decided to make a button on each row to take you to this magical place. That went smoothly. In a snap I had an "edit" page, very similar to the new entry page. I also had another "delete" page, which you coould get to from the edit page, to delete an entry. I spent just 30 seconds cleaning up all my test data. Talk about yak shaving.
 
 <Future>As I imagined my app getting bigger and more complex, the idea of not having many tests started to scare me a bit. I wanted to keep focusing on small parts of the system, but if I broke some other functionality I wasn't manually testing at the time, I wouldn't have any way to tell until I went to use it. I thought there was a chance it could help speed up development by lowering the friction to moving forward confidently. </Future>
+
+<Future>As I built up a few routes in my site's back-end, I was already seeing some patterns that I had the urge to refactor and streamline, but I resisted. Instead I just wrote about how I was thinking about fixing them. If these thoughts still made sense in the future after some more movement, I could execute the refactor then. The main pattern I saw was that every in-app route had a similar pattern: get a supabase client, check that I'm authenticated, retrieve user auth info, retrieve other data from the system or manipulate it, pipe that response into a template, send the template back. I noticed between the template and the retrieving info, there was always a consistent interface where Typescript could help. I felt my giant file full of templates was untenable, but I hadn't felt pain other than the confusion of a large file of XML. Oh, well I also felt that my "as const" wasn't working - I had to check how specific that was. Could I give a component props that actually fulfill the signature of another component?</Future>
+
+<Future>I made a 404 page with a link back to the homepage, and a 5XX page similarly, instead of getting stranded with a (dangerous in production?) stack trace</Future>
+
+<Future>I tried to remember how I dealt with timestamps on my last application. I was already struggling with a consistent view on time.</Future>
+
+<Future>I implemented a way to have toast messages on pages explaining what just happened on the server, even after using `res.redirect`</Future>
+
+<Future>I added user settings with whether to use kilograms or pounds</Future>

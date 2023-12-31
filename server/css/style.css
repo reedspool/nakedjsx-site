@@ -386,7 +386,7 @@ li {
     1px 1px;
   border: 1px solid #333;
   font-family: arial;
-  @apply py-0 px-1;
+  @apply py-1 px-1;
   background: #eee;
 }
 
