@@ -40,8 +40,6 @@ Then I started looking at options for receiving that form data via Supabase. The
 
 I considered whether I could restrict my usage to Supabase for its authentication, and then access that authentication via a NodeJS call from another server. I began looking at Fly.io, a service I knew I could put up a basic Node server for free. I'd never used Fly.io myself, but I had heard good reviews from developer friends. 
 
-<Future>Once I had the form working with a normal, page refreshing action, I set up `htmx` to perform an insert without a page refresh. That took some work to hook up htmx and Supabase's auth token.</Future>
-
 ### Sun Dec 24 10:07:57 AM PST 2023
 
 To get started with Fly.io, I searched for a tutorial of deploying a Docker container NodeJS application with a PostgreSQL database. Fly.io's main documentation had separate articles for each of these! 
@@ -345,8 +343,6 @@ So that was my login page working. Next I wanted to go to a page which showed al
 
 I learned a valuable lesson from this fiddling. When I was playing in the DevTools console the day before, I'd made some discoveries, but I hadn't recorded the detailed differences anywhere. This is exactly what I hoped the strength of my note-taking would be, so it was frustrating. The lesson was - if you're playing somewhere outside your notes and you're learning useful things, maybe take a note!
 
-<Future>I figured out how to use cookies for my authentication correctly, since using only POST body was annoying. I could put it in the query parameters as well, [since HTTPS hides those as well](https://stackoverflow.com/a/61043479). But cookies definitely seemed like the industry standard.</Future>
-
 <Future>I corrected my usage of the google sign-in nonce. When I started exploring google sign in, I used a static nonce to get through it, but that eliminated the safety guarantees a nonce provides. At this point, I thought I had two options. Maybe I could set the HTML attribute `data-nonce` via JavaScript, or I could make a backend request which returned the sign-in HTML with the Nonce.</Future>
 
 <Future>Once I had authentication working and feeling relatively nice in my new app page, I made a bunch of fake data and a way to switch on fake-data mode so that I wouldn't have to deploy my site to test.</Future>
@@ -371,8 +367,6 @@ Dynamic require of "stream" is not supported
 
 That led me to discover that I'd been using `esbuild` incorrectly to compile my browser code this whole time. I wanted `format: "browser"`, but I'd copied `format: "node"` straight from the static page JSX compiler. That fixed the error! I pushed to the server, since I still didn't have Google auth working locally, to test out if I saw the authentication in the cookies as I expected.
 
-<Future>I got rid of my CDN import of supabase, now that I'd figured out how to compile properly for the frontend</Future>
-
 I did not see those cookies. And I got quite frustrated in my attempts to send those cookies to my server. Then I realized, I could just host my front-end on my fly.io machine. At least for this application, then the front-end and back-end will be on the same origin, and no more issues. 
 
 I simply had to build the page the exact same way as I had on my front-end as on my back-end, including all of the assets. I thought maybe an easy way to test if this solved the issue first before committing to rebuilding everything would be just to copy the result of the front-end build. So I set my Dockerfile to copy some chunks of the result of my front-end build, and voila! Everything worked! My cookies were set and read on the backend.
@@ -391,8 +385,6 @@ I quickly had a table and a form working, with pretty printing of the timestamps
 
 <Future>I limited the history table to the last 30 days entry, and added a method to load more on demand/scroll.</Future>
 
-<Future>I added delete and edit buttons to the history table. The delete button had a confirmation.</Future>
-
 <Future>Now that I had a no-JS multi-page application working, I added htmx to fetch the data on page-load if authenticated. I hoped cookies would still take care of auth with no change</Future>
 
 <Future>I tried recording my weight for a week</Future>
@@ -405,8 +397,6 @@ I recorded my first entry today. And it was easy! Since I had a bunch of test da
 
 <Future>As I built up a few routes in my site's back-end, I was already seeing some patterns that I had the urge to refactor and streamline, but I resisted. Instead I just wrote about how I was thinking about fixing them. If these thoughts still made sense in the future after some more movement, I could execute the refactor then. The main pattern I saw was that every in-app route had a similar pattern: get a supabase client, check that I'm authenticated, retrieve user auth info, retrieve other data from the system or manipulate it, pipe that response into a template, send the template back. I noticed between the template and the retrieving info, there was always a consistent interface where Typescript could help. I felt my giant file full of templates was untenable, but I hadn't felt pain other than the confusion of a large file of XML. Oh, well I also felt that my "as const" wasn't working - I had to check how specific that was. Could I give a component props that actually fulfill the signature of another component?</Future>
 
-<Future>I made a 404 page with a link back to the homepage, and a 5XX page similarly, instead of getting stranded with a (dangerous in production?) stack trace</Future>
-
 <Future>I tried to remember how I dealt with timestamps on my last application. I was already struggling with a consistent view on time.</Future>
 
 <Future>I implemented a way to have toast messages on pages explaining what just happened on the server, even after using `res.redirect`</Future>
@@ -416,3 +406,6 @@ I recorded my first entry today. And it was easy! Since I had a bunch of test da
 I was really feeling the pain of remote development. So I set my sights on authenticating locally. I might have to use a different authentication method, like email and password. I found [this promising SO answer](https://stackoverflow.com/a/68469319) to my Google Sign In woes. Was it really as simple as duplicating some configuration in my Google settings? It seemed that way. Once I fixed that, local just worked. 
 
 I feel like there's a lesson to learn here - that it's worth investigating a little bit into a difficulty before deciding that it can be fixed later. Of course, I should be nicer to myself. I don't think i could have solved this issue locally before fixing my remote setup, where I knew it should work. On the other hand, this SO answer just pointed me back to a note about actual documentation I already read, so maybe I'm blind.
+
+I made a 404 page with a link back to the homepage, and a 5XX page similarly, instead of getting stranded with a (dangerous in production?) stack trace. [This SO answer](https://stackoverflow.com/a/34697340) walked me through it.
+

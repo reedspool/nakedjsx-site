@@ -2,10 +2,6 @@ import { Layout } from "components/Record";
 export const Body = () => (
   <Layout>
     <div class="w-full h-full flex flex-col gap-4 justify-center items-center dashboard ">
-      <script
-        src="https://unpkg.com/@supabase/supabase-js@2"
-        type="module"
-      ></script>
       <script src="./record.js" type="module"></script>
       <script src="https://accounts.google.com/gsi/client" defer></script>
 

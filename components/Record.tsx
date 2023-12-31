@@ -139,4 +139,51 @@ export const Components = {
       </tbody>
     </table>
   ),
+
+  "cpnt-body-weight-404": ({
+    message,
+    error,
+  }: {
+    message?: string;
+    error?: { status?: number };
+  }) => (
+    <div class="flex flex-col gap-4">
+      <h1>404 Not Found</h1>
+      <p>Sorry, that URL didn't show up for itself or its friends today.</p>
+      <p>
+        <a href="/">Home page</a>
+      </p>
+      {message || error ? <h2>Error (development)</h2> : null}
+      {message && <blockquote>{message}</blockquote>}
+
+      {error && (
+        <pre>
+          <code>{error}</code>
+        </pre>
+      )}
+    </div>
+  ),
+  "cpnt-body-weight-5XX": ({
+    message,
+    error,
+  }: {
+    message?: string;
+    error?: { status?: number };
+  }) => (
+    <div class="flex flex-col gap-4">
+      <h1>5XX Injury</h1>
+      <p>The server fumbled. Must ice, compress, and elevate.</p>
+      <p>
+        <a href="/">Home page</a>
+      </p>
+      {message || error ? <h2>Error (development)</h2> : null}
+      {message && <blockquote>{message}</blockquote>}
+
+      {error && (
+        <pre>
+          <code>{error}</code>
+        </pre>
+      )}
+    </div>
+  ),
 } as const;

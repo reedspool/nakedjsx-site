@@ -96,40 +96,7 @@ const giveMeAnAuthenticatedSupabaseClient = async (
   req: express.Request<{}, {}, AuthBody>,
   res: express.Response,
 ) => {
-  const startTime = process.hrtime();
-  {
-    const [seconds, nanos] = process.hrtime(startTime);
-    const durationInMillis = (seconds * 1000000000 + nanos) / 1000000; // convert first to ns then to ms
-    console.log(`Start: ${durationInMillis}`);
-  }
-
-  const supabase = createClient({ req, res });
-
-  {
-    const [seconds, nanos] = process.hrtime(startTime);
-    const durationInMillis = (seconds * 1000000000 + nanos) / 1000000; // convert first to ns then to ms
-    console.log(`Before set session: ${durationInMillis}`);
-  }
-
-  {
-    const [seconds, nanos] = process.hrtime(startTime);
-    const durationInMillis = (seconds * 1000000000 + nanos) / 1000000; // convert first to ns then to ms
-    console.log(`after set session: ${durationInMillis}`);
-  }
-
-  const { data: _, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error(authError);
-    throw new Error("Problem authenticating");
-  }
-
-  {
-    const [seconds, nanos] = process.hrtime(startTime);
-    const durationInMillis = (seconds * 1000000000 + nanos) / 1000000; // convert first to ns then to ms
-    console.log(`returning client: ${durationInMillis}`);
-  }
-  return supabase;
+  return createClient({ req, res });
 };
 
 app.post(
@@ -457,6 +424,49 @@ app.get(
 );
 
 app.use(express.static("static-site"));
+
+//
+// Final 404/5XX handlers
+//
+app.use(function (
+  err: { status?: number; message?: string } | undefined,
+  req: express.Request<{}, {}, AuthBody>,
+  res: express.Response,
+  next: unknown,
+) {
+  console.error("5XX", err, req, next);
+  res.status(err?.status || 500);
+
+  const Component = Components["cpnt-body-weight-5XX"];
+  res.send(
+    <CommonPage>
+      <Layout>
+        <div class="dashboard">
+          <Component message={err?.message} error={err} />
+        </div>
+      </Layout>
+    </CommonPage>,
+  );
+});
+
+app.use(function (
+  req: express.Request<{}, {}, AuthBody>,
+  res: express.Response,
+  next: unknown,
+) {
+  res.status(404);
+
+  const Component = Components["cpnt-body-weight-404"];
+  res.send(
+    <CommonPage>
+      <Layout>
+        <div class="dashboard">
+          <Component message={`Could not find '${req.path}'`} />
+        </div>
+      </Layout>
+    </CommonPage>,
+  );
+});
 
 const listener = app.listen(port, () => {
   console.log(`Server is available at http://localhost:${port}`);
