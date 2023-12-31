@@ -1,6 +1,6 @@
 import type { createClient as supabaseCreateClient } from "@supabase/supabase-js";
 import { createBrowserClient } from "@supabase/ssr";
-import { Database } from "../server/src/supabaseGeneratedTypes";
+import { Database } from "server/src/types";
 
 // What to do once authenticated cookies are established
 const next = () => (location.pathname = "/history");

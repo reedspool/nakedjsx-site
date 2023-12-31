@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import type { Database } from "./supabaseGeneratedTypes";
+import type { Database, FitnessRecordWeightRow } from "./types";
 import { Components, Layout } from "components/Record";
 import { CommonPage } from "components/CommonPage";
 

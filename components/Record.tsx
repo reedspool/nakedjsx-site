@@ -1,11 +1,10 @@
-import type { Database } from "server/src/supabaseGeneratedTypes";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import {
+  FitnessRecordWeightRow,
+  FitnessRecordWeightRows,
+} from "server/src/types";
 dayjs.extend(relativeTime);
-
-type WeightRecords = Array<
-  Database["public"]["Tables"]["fitness_record_weight"]["Row"]
->;
 
 export const Layout = ({ children }: { children: JSX.Children }) => {
   return (
@@ -46,7 +45,11 @@ export const Components = {
       <input type="submit" value="Submit" />
     </form>
   ),
-  "cpnt-body-weight-history": ({ records }: { records: WeightRecords }) => (
+  "cpnt-body-weight-history": ({
+    records,
+  }: {
+    records: FitnessRecordWeightRows;
+  }) => (
     <table>
       <thead>
         <tr>
@@ -55,11 +58,21 @@ export const Components = {
         </tr>
       </thead>
       <tbody>
-        {records.map(({ created_at, kilograms }) => {
+        {records.map(({ id, created_at, kilograms }) => {
           return (
             <tr>
               <td>{dayjs().to(dayjs(created_at), false)}</td>
-              <td>{kilograms}</td>
+              <td>
+                <span class="flex flex-row justify-between items-baseline">
+                  <span>{kilograms}</span>
+                  <a href={`/entries/${id}/edit?id=${id}`} class="no-underline">
+                    Edit{" "}
+                    <i
+                      class={`bx bx-edit align-middle ml-sm inline-block font-[1.25em]`}
+                    />
+                  </a>
+                </span>
+              </td>
             </tr>
           );
         })}
