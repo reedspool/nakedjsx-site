@@ -45,7 +45,7 @@ export const MyJSXFactory = (
       Object.entries(props)
         .map(([name, value]) => {
           // For boolean attributes, just the name, not `name="true"`
-          if (typeof value === "boolean" && value) return name;
+          if (typeof value === "boolean") return value ? name : "";
           return `${name}="${value.toString()}"`;
         })
         .join(" ");

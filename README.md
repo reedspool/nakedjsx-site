@@ -107,6 +107,17 @@ Run a web server on the output of compilation.
 
 Runs a utility script to automate some disparate steps involved in writing a new post. Create the file, make a link entry for it, etc. I forget all the things it does, and follow the prompts it gives. I use `git` to check the output of this script after it runs.
 
+#### `npm run all:dev:downloadGeneratedDatabaseTypes`
+
+Requires Supabase database password, which I store in a password storage. Also requires the CLI to be installed (should be installed via `npm install`), logged in, and then to be linked (may not require linking):
+
+```sh
+npm i supabase@">=1.8.1" --save-dev
+npx supabase login
+npx supabase link
+npm run all:dev:downloadGeneratedDatabaseTypes
+```
+
 ## Server for Reed's Website
 
 ### Usage

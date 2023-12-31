@@ -1,7 +1,12 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import type { Database, FitnessRecordWeightRow } from "./types";
+import {
+  type Database,
+  type FitnessRecordUserPreferencesRowSettings,
+  type FitnessRecordWeightRow,
+  maybeMeasurementInput,
+} from "./types";
 import { Components, Layout } from "components/Record";
 import { CommonPage } from "components/CommonPage";
 
@@ -59,6 +64,11 @@ app.use(
 // Defunct, remove
 type AuthBody = {};
 
+const getUserId = async (supabase: ReturnType<typeof createClient>) => {
+  const { data, error } = await supabase.auth.getSession();
+  return { user_id: data.session?.user.id, error };
+};
+
 const createClient = ({
   req,
   res,
@@ -80,7 +90,7 @@ const createClient = ({
           if (!res) return;
           res.cookie(key, encodeURIComponent(value), {
             ...options,
-            sameSite: "Lax",
+            sameSite: "lax",
             httpOnly: true,
           });
         },
@@ -423,6 +433,144 @@ app.get(
   },
 );
 
+const defaultSettings: FitnessRecordUserPreferencesRowSettings = {
+  version: "v1",
+  timezone: "UTC",
+  measurementInput: "kilograms",
+};
+
+app.get(
+  "/me",
+  async (
+    req: express.Request<{}, {}, AuthBody>,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+    const { data: records, error } = await supabase
+      .from("fitness_record_user_preferences")
+      .select("*");
+
+    if (error) {
+      console.error(error);
+      return next(new Error("Problem fetching data"));
+    }
+
+    let settings = defaultSettings;
+    if (
+      !records ||
+      records.length < 1 ||
+      !records[0]?.settings ||
+      typeof records[0]?.settings !== "object" ||
+      Array.isArray(records[0]?.settings)
+    ) {
+      console.log("No user settings found, using default");
+    } else if (records.length > 1) {
+      return next(
+        new Error("Unexpected: more than one user preferences entry"),
+      );
+    } else {
+      const { settings: coalesced, error } = coalesce(records[0]?.settings);
+
+      if (error) {
+        console.error(error);
+        return next(
+          new Error("Problem coalescing client-side data with defaults"),
+        );
+      }
+
+      settings = coalesced;
+    }
+
+    const Component = Components["cpnt-body-weight-user-preferences"];
+    res.send(
+      <CommonPage>
+        <Layout>
+          <div class="dashboard">
+            <Component settings={settings} />
+          </div>
+        </Layout>
+      </CommonPage>,
+    );
+  },
+);
+
+type UserPreferencesPostBody = Partial<FitnessRecordUserPreferencesRowSettings>;
+
+const coalesce = (
+  fromDatabase: Partial<FitnessRecordUserPreferencesRowSettings>,
+) => {
+  const settings: FitnessRecordUserPreferencesRowSettings = {
+    ...defaultSettings,
+  };
+
+  const next = (error: Error) => ({ settings: null, error });
+
+  if (Array.isArray(fromDatabase))
+    return next(new Error("Settings was an array somehow"));
+  if (fromDatabase.version !== "v1")
+    return next(new Error("Settings version was not v1"));
+  settings.version = fromDatabase.version;
+  if (typeof fromDatabase.timezone !== "string")
+    return next(new Error("Timezone was invalid"));
+  settings.timezone = fromDatabase.timezone;
+  if (typeof fromDatabase.measurementInput !== "string")
+    return next(new Error("Measurement Input was invalid"));
+  const measurementInput = maybeMeasurementInput(fromDatabase.measurementInput);
+  if (!measurementInput)
+    return next(new Error("Measurement Input was an invalid choice"));
+  settings.measurementInput = measurementInput;
+  return { settings, error: null };
+};
+
+app.post(
+  "/me",
+  async (
+    req: express.Request<{}, {}, UserPreferencesPostBody>,
+    res: express.Response,
+    next,
+  ) => {
+    let supabase;
+    try {
+      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+    } catch (error) {
+      return next(error);
+    }
+
+    const { user_id, error: errorId } = await getUserId(supabase);
+
+    if (errorId || !user_id) {
+      console.error(errorId);
+      return next(new Error("Problem fetching data"));
+    }
+
+    const { settings, error } = coalesce(req.body);
+
+    if (error) {
+      console.error(error);
+      return next(
+        new Error("Problem coalescing client-side data with defaults"),
+      );
+    }
+
+    const { error: upsertError } = await supabase
+      .from("fitness_record_user_preferences")
+      .upsert({ user_id, settings });
+
+    if (upsertError) {
+      console.error(upsertError);
+      return next(new Error("Issue inserting settings into database"));
+    }
+
+    res.redirect(303, `/me`);
+  },
+);
+
 app.use(express.static("static-site"));
 
 //
@@ -452,7 +600,6 @@ app.use(function (
 app.use(function (
   req: express.Request<{}, {}, AuthBody>,
   res: express.Response,
-  next: unknown,
 ) {
   res.status(404);
 

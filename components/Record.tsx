@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import {
+  FitnessRecordUserPreferencesRowSettings,
   FitnessRecordWeightRow,
   FitnessRecordWeightRows,
 } from "server/src/types";
@@ -24,6 +25,10 @@ export const Layout = ({ children }: { children: JSX.Children }) => {
           <a href="/history">
             History{" "}
             <i class={`bx bx-calendar align-middle ml-sm inline-block`} />
+          </a>
+
+          <a href="/me">
+            Me <i class={`bx bx-cog align-middle ml-sm inline-block`} />
           </a>
         </div>
       </header>
@@ -91,6 +96,49 @@ export const Components = {
 
       <input type="submit" value="Delete" class="bg-red-800 text-flashybg" />
       <a href={`/entries/${id}/edit`}>Back to edit</a>
+    </form>
+  ),
+  "cpnt-body-weight-user-preferences": ({
+    settings: { measurementInput },
+  }: {
+    settings: FitnessRecordUserPreferencesRowSettings;
+  }) => (
+    <form class="cpnt-bleed-layout items-start" method="POST" action={`/me`}>
+      <h1>User Settings</h1>
+      <fieldset>
+        <legend>Input and Display Measurement Units</legend>
+
+        <p>
+          In the server, your measurement is always stored as kilograms, because
+          we humans have 10 fingers. In what unit do you want to enter and view
+          your measurements?
+        </p>
+
+        <label>
+          Pounds (lbs)
+          <input
+            type="radio"
+            name="measurementInput"
+            value="pounds"
+            checked={"pounds" === measurementInput}
+          />
+        </label>
+
+        <label>
+          Kilograms (kg)
+          <input
+            type="radio"
+            name="measurementInput"
+            value="kilograms"
+            checked={"kilograms" === measurementInput}
+          />
+        </label>
+      </fieldset>
+
+      <input type="hidden" name="timezone" value="utc" />
+      <input type="hidden" name="version" value="v1" />
+
+      <input type="submit" value="Submit" />
     </form>
   ),
   "cpnt-body-weight-entry": () => (
