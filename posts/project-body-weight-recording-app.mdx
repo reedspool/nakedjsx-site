@@ -397,11 +397,7 @@ I recorded my first entry today. And it was easy! Since I had a bunch of test da
 
 <Future>As I built up a few routes in my site's back-end, I was already seeing some patterns that I had the urge to refactor and streamline, but I resisted. Instead I just wrote about how I was thinking about fixing them. If these thoughts still made sense in the future after some more movement, I could execute the refactor then. The main pattern I saw was that every in-app route had a similar pattern: get a supabase client, check that I'm authenticated, retrieve user auth info, retrieve other data from the system or manipulate it, pipe that response into a template, send the template back. I noticed between the template and the retrieving info, there was always a consistent interface where Typescript could help. I felt my giant file full of templates was untenable, but I hadn't felt pain other than the confusion of a large file of XML. Oh, well I also felt that my "as const" wasn't working - I had to check how specific that was. Could I give a component props that actually fulfill the signature of another component?</Future>
 
-<Future>I tried to remember how I dealt with timestamps on my last application. I was already struggling with a consistent view on time.</Future>
-
 <Future>I implemented a way to have toast messages on pages explaining what just happened on the server, even after using `res.redirect`</Future>
-
-<Future>I added user settings with whether to use kilograms or pounds</Future>
 
 I was really feeling the pain of remote development. So I set my sights on authenticating locally. I might have to use a different authentication method, like email and password. I found [this promising SO answer](https://stackoverflow.com/a/68469319) to my Google Sign In woes. Was it really as simple as duplicating some configuration in my Google settings? It seemed that way. Once I fixed that, local just worked. 
 
@@ -409,3 +405,15 @@ I feel like there's a lesson to learn here - that it's worth investigating a lit
 
 I made a 404 page with a link back to the homepage, and a 5XX page similarly, instead of getting stranded with a (dangerous in production?) stack trace. [This SO answer](https://stackoverflow.com/a/34697340) walked me through it.
 
+I tried to remember how I dealt with timestamps on my last application. I was already struggling with a consistent view on time. I felt this was important to get in place at this early stage before I began to enter a lot of data myself. I started looking through the source code of my last project. I realized that there was a piece of that which I had done on the front-end, detecting the user's timestamp. Then I transmitted that via cookie. So I'd have to determine how I wanted to do this in the no-JS mode I'd been doing so far.
+
+### Sun Dec 31 10:19:05 AM PST 2023
+
+From some [old SO answers](https://stackoverflow.com/a/797), I found that there's no foolproof way to guess a timezone, and even if there was, a user might still want to change it. I decided to always store the server-side time in UTC, and then project that time to their preferred offset at runtime. And they could set and update their preferred offset in their preferences. I also wanted a user setting for whether to use kilograms or pounds. So I set upon a user settings screen.
+
+
+<Future>I thought about the future, how I would want to do exactly the process I was about to embark on a hundred times. At work, I'd call it "adding a feature." Because I wanted to do this many more times, and I knew the process was a bit tedious, I wanted to improve it in the future. So I tried to write out some of the steps I was taking at a higher level while I went.</Future>
+
+<Future>The first setting I decided to add was weight measurement, kilograms or pounds. This seemed more straightforward than the timezone question. So I added  to my page</Future>
+
+<Future>I thought about Fly.io's connection module, and I wondered if I could work remotely by connecting to and editing directly on a Fly.io machine. I could rebuild by running the same NPM commands which I run in my Dockerfile.</Future>

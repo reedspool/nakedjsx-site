@@ -1,10 +1,12 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 import {
   FitnessRecordWeightRow,
   FitnessRecordWeightRows,
 } from "server/src/types";
 dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 function serverDateTimeStringToInputDateTimeLocalValueString(date: string) {
   return dayjs(date).format("YYYY-MM-DDTHH:mm:ss.SSS");
@@ -80,9 +82,11 @@ export const Components = {
       action={`/entries/${id}/delete`}
     >
       <p>
-        You are about to delete the entry from
-        {serverDateTimeStringToInputDateTimeLocalValueString(created_at)} with
-        the measurement {kilograms}kg. You cannot undo this. Continue?
+        You are about to delete the entry from{" "}
+        <time datetime={dayjs(created_at).toISOString()}>
+          {dayjs(created_at).format("LLLL")}
+        </time>{" "}
+        with the measurement {kilograms}kg. You cannot undo this. Continue?
       </p>
 
       <input type="submit" value="Delete" class="bg-red-800 text-flashybg" />
@@ -123,7 +127,11 @@ export const Components = {
         {records.map(({ id, created_at, kilograms }) => {
           return (
             <tr>
-              <td>{dayjs().to(dayjs(created_at), false)}</td>
+              <td>
+                <time datetime={dayjs(created_at).toISOString()}>
+                  {dayjs().to(dayjs(created_at), false)}
+                </time>
+              </td>
               <td>{kilograms}</td>
               <td>
                 <a href={`/entries/${id}/edit?id=${id}`} class="no-underline">
