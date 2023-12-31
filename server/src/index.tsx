@@ -109,34 +109,6 @@ const giveMeAnAuthenticatedSupabaseClient = async (
   return createClient({ req, res });
 };
 
-app.post(
-  "/",
-  async (
-    req: express.Request<{}, {}, AuthBody>,
-    res: express.Response,
-    next,
-  ) => {
-    let supabase;
-    try {
-      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
-    } catch (error) {
-      return next(error);
-    }
-    const { data: user } = await supabase.auth.getUser();
-
-    const { data: records, error } = await supabase
-      .from("fitness_record_weight")
-      .select("*");
-
-    if (error) {
-      console.error(error);
-      return next(new Error("Problem fetching data"));
-    }
-
-    res.json({ records, user });
-  },
-);
-
 app.get(
   "/record/cpnt-body-weight-history.html",
   async (
@@ -184,11 +156,16 @@ app.post(
       return next(error);
     }
 
-    const { data } = await supabase.auth.getUser();
+    const { user_id, error: errorId } = await getUserId(supabase);
+
+    if (errorId || !user_id) {
+      console.error(errorId);
+      return next(new Error("Problem fetching data"));
+    }
 
     await supabase
       .from("fitness_record_weight")
-      .insert([{ kilograms: req.body.kilograms, user_id: data.user!.id }]);
+      .insert([{ kilograms: req.body.kilograms, user_id }]);
 
     res.redirect("/history");
   },
@@ -224,10 +201,11 @@ app.get(
       return next(error);
     }
 
-    const { data, error: userError } = await supabase.auth.getUser();
+    const { user_id, error: errorId } = await getUserId(supabase);
 
-    if (!data || userError || !data.user.id) {
-      return next(userError || new Error("Auth failure"));
+    if (errorId || !user_id) {
+      console.error(errorId);
+      return next(new Error("Problem fetching data"));
     }
 
     if (!req.params.id) {
@@ -237,7 +215,7 @@ app.get(
     const { data: records, error } = await supabase
       .from("fitness_record_weight")
       .select("*")
-      .eq("user_id", data.user?.id)
+      .eq("user_id", user_id)
       .eq("id", req.params.id)
       .limit(1);
 
@@ -273,10 +251,11 @@ app.post(
       return next(error);
     }
 
-    const { data, error: userError } = await supabase.auth.getUser();
+    const { user_id, error: errorId } = await getUserId(supabase);
 
-    if (!data || userError || !data.user.id) {
-      return next(userError || new Error("Auth failure"));
+    if (errorId || !user_id) {
+      console.error(errorId);
+      return next(new Error("Problem fetching data"));
     }
 
     if (!req.params.id) {
@@ -286,7 +265,7 @@ app.post(
     const { error } = await supabase
       .from("fitness_record_weight")
       .delete()
-      .eq("user_id", data.user?.id)
+      .eq("user_id", user_id)
       .eq("id", req.params.id);
 
     if (error) {
@@ -311,10 +290,11 @@ app.get(
       return next(error);
     }
 
-    const { data, error: userError } = await supabase.auth.getUser();
+    const { user_id, error: errorId } = await getUserId(supabase);
 
-    if (!data || userError || !data.user.id) {
-      return next(userError || new Error("Auth failure"));
+    if (errorId || !user_id) {
+      console.error(errorId);
+      return next(new Error("Problem fetching data"));
     }
 
     if (!req.params.id) {
@@ -324,7 +304,7 @@ app.get(
     const { data: records, error } = await supabase
       .from("fitness_record_weight")
       .select("*")
-      .eq("user_id", data.user?.id)
+      .eq("user_id", user_id)
       .eq("id", req.params.id)
       .limit(1);
 
@@ -364,10 +344,11 @@ app.post(
       return next(error);
     }
 
-    const { data, error: userError } = await supabase.auth.getUser();
+    const { user_id, error: errorId } = await getUserId(supabase);
 
-    if (!data || userError || !data.user.id) {
-      return next(userError || new Error("Auth failure"));
+    if (errorId || !user_id) {
+      console.error(errorId);
+      return next(new Error("Problem fetching data"));
     }
 
     if (!req.params.id) {
@@ -385,7 +366,7 @@ app.post(
     const { error } = await supabase
       .from("fitness_record_weight")
       .update(update)
-      .eq("user_id", data.user?.id)
+      .eq("user_id", user_id)
       .eq("id", req.params.id);
 
     if (error) {
