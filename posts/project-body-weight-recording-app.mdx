@@ -351,8 +351,6 @@ I learned a valuable lesson from this fiddling. When I was playing in the DevToo
 
 <Future>Once I had authentication working and feeling relatively nice in my new app page, I made a bunch of fake data and a way to switch on fake-data mode so that I wouldn't have to deploy my site to test.</Future>
 
-<Future>I figured out authentication for my local machine so that I could test with real data/API timing.</Future>
-
 ### Fri Dec 29 09:13:59 AM PST 2023
 
 Now that I had an endpoint which returned a table with live data for my real authenticated user, I could go a couple directions. I could use HTMX or similar JS to just insert the table into the DOM. But I wanted to go a little farther than that. I wanted to start with as little JavaScript as possible. I know I already used a lot of JS to do the Google Sign In, but I didn't have to. There were other auth strategies to replace that with which used little or no JS. I thought if I could keep the mindset of serving a population of minimal JS, kind of like a squint test, I could serve a basic level of need to start, and then fancy it up with JS as I went forward.
@@ -414,3 +412,7 @@ I recorded my first entry today. And it was easy! Since I had a bunch of test da
 <Future>I implemented a way to have toast messages on pages explaining what just happened on the server, even after using `res.redirect`</Future>
 
 <Future>I added user settings with whether to use kilograms or pounds</Future>
+
+I was really feeling the pain of remote development. So I set my sights on authenticating locally. I might have to use a different authentication method, like email and password. I found [this promising SO answer](https://stackoverflow.com/a/68469319) to my Google Sign In woes. Was it really as simple as duplicating some configuration in my Google settings? It seemed that way. Once I fixed that, local just worked. 
+
+I feel like there's a lesson to learn here - that it's worth investigating a little bit into a difficulty before deciding that it can be fixed later. Of course, I should be nicer to myself. I don't think i could have solved this issue locally before fixing my remote setup, where I knew it should work. On the other hand, this SO answer just pointed me back to a note about actual documentation I already read, so maybe I'm blind.
