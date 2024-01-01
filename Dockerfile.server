@@ -15,7 +15,9 @@ COPY ./server/compiler.tsx ./
 
 RUN npm run server:build:buildCompiler
 
-COPY ./server/src/ ./src/utilities.tsx src/
+COPY ./src/utilities.tsx src/
+
+COPY ./server/src/ ./server/src/
 
 COPY ./components/Record.tsx ./components/CommonPage.tsx ./components/
 

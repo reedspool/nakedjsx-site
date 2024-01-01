@@ -8,11 +8,23 @@ import {
   type Database,
   type FitnessRecordUserPreferencesRowSettings,
   type FitnessRecordWeightRow,
-} from "./types";
+  maybeTimeZone,
+} from "server/src/types";
 
 import { createServerClient } from "@supabase/ssr";
 import morgan from "morgan";
 import { poundsToKilograms } from "src/utilities";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -250,6 +262,7 @@ app.get(
             <Component
               entry={records[0]}
               measurementInput={settings.measurementInput}
+              timeZone={settings.timezone}
             />
           </div>
         </Layout>
@@ -352,6 +365,7 @@ app.get(
             <Component
               entry={records[0]}
               measurementInput={settings.measurementInput}
+              timeZone={settings.timezone}
             />
           </div>
         </Layout>
@@ -391,10 +405,29 @@ app.post(
       return next(new Error("Entry ID Required"));
     }
 
+    const promises = Promise.all([
+      supabase.from("fitness_record_user_preferences").select("*").limit(1),
+    ]);
+
+    const [resultsUserPreferences] = await promises;
+    const { data: settingsResults, error: errorUserPreferences } =
+      resultsUserPreferences;
+
+    if (errorUserPreferences) {
+      console.error({ errorUserPreferences });
+      return next(new Error("Problem fetching data"));
+    }
+
+    const { settings } = questionablySourcedSettingsToProperSafeSettings(
+      settingsResults?.[0]?.settings,
+    );
+
     const update: Partial<FitnessRecordWeightRow> = {};
 
     if (req.body.created_at) {
-      update.created_at = req.body.created_at;
+      update.created_at = dayjs
+        .tz(req.body.created_at, settings.timezone)
+        .toISOString();
     }
     if (req.body.kilograms) {
       update.kilograms = req.body.kilograms;
@@ -472,7 +505,7 @@ app.get(
 
 const defaultSettings: FitnessRecordUserPreferencesRowSettings = {
   version: "v1",
-  timezone: "UTC",
+  timezone: "America/Los_Angeles",
   measurementInput: "kilograms",
 };
 
@@ -548,6 +581,8 @@ const questionablySourcedSettingsToProperSafeSettings = (
     typeof fromDatabase.timezone !== "string"
   )
     return next(new Error("Timezone was invalid"));
+  if (!maybeTimeZone(fromDatabase.timezone))
+    return next(new Error("Timezone was an invalid choice"));
   settings.timezone = fromDatabase.timezone;
   if (
     !("measurementInput" in fromDatabase) ||

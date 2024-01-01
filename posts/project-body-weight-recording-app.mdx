@@ -433,13 +433,17 @@ At this point, I had a User Settings page and settings which were persisted to t
 
 As I applied the same logic everywhere else, I found myself performing a pattern of changes across the site. Anywhere I had written "kilograms" or "kg" statically, I had to suddenly make dynamic. That involved pulling in my user settings with a database round-trip all over the place.
 
+I successfully made my whole little site respect the new user setting. I had to make some new components and decide on some new control flow for validating information from the client and the database.
+
+Now I wanted to complete the user setting dance by setting and respecting a user-specified time zone everywhere a time was displayed. First I had to decide how timezone would be stored. At this point, I was already storing a time zone in the database as a string. Though I'd made no way to update or use it, I just threw it in there while I was adding the weight. I wasn't sure the most future-proof item to put in that string, so I searched timezone formats. I first searched in [`Day.js`'s documentation](https://day.js.org/docs/en/timezone/timezone) since that was already the date library I was using. If they had a sensible choice for a timezone enumeration, I'd take their word for it.  They recommended the IANA database of timezone names. Yes, it looked like Day.js was exactly what I needed. Day.js's UTC plugin also looked helpful for my strategy of storing times in UTC. That went quickly. Day.js was a great resource. I left a place untouched because it was doing math to get strings like "15 hours ago". As long as the math was done with two times in the same time zone, the difference would make sense.
+
+I realized I needed to fix when I edited times. When I used the built-in database `created_at` generation, that was luckily using UTC by default. But in my endpoint for making explicit changes, I had to be careful there.
+
+<Future>I renamed `timezone` to `timeZone` everywhere, because that's what the JavaScript standard called it, and I wanted to stop considering if I had the right one.</Future>
+
 <Future>Because I was requesting my user settings over and over again, while at the same time accessing a session with no round trip, I realized I should move the user settings to the session. There should be some max time for the life time of that, in case settings are changed from another device. And on this same device, of course changing the user preferences should update the session and everything should continue working perfectly.</Future>
 
-<Future>Now to apply that treatment to everywhere a weight was shown or input.</Future>
-
 <Future>I added a way to "reset all settings", which in the bakc-end simply deleted the user settings entry.</Future>
-
-<Future>The first setting I decided to add was weight measurement, kilograms or pounds. This seemed more straightforward than the timezone question. So I added  to my page</Future>
 
 <Future>I split my HTML templates into separate files, instead of the one giant JS object. Though Typescript had kept me sane in that environment, I realized that I wanted my HTML templates to grow separately, so there was no reason to keep them together. The benefit to the giant JS object was not having to invest any energy in splitting the thing up and then managing files and imports. But I thought i could automate the import part by writing a script which created the new template file and then appended to a file which just exported every template by name. That way, where i wanted to use a template, I could just import my one template file and access every other template file via their export there.</Future>
 

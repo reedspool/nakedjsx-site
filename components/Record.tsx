@@ -1,17 +1,25 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import {
   FitnessRecordUserPreferencesRowSettings,
   FitnessRecordWeightRow,
   FitnessRecordWeightRows,
 } from "server/src/types";
 import { kilogramsToPounds } from "src/utilities";
+import { timeZones } from "server/src/timeZones";
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
-function serverDateTimeStringToInputDateTimeLocalValueString(date: string) {
-  return dayjs(date).format("YYYY-MM-DDTHH:mm:ss.SSS");
+function serverDateTimeStringToInputDateTimeLocalValueString(
+  date: string,
+  timeZone: FitnessRecordUserPreferencesRowSettings["timezone"],
+) {
+  return dayjs.utc(date).tz(timeZone).format("YYYY-MM-DDTHH:mm:ss.SSS");
 }
 
 export const Layout = ({ children }: { children: JSX.Children }) => {
@@ -42,9 +50,11 @@ export const Components = {
   "cpnt-body-weight-entry-edit": ({
     entry: { id, kilograms, created_at },
     measurementInput,
+    timeZone,
   }: {
     entry: FitnessRecordWeightRow;
     measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
+    timeZone: FitnessRecordUserPreferencesRowSettings["timezone"];
   }) => (
     <form
       class="cpnt-bleed-layout items-start"
@@ -58,6 +68,7 @@ export const Components = {
           name="created_at"
           value={serverDateTimeStringToInputDateTimeLocalValueString(
             created_at,
+            timeZone,
           )}
         />
       </label>
@@ -98,9 +109,11 @@ export const Components = {
   "cpnt-body-weight-entry-delete": ({
     entry: { id, kilograms, created_at },
     measurementInput,
+    timeZone,
   }: {
     entry: FitnessRecordWeightRow;
     measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
+    timeZone: FitnessRecordUserPreferencesRowSettings["timezone"];
   }) => (
     <form
       class="cpnt-bleed-layout items-start"
@@ -109,8 +122,8 @@ export const Components = {
     >
       <p>
         You are about to delete the entry from{" "}
-        <time datetime={dayjs(created_at).toISOString()}>
-          {dayjs(created_at).format("LLLL")}
+        <time datetime={dayjs.utc(created_at).toISOString()}>
+          {dayjs.utc(created_at).tz(timeZone).format("LLLL")}
         </time>{" "}
         with the measurement{" "}
         <CpntInlineWeight
@@ -125,7 +138,7 @@ export const Components = {
     </form>
   ),
   "cpnt-body-weight-user-preferences": ({
-    settings: { measurementInput },
+    settings: { measurementInput, timezone },
   }: {
     settings: FitnessRecordUserPreferencesRowSettings;
   }) => (
@@ -161,7 +174,34 @@ export const Components = {
         </label>
       </fieldset>
 
-      <input type="hidden" name="timezone" value="utc" />
+      <fieldset>
+        <legend>Time Zone</legend>
+
+        <p>
+          All times are persisted in UTC. They are translated to your preferred
+          timezone when rendered.
+        </p>
+
+        <p>
+          Your current time zone is "{timezone}". The current time is{" "}
+          <time datetime={dayjs.utc().toISOString()}>
+            {dayjs.utc().tz(timezone).format("LLLL")}
+          </time>
+          .
+        </p>
+
+        <label>
+          Set your display time zone
+          <select name="timezone">
+            {timeZones.map((tz) => (
+              <option value={tz} selected={tz === timezone}>
+                {tz}
+              </option>
+            ))}
+          </select>
+        </label>
+      </fieldset>
+
       <input type="hidden" name="version" value="v1" />
 
       <input type="submit" value="Submit" />
