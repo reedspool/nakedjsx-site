@@ -431,6 +431,10 @@ While tackling this problem, I also realized I was doing a round trip I didn't n
 
 At this point, I had a User Settings page and settings which were persisted to the back-end, but my settings did not affect anything in the front-end. Also, the only setting visible was the measurement input. So my next step was to wire up that setting to actually effect the rest of the UI. It would effect the entry input, and it would effect the display. If the setting was the default, kilograms, then nothing would change. But if it were pounds, then the entry should convert to kilograms before storing it. On the viewing side, the history table should convert every entry from kilograms to pounds, if the user setting is thus. I wasn't sure how to do this straight-forwardly on the database with Postgres (or even MySQL, the db I was most familiar with). So I decided to request user settings on the server and then transmute the data myself. In no time, I had the history table displaying the correct measurements. 
 
+As I applied the same logic everywhere else, I found myself performing a pattern of changes across the site. Anywhere I had written "kilograms" or "kg" statically, I had to suddenly make dynamic. That involved pulling in my user settings with a database round-trip all over the place.
+
+<Future>Because I was requesting my user settings over and over again, while at the same time accessing a session with no round trip, I realized I should move the user settings to the session. There should be some max time for the life time of that, in case settings are changed from another device. And on this same device, of course changing the user preferences should update the session and everything should continue working perfectly.</Future>
+
 <Future>Now to apply that treatment to everywhere a weight was shown or input.</Future>
 
 <Future>I added a way to "reset all settings", which in the bakc-end simply deleted the user settings entry.</Future>

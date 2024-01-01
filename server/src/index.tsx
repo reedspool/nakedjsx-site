@@ -12,6 +12,7 @@ import {
 
 import { createServerClient } from "@supabase/ssr";
 import morgan from "morgan";
+import { poundsToKilograms } from "src/utilities";
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -115,8 +116,8 @@ app.post(
     req: express.Request<
       {},
       {},
-      {
-        kilograms: number;
+      Partial<FitnessRecordWeightRow> & {
+        pounds?: FitnessRecordWeightRow["kilograms"];
       }
     >,
     res: express.Response,
@@ -136,29 +137,63 @@ app.post(
       return next(new Error("Problem fetching data"));
     }
 
-    await supabase
-      .from("fitness_record_weight")
-      .insert([{ kilograms: req.body.kilograms, user_id }]);
+    let kilograms;
+    if (req.body.kilograms) {
+      kilograms = req.body.kilograms;
+    } else if (req.body.pounds) {
+      kilograms = poundsToKilograms(req.body.pounds);
+    }
+
+    if (!kilograms) {
+      return next(
+        new Error("Expected weight measurement, either kilograms or pounds"),
+      );
+    }
+
+    await supabase.from("fitness_record_weight").insert([
+      {
+        user_id,
+        kilograms,
+      },
+    ]);
 
     res.redirect("/history");
   },
 );
 
-app.get(
-  "/entry",
-  async (_: express.Request<{}, {}, AuthBody>, res: express.Response) => {
-    const Component = Components["cpnt-body-weight-entry"];
-    res.send(
-      <CommonPage>
-        <Layout>
-          <div class="dashboard">
-            <Component />
-          </div>
-        </Layout>
-      </CommonPage>,
-    );
-  },
-);
+app.get("/entry", async (req, res, next) => {
+  let supabase;
+  try {
+    supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
+  } catch (error) {
+    return next(error);
+  }
+
+  const [{ data: settingsResults, error: errorUserPreferences }] =
+    await Promise.all([
+      supabase.from("fitness_record_user_preferences").select("*").limit(1),
+    ]);
+
+  if (errorUserPreferences) {
+    console.error({ errorUserPreferences });
+    return next(new Error("Problem fetching data"));
+  }
+
+  const { settings } = questionablySourcedSettingsToProperSafeSettings(
+    settingsResults?.[0]?.settings,
+  );
+
+  const Component = Components["cpnt-body-weight-entry"];
+  res.send(
+    <CommonPage>
+      <Layout>
+        <div class="dashboard">
+          <Component measurementInput={settings.measurementInput} />
+        </div>
+      </Layout>
+    </CommonPage>,
+  );
+});
 
 app.get(
   "/entries/:id/delete",
@@ -185,24 +220,37 @@ app.get(
       return next(new Error("Entry ID Required"));
     }
 
-    const { data: records, error } = await supabase
-      .from("fitness_record_weight")
-      .select("*")
-      .eq("user_id", user_id)
-      .eq("id", req.params.id)
-      .limit(1);
+    const [
+      { data: records, error },
+      { data: settingsResults, error: errorUserPreferences },
+    ] = await Promise.all([
+      supabase
+        .from("fitness_record_weight")
+        .select("*")
+        .eq("user_id", user_id)
+        .eq("id", req.params.id)
+        .limit(1),
+      supabase.from("fitness_record_user_preferences").select("*").limit(1),
+    ]);
 
-    if (error || !records[0]) {
-      console.error(error, records);
+    if (error || errorUserPreferences || !records?.[0]) {
+      console.error({ error, errorUserPreferences, records });
       return next(new Error("Problem fetching data"));
     }
+
+    const { settings } = questionablySourcedSettingsToProperSafeSettings(
+      settingsResults?.[0]?.settings,
+    );
 
     const Component = Components["cpnt-body-weight-entry-delete"];
     res.send(
       <CommonPage>
         <Layout>
           <div class="dashboard">
-            <Component entry={records[0]} />
+            <Component
+              entry={records[0]}
+              measurementInput={settings.measurementInput}
+            />
           </div>
         </Layout>
       </CommonPage>,
@@ -274,24 +322,37 @@ app.get(
       return next(new Error("Entry ID Required"));
     }
 
-    const { data: records, error } = await supabase
-      .from("fitness_record_weight")
-      .select("*")
-      .eq("user_id", user_id)
-      .eq("id", req.params.id)
-      .limit(1);
+    const [
+      { data: records, error },
+      { data: settingsResults, error: errorUserPreferences },
+    ] = await Promise.all([
+      supabase
+        .from("fitness_record_weight")
+        .select("*")
+        .eq("user_id", user_id)
+        .eq("id", req.params.id)
+        .limit(1),
 
-    if (error || !records[0]) {
+      supabase.from("fitness_record_user_preferences").select("*").limit(1),
+    ]);
+
+    if (error || errorUserPreferences || !records?.[0]) {
       console.error(error, records);
       return next(new Error("Problem fetching data"));
     }
 
+    const { settings } = questionablySourcedSettingsToProperSafeSettings(
+      settingsResults?.[0]?.settings,
+    );
     const Component = Components["cpnt-body-weight-entry-edit"];
     res.send(
       <CommonPage>
         <Layout>
           <div class="dashboard">
-            <Component entry={records[0]} />
+            <Component
+              entry={records[0]}
+              measurementInput={settings.measurementInput}
+            />
           </div>
         </Layout>
       </CommonPage>,
@@ -305,7 +366,9 @@ app.post(
     req: express.Request<
       { id?: FitnessRecordWeightRow["id"] },
       {},
-      Partial<FitnessRecordWeightRow>
+      Partial<FitnessRecordWeightRow> & {
+        pounds?: FitnessRecordWeightRow["kilograms"];
+      }
     >,
     res: express.Response,
     next,
@@ -335,7 +398,10 @@ app.post(
     }
     if (req.body.kilograms) {
       update.kilograms = req.body.kilograms;
+    } else if (req.body.pounds) {
+      update.kilograms = poundsToKilograms(req.body.pounds);
     }
+
     const { error } = await supabase
       .from("fitness_record_weight")
       .update(update)
@@ -384,24 +450,19 @@ app.get(
       return next(new Error("Problem fetching data"));
     }
 
-    const settings = settingsResults?.[0]?.settings;
-    let measurementInput = defaultSettings.measurementInput;
-    if (
-      settings &&
-      typeof settings === "object" &&
-      !Array.isArray(settings) &&
-      typeof settings.measurementInput === "string"
-    ) {
-      const m = maybeMeasurementInput(settings.measurementInput);
-      if (m) measurementInput = m;
-    }
+    const { settings } = questionablySourcedSettingsToProperSafeSettings(
+      settingsResults?.[0]?.settings,
+    );
 
     const Component = Components["cpnt-body-weight-history"];
     res.send(
       <CommonPage>
         <Layout>
           <div class="dashboard">
-            <Component records={records} measurementInput={measurementInput} />
+            <Component
+              records={records}
+              measurementInput={settings.measurementInput}
+            />
           </div>
         </Layout>
       </CommonPage>,
@@ -437,30 +498,14 @@ app.get(
       return next(new Error("Problem fetching data"));
     }
 
-    let settings = defaultSettings;
-    if (
-      !records ||
-      records.length < 1 ||
-      !records[0]?.settings ||
-      typeof records[0]?.settings !== "object" ||
-      Array.isArray(records[0]?.settings)
-    ) {
-      console.log("No user settings found, using default");
-    } else if (records.length > 1) {
+    const { settings, error: errorSettings } =
+      questionablySourcedSettingsToProperSafeSettings(records[0]?.settings);
+
+    if (errorSettings) {
+      console.error(errorSettings);
       return next(
-        new Error("Unexpected: more than one user preferences entry"),
+        new Error("Problem coalescing client-side data with defaults"),
       );
-    } else {
-      const { settings: coalesced, error } = coalesce(records[0]?.settings);
-
-      if (error) {
-        console.error(error);
-        return next(
-          new Error("Problem coalescing client-side data with defaults"),
-        );
-      }
-
-      settings = coalesced;
     }
 
     const Component = Components["cpnt-body-weight-user-preferences"];
@@ -478,30 +523,42 @@ app.get(
 
 type UserPreferencesPostBody = Partial<FitnessRecordUserPreferencesRowSettings>;
 
-const coalesce = (
-  fromDatabase: Partial<FitnessRecordUserPreferencesRowSettings>,
-) => {
+const questionablySourcedSettingsToProperSafeSettings = (
+  fromDatabase: unknown,
+): {
+  settings: FitnessRecordUserPreferencesRowSettings;
+  error: Error | null;
+} => {
   const settings: FitnessRecordUserPreferencesRowSettings = {
     ...defaultSettings,
   };
 
-  const next = (error: Error) => ({ settings: null, error });
+  const next = (error: Error | null) => ({ settings, error });
 
+  if (!fromDatabase) return { settings, error: null };
   if (Array.isArray(fromDatabase))
     return next(new Error("Settings was an array somehow"));
-  if (fromDatabase.version !== "v1")
+  if (typeof fromDatabase !== "object")
+    return next(new Error("Settings must be an object"));
+  if (!("version" in fromDatabase) || fromDatabase.version !== "v1")
     return next(new Error("Settings version was not v1"));
   settings.version = fromDatabase.version;
-  if (typeof fromDatabase.timezone !== "string")
+  if (
+    !("timezone" in fromDatabase) ||
+    typeof fromDatabase.timezone !== "string"
+  )
     return next(new Error("Timezone was invalid"));
   settings.timezone = fromDatabase.timezone;
-  if (typeof fromDatabase.measurementInput !== "string")
+  if (
+    !("measurementInput" in fromDatabase) ||
+    typeof fromDatabase.measurementInput !== "string"
+  )
     return next(new Error("Measurement Input was invalid"));
   const measurementInput = maybeMeasurementInput(fromDatabase.measurementInput);
   if (!measurementInput)
     return next(new Error("Measurement Input was an invalid choice"));
   settings.measurementInput = measurementInput;
-  return { settings, error: null };
+  return next(null);
 };
 
 app.post(
@@ -525,7 +582,9 @@ app.post(
       return next(new Error("Problem fetching data"));
     }
 
-    const { settings, error } = coalesce(req.body);
+    const { settings, error } = questionablySourcedSettingsToProperSafeSettings(
+      req.body,
+    );
 
     if (error) {
       console.error(error);

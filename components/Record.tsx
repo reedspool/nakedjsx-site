@@ -41,8 +41,10 @@ export const Layout = ({ children }: { children: JSX.Children }) => {
 export const Components = {
   "cpnt-body-weight-entry-edit": ({
     entry: { id, kilograms, created_at },
+    measurementInput,
   }: {
     entry: FitnessRecordWeightRow;
+    measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
   }) => (
     <form
       class="cpnt-bleed-layout items-start"
@@ -59,18 +61,34 @@ export const Components = {
           )}
         />
       </label>
-      <label>
-        Kilograms{" "}
-        <input
-          autofocus
-          type="number"
-          name="kilograms"
-          value={kilograms}
-          min="0"
-          max="99999"
-          step="0.01"
-        />
-      </label>
+      {measurementInput === "kilograms" && (
+        <label>
+          Kilograms{" "}
+          <input
+            autofocus
+            type="number"
+            name="kilograms"
+            value={kilograms}
+            min="0"
+            max="99999"
+            step="0.01"
+          />
+        </label>
+      )}
+      {measurementInput === "pounds" && (
+        <label>
+          Pounds{" "}
+          <input
+            autofocus
+            type="number"
+            name="pounds"
+            value={kilogramsToPounds(kilograms).toFixed(1)}
+            min="0"
+            max="99999"
+            step="0.01"
+          />
+        </label>
+      )}
 
       <a href={`/entries/${id}/delete`}>Delete?</a>
 
@@ -79,8 +97,10 @@ export const Components = {
   ),
   "cpnt-body-weight-entry-delete": ({
     entry: { id, kilograms, created_at },
+    measurementInput,
   }: {
     entry: FitnessRecordWeightRow;
+    measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
   }) => (
     <form
       class="cpnt-bleed-layout items-start"
@@ -92,7 +112,12 @@ export const Components = {
         <time datetime={dayjs(created_at).toISOString()}>
           {dayjs(created_at).format("LLLL")}
         </time>{" "}
-        with the measurement {kilograms}kg. You cannot undo this. Continue?
+        with the measurement{" "}
+        <CpntInlineWeight
+          kilograms={kilograms}
+          measurementInput={measurementInput}
+        />
+        . You cannot undo this. Continue?
       </p>
 
       <input type="submit" value="Delete" class="bg-red-800 text-flashybg" />
@@ -142,19 +167,38 @@ export const Components = {
       <input type="submit" value="Submit" />
     </form>
   ),
-  "cpnt-body-weight-entry": () => (
+  "cpnt-body-weight-entry": ({
+    measurementInput,
+  }: {
+    measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
+  }) => (
     <form class="cpnt-bleed-layout items-start" method="POST" action="/entry">
-      <label>
-        Kilograms{" "}
-        <input
-          autofocus
-          type="number"
-          name="kilograms"
-          min="0"
-          max="99999"
-          step="0.01"
-        />
-      </label>
+      {measurementInput === "kilograms" && (
+        <label>
+          Kilograms{" "}
+          <input
+            autofocus
+            type="number"
+            name="kilograms"
+            min="0"
+            max="99999"
+            step="0.01"
+          />
+        </label>
+      )}
+      {measurementInput === "pounds" && (
+        <label>
+          Pounds{" "}
+          <input
+            autofocus
+            type="number"
+            name="pounds"
+            min="0"
+            max="99999"
+            step="0.01"
+          />
+        </label>
+      )}
 
       <input type="submit" value="Submit" />
     </form>
