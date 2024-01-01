@@ -65,6 +65,8 @@ export const MyJSXFactory = (
       // </div>
       // Testing needed
       .flat(Infinity)
+      // This is so that `{false && <>Test</>}` when falsy is completely absent
+      .filter((a) => a)
       .join("");
 
     if (type === "code") {

@@ -1,14 +1,14 @@
-import express from "express";
-import cors from "cors";
+import { CommonPage } from "components/CommonPage";
+import { Components, Layout } from "components/Record";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
 import {
+  maybeMeasurementInput,
   type Database,
   type FitnessRecordUserPreferencesRowSettings,
   type FitnessRecordWeightRow,
-  maybeMeasurementInput,
 } from "./types";
-import { Components, Layout } from "components/Record";
-import { CommonPage } from "components/CommonPage";
 
 import { createServerClient } from "@supabase/ssr";
 import morgan from "morgan";
@@ -108,33 +108,6 @@ const giveMeAnAuthenticatedSupabaseClient = async (
 ) => {
   return createClient({ req, res });
 };
-
-app.get(
-  "/record/cpnt-body-weight-history.html",
-  async (
-    req: express.Request<{}, {}, AuthBody>,
-    res: express.Response,
-    next,
-  ) => {
-    let supabase;
-    try {
-      supabase = await giveMeAnAuthenticatedSupabaseClient(req, res);
-    } catch (error) {
-      return next(error);
-    }
-    const { data: records, error } = await supabase
-      .from("fitness_record_weight")
-      .select("*");
-
-    if (error) {
-      console.error(error);
-      return next(new Error("Problem fetching data"));
-    }
-
-    const Component = Components["cpnt-body-weight-history"];
-    res.send(<Component records={records} />);
-  },
-);
 
 app.post(
   "/entry",
@@ -391,14 +364,36 @@ app.get(
     } catch (error) {
       return next(error);
     }
-    const { data: records, error } = await supabase
-      .from("fitness_record_weight")
-      .select("*")
-      .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error(error);
+    const promises = Promise.all([
+      supabase
+        .from("fitness_record_weight")
+        .select("*")
+        .order("created_at", { ascending: false }),
+
+      supabase.from("fitness_record_user_preferences").select("*").limit(1),
+    ]);
+
+    const [resultsWeight, resultsUserPreferences] = await promises;
+    const { data: records, error } = resultsWeight;
+    const { data: settingsResults, error: errorUserPreferences } =
+      resultsUserPreferences;
+
+    if (error || errorUserPreferences) {
+      console.error({ error });
       return next(new Error("Problem fetching data"));
+    }
+
+    const settings = settingsResults?.[0]?.settings;
+    let measurementInput = defaultSettings.measurementInput;
+    if (
+      settings &&
+      typeof settings === "object" &&
+      !Array.isArray(settings) &&
+      typeof settings.measurementInput === "string"
+    ) {
+      const m = maybeMeasurementInput(settings.measurementInput);
+      if (m) measurementInput = m;
     }
 
     const Component = Components["cpnt-body-weight-history"];
@@ -406,7 +401,7 @@ app.get(
       <CommonPage>
         <Layout>
           <div class="dashboard">
-            <Component records={records} />
+            <Component records={records} measurementInput={measurementInput} />
           </div>
         </Layout>
       </CommonPage>,

@@ -6,6 +6,7 @@ import {
   FitnessRecordWeightRow,
   FitnessRecordWeightRows,
 } from "server/src/types";
+import { kilogramsToPounds } from "src/utilities";
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
@@ -160,14 +161,17 @@ export const Components = {
   ),
   "cpnt-body-weight-history": ({
     records,
+    measurementInput,
   }: {
     records: FitnessRecordWeightRows;
+    measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
   }) => (
     <table>
       <thead>
         <tr>
           <th>Time</th>
-          <th>Kilograms</th>
+          {measurementInput === "kilograms" && <th>Kilograms</th>}
+          {measurementInput === "pounds" && <th>Pounds</th>}
           <th></th>
         </tr>
       </thead>
@@ -180,7 +184,12 @@ export const Components = {
                   {dayjs().to(dayjs(created_at), false)}
                 </time>
               </td>
-              <td>{kilograms}</td>
+              <td>
+                <CpntInlineWeight
+                  kilograms={kilograms}
+                  measurementInput={measurementInput}
+                />
+              </td>
               <td>
                 <a href={`/entries/${id}/edit?id=${id}`} class="no-underline">
                   Edit{" "}
@@ -242,4 +251,25 @@ export const Components = {
       )}
     </div>
   ),
+  ["cpnt-inline-weight"]: ({
+    kilograms,
+    measurementInput,
+  }: {
+    kilograms: FitnessRecordWeightRow["kilograms"];
+    measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
+  }) => {
+    let weight = kilograms;
+    let units = "kg";
+    if (measurementInput === "pounds") {
+      weight = kilogramsToPounds(kilograms);
+      units = "lb";
+    }
+    return (
+      <span>
+        {weight.toFixed(1)} {units}
+      </span>
+    );
+  },
 } as const;
+
+const CpntInlineWeight = Components["cpnt-inline-weight"];
