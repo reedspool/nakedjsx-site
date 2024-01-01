@@ -74,7 +74,6 @@ export const Components = {
       </label>
       {measurementInput === "kilograms" && (
         <label>
-          Kilograms{" "}
           <input
             autofocus
             type="number"
@@ -83,12 +82,12 @@ export const Components = {
             min="0"
             max="99999"
             step="0.01"
-          />
+          />{" "}
+          kg
         </label>
       )}
       {measurementInput === "pounds" && (
         <label>
-          Pounds{" "}
           <input
             autofocus
             type="number"
@@ -97,7 +96,8 @@ export const Components = {
             min="0"
             max="99999"
             step="0.01"
-          />
+          />{" "}
+          lb
         </label>
       )}
 
@@ -133,7 +133,7 @@ export const Components = {
         . You cannot undo this. Continue?
       </p>
 
-      <input type="submit" value="Delete" class="bg-red-800 text-flashybg" />
+      <input type="submit" value="Delete" class="!bg-red-800 !text-flashybg" />
       <a href={`/entries/${id}/edit`}>Back to edit</a>
     </form>
   ),
@@ -142,7 +142,11 @@ export const Components = {
   }: {
     settings: FitnessRecordUserPreferencesRowSettings;
   }) => (
-    <form class="cpnt-bleed-layout items-start" method="POST" action={`/me`}>
+    <form
+      class="cpnt-bleed-layout gap-y-4 items-start"
+      method="POST"
+      action={`/me`}
+    >
       <h1>User Settings</h1>
       <fieldset>
         <legend>Input and Display Measurement Units</legend>
@@ -174,6 +178,8 @@ export const Components = {
         </label>
       </fieldset>
 
+      <input type="submit" value="Submit" />
+
       <fieldset>
         <legend>Time Zone</legend>
 
@@ -201,10 +207,9 @@ export const Components = {
           </select>
         </label>
       </fieldset>
+      <input type="submit" value="Submit" />
 
       <input type="hidden" name="version" value="v1" />
-
-      <input type="submit" value="Submit" />
     </form>
   ),
   "cpnt-body-weight-entry": ({
@@ -212,35 +217,41 @@ export const Components = {
   }: {
     measurementInput: FitnessRecordUserPreferencesRowSettings["measurementInput"];
   }) => (
-    <form class="cpnt-bleed-layout items-start" method="POST" action="/entry">
+    <form
+      class="cpnt-bleed-layout gap-y-4 items-start"
+      method="POST"
+      action="/entry"
+    >
       {measurementInput === "kilograms" && (
         <label>
-          Kilograms{" "}
           <input
+            class="w-full max-w-[60%] ml-[20%] py-1 pl-1 text-lg"
             autofocus
             type="number"
             name="kilograms"
             min="0"
             max="99999"
             step="0.01"
-          />
+          />{" "}
+          <span class="text-lg">kg</span>
         </label>
       )}
       {measurementInput === "pounds" && (
         <label>
-          Pounds{" "}
           <input
+            class="w-full max-w-[60%] ml-[20%] py-1 pl-1 text-lg"
             autofocus
             type="number"
             name="pounds"
             min="0"
             max="99999"
             step="0.01"
-          />
+          />{" "}
+          <span class="text-lg">lb</span>
         </label>
       )}
 
-      <input type="submit" value="Submit" />
+      <input type="submit" class="text-lg" value="Submit" />
     </form>
   ),
   "cpnt-body-weight-history": ({
@@ -285,6 +296,11 @@ export const Components = {
             </tr>
           );
         })}
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
       </tbody>
     </table>
   ),

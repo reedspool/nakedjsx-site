@@ -134,6 +134,10 @@ input[type="submit"] {
   cursor: pointer;
 }
 
+label {
+  @apply block;
+}
+
 /**
  * This component is taken almost verbatim from Ryan Mulligan's
  * See https://ryanmulligan.dev/blog/layout-breakouts/
@@ -170,6 +174,8 @@ input[type="submit"] {
     [feature-end]
     var(--cpnt-bleed-layout-full)
     [full-end];
+
+  @apply gap-y-4;
 }
 
 /* Default all top-level content to the content column */
@@ -186,66 +192,16 @@ input[type="submit"] {
   grid-column: full;
 }
 
-.cpnt-record-page {
-  @apply layout-full cpnt-bleed-layout;
-  @apply py-sm;
+p {
+  @apply mb-lg;
+}
 
-  & p,
-  & ul,
-  & ol {
-    @apply mb-lg;
-    @apply no-boost;
-  }
+fieldset {
+  border: 1px solid;
+  @apply p-2 w-full layout-full;
 
-  & blockquote {
-    @apply layout-popout m-0 mb-lg p-xl;
-
-    & p {
-      @apply mb-0 mx-0 mt-md p-0;
-    }
-
-    & p:nth-of-type(1) {
-      @apply mt-0;
-    }
-
-    & pre {
-      @apply mt-md;
-    }
-  }
-
-  & pre {
-    @apply text-xs;
-    line-height: 1.4em;
-
-    @apply layout-popout bg-primaryfg/10 text-primaryfg px-lg py-sm rounded-md overflow-x-auto mb-md;
-  }
-
-  & figure {
-    @apply bg-primaryfg/40 p-xl rounded-md;
-
-    & figcaption {
-      @apply mb-xs;
-    }
-
-    & pre {
-      @apply bg-primaryfg/10 text-primaryfg px-md py-sm rounded-md overflow-x-auto mb-md;
-    }
-
-    & output pre {
-      @apply p-md overflow-y-auto;
-      max-height: 10rem;
-    }
-  }
-
-  & h1 {
-    @apply my-lg;
-  }
-
-  & h2,
-  & h3,
-  & h4,
-  & h6 {
-    @apply my-md;
+  & legend {
+    @apply ml-1;
   }
 }
 
@@ -364,6 +320,12 @@ td {
 tr:hover td {
   background: #eee;
 }
+tr:last-child td,
+tr td:last-child,
+tr th:last-child {
+  background: inherit;
+  border: none;
+}
 
 th {
   background-color: #666;
@@ -380,7 +342,9 @@ li {
   border-bottom: 2px solid;
 }
 
-.dashboard a {
+.dashboard a,
+.dashboard button,
+.dashboard input[type="submit"] {
   box-shadow:
     0px 0px,
     1px 1px;
@@ -390,24 +354,9 @@ li {
   background: #eee;
 }
 
-.dashboard button {
-  appearance: none;
-  border: inherit;
-  color: inherit;
-  font-family: arial;
-  font-size: 24px;
-  line-height: 1.1em;
-  width: 1.2em;
-  height: 1.2em;
-  padding: 0;
-  text-align: center;
-  float: right;
-  z-index: 9;
-  position: relative;
-  background: #eee;
-}
-
-.dashboard button:hover {
+.dashboard a:hover,
+.dashboard button:hover,
+.dashboard input[type="submit"]:hover {
   background: #666;
   border-color: #666;
   color: white;
