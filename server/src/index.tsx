@@ -374,6 +374,19 @@ app.get(
   },
 );
 
+app.get("/main-menu", (req, res) => {
+  const Component = Components["cpnt-main-menu"];
+  res.send(
+    <CommonPage>
+      <Layout>
+        <div class="dashboard">
+          <Component />
+        </div>
+      </Layout>
+    </CommonPage>,
+  );
+});
+
 app.post(
   "/entries/:id/edit",
   async (

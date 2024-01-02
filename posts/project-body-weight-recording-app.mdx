@@ -451,3 +451,29 @@ I realized I needed to fix when I edited times. When I used the built-in databas
 <Future>I thought about the future, how I would want to do exactly the process I was about to embark on a hundred times. At work, I'd call it "adding a feature." Because I wanted to do this many more times, and I knew the process was a bit tedious, I wanted to improve it in the future. So I tried to write out some of the steps I was taking at a higher level while I went.</Future>
 
 <Future>I thought about Fly.io's connection module, and I wondered if I could work remotely by connecting to and editing directly on a Fly.io machine. I could rebuild by running the same NPM commands which I run in my Dockerfile.</Future>
+
+### Mon Jan  1 01:45:05 PM PST 2024
+
+Played with styles especially on smaller devices, using Chrome DevTools' mobile target emulation.
+
+<Future>I considered using Express Routers to try to refactor my server to segregate different kinds of flows, and maybe use a building-up of assets on the `req` object. I read the [docs on routing](https://expressjs.com/en/guide/routing.html)</Future>
+
+### Tue Jan  2 10:18:11 AM PST 2024
+
+Now that I had a working solution, I took a moment to reflect on the positive outcome. After just a week and a half, I had a real, working, authenticated application deployed. And I was using it every morning! Awesome.
+
+I wanted to refactor the server. I had several improvements/explorations in mind for the shape of the code as well as the development environment. But I didn't feel safe making those changes only for me to need to manually test every endpoint. So I decided to take a foray into e2e testing.
+
+I'd used Playwright a lot recently, but I wanted to take a moment to consider other options. I did a quick search but nothing caught my eye. I installed Playwright with their custom script `npm init playwright@latest`. 
+
+Then I wrote my first test.
+
+<Future>I had to deal with authentication in playwright somehow</Future>
+
+<Future>
+I wanted to explore a structured way to describe what I wanted to test. Test code for interactive programs describes an expectation the human in the interaction has. That is, test code describes an expectation of behavior for a human observing the system. A human writes a test to automate a behavior which a human would otherwise manually check for. And what behaviors do I want to check for? Well, that depends on the scale, scope, lens, angle, and tool of the test! So to get more specific, for my e2e tests, what behaviors do I want my e2e tests to check for? And if I'm going to describe those behaviors in a structured way, and write down my thoughts in a structured format, then what other value can that structured format be to me? Surely there are other reasons for a giant, structured list of user behaviors. I could imagine a use for this kind of list in roles of support, QA, product, and sales. Especially if they were in a tabular form with other information associated. That is, if engineering could update that giant list of user behaviors with testing coverage information, that would give a lot of people a lot of confidence about the product. What would this giant list look like? And how could I associate it with my actual test code as I began to write it? I decided to start exploring this as I wrote my tests. I wanted to try to simultaneously write this list of user behaviors while writing my test code which would test if those behaviors had the intended results. So I began a list and I began my test code.
+
+1. Someone can log in.
+</Future>
+
+<Future>I thought it would smooth out my experience recording my weight if I got a notification with a reminder in the morning. I was already getting a notification from my separate habit-tracking app, and it would be great if I could tap that notification to send me directly to the entry screen.</Future>

@@ -27,17 +27,9 @@ export const Layout = ({ children }: { children: JSX.Children }) => {
     <main class="cpnt-bleed-layout">
       <header class="cpnt-bleed-layout layout-full">
         <div class="flex flex-row gap-4">
-          <a href="/entry">
-            New Entry{" "}
-            <i class={`bx bx-calendar-plus align-middle ml-sm inline-block`} />
-          </a>
-          <a href="/history">
-            History{" "}
-            <i class={`bx bx-calendar align-middle ml-sm inline-block`} />
-          </a>
-
-          <a href="/me">
-            Me <i class={`bx bx-cog align-middle ml-sm inline-block`} />
+          <a href="/main-menu">
+            <i class={`bx bx-arrow-back align-middle ml-sm inline-block`} />
+            Main Menu <i class={`bx bx-menu align-middle ml-sm inline-block`} />
           </a>
         </div>
       </header>
@@ -47,6 +39,21 @@ export const Layout = ({ children }: { children: JSX.Children }) => {
 };
 
 export const Components = {
+  "cpnt-main-menu": () => (
+    <>
+      <a href="/entry">
+        New Entry{" "}
+        <i class={`bx bx-calendar-plus align-middle ml-sm inline-block`} />
+      </a>
+      <a href="/history">
+        History <i class={`bx bx-calendar align-middle ml-sm inline-block`} />
+      </a>
+
+      <a href="/me">
+        Me <i class={`bx bx-cog align-middle ml-sm inline-block`} />
+      </a>
+    </>
+  ),
   "cpnt-body-weight-entry-edit": ({
     entry: { id, kilograms, created_at },
     measurementInput,
@@ -152,9 +159,8 @@ export const Components = {
         <legend>Input and Display Measurement Units</legend>
 
         <p>
-          In the server, your measurement is always stored as kilograms, because
-          we humans have 10 fingers. In what unit do you want to enter and view
-          your measurements?
+          In the server, your measurement is always stored as kilograms. In what
+          unit do you want to enter and view your measurements?
         </p>
 
         <label>
@@ -275,9 +281,20 @@ export const Components = {
           return (
             <tr>
               <td>
-                <time datetime={dayjs(created_at).toISOString()}>
+                <time
+                  class="hidden sm:inline"
+                  datetime={dayjs(created_at).toISOString()}
+                >
                   {dayjs().to(dayjs(created_at), false)}
                 </time>
+                <span class="sm:hidden">
+                  {dayjs
+                    .utc(created_at)
+                    .format("l")
+                    .split("/")
+                    .filter((d) => d.length <= 2)
+                    .join("/")}
+                </span>
               </td>
               <td>
                 <CpntInlineWeight
@@ -286,7 +303,10 @@ export const Components = {
                 />
               </td>
               <td>
-                <a href={`/entries/${id}/edit?id=${id}`} class="no-underline">
+                <a
+                  href={`/entries/${id}/edit?id=${id}`}
+                  class="no-underline float-right"
+                >
                   Edit{" "}
                   <i
                     class={`bx bx-edit align-middle ml-sm inline-block font-[1.25em]`}
@@ -296,11 +316,6 @@ export const Components = {
             </tr>
           );
         })}
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
       </tbody>
     </table>
   ),
@@ -366,7 +381,7 @@ export const Components = {
     }
     return (
       <span>
-        {weight.toFixed(1)} {units}
+        {weight.toFixed(1)} <span class="hidden sm:inline">{units}</span>
       </span>
     );
   },

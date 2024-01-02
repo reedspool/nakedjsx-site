@@ -4,9 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
+/* From https://dev.to/fenok/stretching-body-to-full-viewport-height-the-missing-way-2ghd */
+html {
+  min-height: 100%; /* Look, it's not fixed anymore! */
+
+  display: flex;
+  flex-direction: column;
+}
+
 body {
-  height: 100%;
+  flex-grow: 1;
 }
 
 body {
@@ -74,6 +81,11 @@ header {
   justify-content: flex-start;
   @apply bg-primarybg;
   border-bottom: 2px solid;
+  box-shadow:
+    0px 0px,
+    1px 1px,
+    2px 2px,
+    3px 3px;
 }
 
 header.sticky {
@@ -241,10 +253,8 @@ body {
 }
 
 .dashboard {
-  @apply mt-4;
   padding: 20px;
   border: 2px solid;
-  max-width: calc(100% - 40px);
   background: #ddd;
   box-shadow:
     1px 1px,
@@ -312,19 +322,18 @@ table {
 
 th,
 td {
-  border: 2px solid #333;
-  padding: 8px;
+  border-bottom: 2px solid #333;
   text-align: left;
+  @apply sm:p-2;
+}
+
+tr:last-child th,
+tr:last-child td {
+  border-bottom: none;
 }
 
 tr:hover td {
   background: #eee;
-}
-tr:last-child td,
-tr td:last-child,
-tr th:last-child {
-  background: inherit;
-  border: none;
 }
 
 th {
@@ -345,13 +354,8 @@ li {
 .dashboard a,
 .dashboard button,
 .dashboard input[type="submit"] {
-  box-shadow:
-    0px 0px,
-    1px 1px;
-  border: 1px solid #333;
   font-family: arial;
   @apply py-1 px-1;
-  background: #eee;
 }
 
 .dashboard a:hover,
