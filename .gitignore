@@ -15,3 +15,9 @@ yarn-error.log*
 
 # SyncThing
 .stignore
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

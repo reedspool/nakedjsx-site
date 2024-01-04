@@ -17,6 +17,7 @@ const dataForPages = [
     pageJsxOrTsxSrc: "pages/record.tsx",
     output: "build/record.html",
     layout: "EmptyLayout",
+    title: "Record",
   },
   {
     clientSrc: "src/record.tsx",
@@ -171,6 +172,7 @@ async function compilePageFromJsxOrTsx({
   pageJsxOrTsxSrc,
   output,
   layout,
+  title,
 }: (typeof dataForPages)[number]) {
   if (!pageJsxOrTsxSrc)
     throw new Error(`No Page JSX or TSX to compile for ${output}`);
@@ -207,7 +209,7 @@ await mkdir("./build", { recursive: true });
 await writeFile(
   "${output}",
   (
-    <CommonPage>
+    <CommonPage ${title ? `title={"${title}"}` : ""}>
       <Stuff.${layout}>
         <Body components={{ Link, HashTarget, GitHubLink, Future }} />
       </Stuff.${layout}>

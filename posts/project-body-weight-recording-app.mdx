@@ -466,14 +466,99 @@ I wanted to refactor the server. I had several improvements/explorations in mind
 
 I'd used Playwright a lot recently, but I wanted to take a moment to consider other options. I did a quick search but nothing caught my eye. I installed Playwright with their custom script `npm init playwright@latest`. 
 
-Then I wrote my first test.
+Then I wrote my first test. In no time, I had 4 tests, and my last one was failing. A good place to begin!
 
-<Future>I had to deal with authentication in playwright somehow</Future>
+I took a moment to [explore and implement fixtures](https://playwright.dev/docs/test-fixtures) as recommended by Playwright's docs. I liked the idea, but I found their use of HTML classes a bit confusing. 
+
+There was a bit of magic which really confused me. The [playwright docs](https://playwright.dev/docs/test-fixtures) say:
+
+> Just mention fixture in your test function argument, and test runner will take care of it.
+
+So I just put the variable name of my fixture, unused, inside an argument definition, and by some magic Playwright figures out that I want to use that? That seemed like a not-so-helpful feature, a feature  I could forget about, because it's so non-standard in Javascript. I can't even imagine how I would implement detecting that in JavaScript myself. Well, that's some fascinating gadgetry. I wonder if it's the sort of gadgetry I'd ever want to use myself.
+
+And of course
+
+> Custom fixture names should start with a letter or underscore, and can contain only letters, numbers, underscores.
+
+Strange, but at least I figured it out on my machine!
+
+Now that I had some tests about the non-functional parts of my home page, I had to deal with authentication in playwright somehow
 
 <Future>
 I wanted to explore a structured way to describe what I wanted to test. Test code for interactive programs describes an expectation the human in the interaction has. That is, test code describes an expectation of behavior for a human observing the system. A human writes a test to automate a behavior which a human would otherwise manually check for. And what behaviors do I want to check for? Well, that depends on the scale, scope, lens, angle, and tool of the test! So to get more specific, for my e2e tests, what behaviors do I want my e2e tests to check for? And if I'm going to describe those behaviors in a structured way, and write down my thoughts in a structured format, then what other value can that structured format be to me? Surely there are other reasons for a giant, structured list of user behaviors. I could imagine a use for this kind of list in roles of support, QA, product, and sales. Especially if they were in a tabular form with other information associated. That is, if engineering could update that giant list of user behaviors with testing coverage information, that would give a lot of people a lot of confidence about the product. What would this giant list look like? And how could I associate it with my actual test code as I began to write it? I decided to start exploring this as I wrote my tests. I wanted to try to simultaneously write this list of user behaviors while writing my test code which would test if those behaviors had the intended results. So I began a list and I began my test code.
 
 1. Someone can log in.
+
+I considered that in my Playwright tests, I'd write things like:
+
+```
+test.describe('New Todo', () => {
+  test('should allow me to add todo items', async ({ page }) => {
+```
+
+And that looked like the perfect place to write the behaviors I had in mind. But in the structure so-presented I didn't see how other roles could use this information. In these JS files, it was a goldmine of information hidden in a tangled jungle of jargon. So I thought about how I could get that information out.
+
+I also considerd how I could get that information into my tests in some other way, but I imagined I'd just have ot create some other name for it, or just re-type exactly the same sentences in two places, and that didn't seem like a sustainable situation. So I went back to exploring solutions where I write the behavior statements exactly as I would if I were only writing playwright tests, but then get the information out somehow.
+
+One idea I had was to ask the Playwright CLI to print out all of that for me. I found [an article](https://playwrightsolutions.com/is-there-a-way-to-list-all-the-playwright-tests-without-running-them/) which described exactly how to do that:
+
+```sh
+npx playwright test --list
+# Or
+npx playwright test --list --reporter=json
+```
+
+Unfortunately, the first command didn't look too nice. A good summary for humans, but not good foundational data to build another tool from. The `--reporter=json` variant was a lot more helpful, full of detailed entries. Here's one slice of the output for example, in `suites.specs` of the resulting JSON:
+
+```json
+{
+  "title": "has title",
+  "ok": true,
+  "tags": [],
+  "tests": [
+    {
+      "timeout": 30000,
+      "annotations": [],
+      "expectedStatus": "passed",
+      "projectId": "chromium",
+      "projectName": "chromium",
+      "results": [],
+      "status": "skipped"
+    }
+  ],
+  "id": "a30a6eba6312f6b87ea5-b06063a3e613764d08f8",
+  "file": "example.spec.ts",
+  "line": 3,
+  "column": 5
+}
+```
+
+There were also a bunch more reporters to check out:
+
+```
+$ npx playwright test --help
+...
+  --reporter <reporter> 
+  Reporter to use, comma-separated, can be "list", "line", "dot", "json", "junit", "null", "github", "html", "blob", "markdown" (default: "list") 
+```
+
+Another idea I had was to use parts of JavaScript which playwright wasn't using. Instead of writing in Playwright's format, I could write in another more structured-data way, and then transform that data into both Playwright's format, and another format more suitable for my plans outside of the engineering role. So instead of writing:
+
+```
+test.describe('New Todo', () => {
+  test('should allow me to add todo items', async ({ page }) => { /* test */ })
+```
+
+I'd write:
+
+```
+tests["New TODO"]["should allow me to add todo items"] =
+  async ({ page }) => { /* test */ })
+```
+
+Then later, I'd iterate over that `tests` object to run Playwright's functions with the same data, and as a foundation for other use-cases for that data. 
 </Future>
 
 <Future>I thought it would smooth out my experience recording my weight if I got a notification with a reminder in the morning. I was already getting a notification from my separate habit-tracking app, and it would be great if I could tap that notification to send me directly to the entry screen.</Future>
+
+<Future>With the addition of playwright, the amount of levers I was pulling for normal operations, the amount of terminals I had open, was getting large and confusing. I enjoyed this strategy to get started, but I'd like to streamline everything. So what would my dream "local operations" setup look like? Maybe a giant cassette futurist blinkenlights switches and knobs wall of doodads and macro-circuitry? Or maybe I can solve the issue another way, by thinking harder about structural optimizations for operations. For example, I was now building JSX in several different ways. And my static website was deployed in an entirely different way than a very similar system for dynamic backends. I wished those targets, client JS; static HTML, and dynamic HTML all had similar operations, unified operations, especially because I want to flow between them. I imagine myself easily moving over a bunch of dynamic HTML and CSS which actually should and could be totally static. It helped me understand why people liked Next.js and these big, hulking systems which purport to do everything for you.</Future>

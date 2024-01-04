@@ -197,7 +197,7 @@ app.get("/entry", async (req, res, next) => {
 
   const Component = Components["cpnt-body-weight-entry"];
   res.send(
-    <CommonPage>
+    <CommonPage title="Record">
       <Layout>
         <div class="dashboard">
           <Component measurementInput={settings.measurementInput} />
