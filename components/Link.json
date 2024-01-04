@@ -27,7 +27,9 @@
     "project-plant-parenthood": "project-plant-parenthood.html",
     "project-body-weight-recording-app": "project-body-weight-recording-app.html",
     "make-wrong-things-look-wrong": "make-wrong-things-look-wrong.html",
-    "project-proxies-as-variable-environments": "project-proxies-as-variable-environments.html"
+    "project-proxies-as-variable-environments": "project-proxies-as-variable-environments.html",
+    "topic-recurse-center": "topic-recurse-center.html",
+    "project-useful-new-tab-page": "project-useful-new-tab-page.html"
   },
   "slugsToHashes": {
     "project-improve-this-website": [
