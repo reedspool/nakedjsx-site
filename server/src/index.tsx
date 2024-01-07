@@ -122,6 +122,19 @@ const giveMeAnAuthenticatedSupabaseClient = async (
   return createClient({ req, res });
 };
 
+app.get("/signup", async (_, res) => {
+  const Component = Components["cpnt-signup-with-email"];
+  res.send(
+    <CommonPage title="Record">
+      <Layout>
+        <div class="dashboard">
+          <Component />
+        </div>
+      </Layout>
+    </CommonPage>,
+  );
+});
+
 app.post(
   "/entry",
   async (

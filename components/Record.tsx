@@ -39,6 +39,29 @@ export const Layout = ({ children }: { children: JSX.Children }) => {
 };
 
 export const Components = {
+  "cpnt-signup-with-email": () => (
+    <form
+      class="cpnt-bleed-layout items-start"
+      method="POST"
+      action={`/signup`}
+    >
+      <label>
+        Email{" "}
+        <input
+          type="email"
+          name="email"
+          placeholder="healthy@vibes.url"
+          required
+        />
+      </label>
+      <label>
+        Password{" "}
+        <input type="password" name="password" minlength="8" required />
+      </label>
+
+      <input type="submit" value="Submit" />
+    </form>
+  ),
   "cpnt-main-menu": () => (
     <>
       <a href="/entry">

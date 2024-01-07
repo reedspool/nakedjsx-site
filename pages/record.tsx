@@ -30,6 +30,10 @@ export const Body = () => (
           data-logo_alignment="left"
         ></div>
       </div>
+
+      <p>
+        Or <a href="/signup">Sign up with email</a>
+      </p>
     </div>
   </Layout>
 );

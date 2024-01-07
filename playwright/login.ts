@@ -62,13 +62,19 @@ test("Page instructs to log in", async ({ page, homePage }) => {
 });
 
 // @ts-ignore "Just mention" https://playwright.dev/docs/test-fixtures#using-a-fixture
-test("Page has Main Menu button", async ({ page, homePage }) => {
+test("Page has 'Main Menu' button", async ({ page, homePage }) => {
   expect(page.getByText("Main Menu")).toBeVisible();
 });
 
 // @ts-ignore "Just mention" https://playwright.dev/docs/test-fixtures#using-a-fixture
-test("Page has Google Sign-in button", async ({ page, homePage }) => {
-  expect(page.getByText("Sign in with Google")).toBeVisible({
-    timeout: 10_000_000,
+test("Page has 'Google Sign-in' button", async ({ page, homePage }) => {
+  expect(page.getByText("Sign in with Google").first()).toBeVisible({
+    timeout: 10_000,
   });
+});
+
+// @ts-ignore "Just mention" https://playwright.dev/docs/test-fixtures#using-a-fixture
+test("Sign up with Email Flow", async ({ page, homePage }) => {
+  await page.getByText("Sign up with email").click();
+  await page.waitForURL("**/signup");
 });
