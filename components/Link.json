@@ -29,14 +29,14 @@
     "make-wrong-things-look-wrong": "make-wrong-things-look-wrong.html",
     "project-proxies-as-variable-environments": "project-proxies-as-variable-environments.html",
     "topic-recurse-center": "topic-recurse-center.html",
-    "project-useful-new-tab-page": "project-useful-new-tab-page.html"
+    "project-useful-new-tab-page": "project-useful-new-tab-page.html",
+    "project-explore-uxn-and-playdate": "project-explore-uxn-and-playdate.html"
   },
   "slugsToHashes": {
-    "project-improve-this-website": [
-      "exploring-client-side-js-in-nakedjsx"
-    ],
+    "project-improve-this-website": ["exploring-client-side-js-in-nakedjsx"],
     "project-supabase-authentication": [
       "supabase-auth-starting-body-weight-app"
-    ]
+    ],
+    "topic-recurse-center": ["recurse-center-starting-uxn-and-playdate"]
   }
 }
