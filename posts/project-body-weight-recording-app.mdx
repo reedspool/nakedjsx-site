@@ -200,19 +200,9 @@ Back Following [docs on Server-side Rendering Auth with Supabase](https://supaba
 
 Got this code to play with state change. I observed the cookies changing after logging in with the Google Sign In button above.
 
-export const MySpecialScriptCodeBlockRunnable = ({ scriptProps, children }) => 
-<>
-{`
-<pre><code>&lt;script&gt;<script class="block" type="module" {...scriptProps}>
-${children}
-</script>&lt;/script&gt;</code></pre>
-`}
-</>
-
 <details>
 <summary>Code</summary>
-<MySpecialScriptCodeBlockRunnable>{`
-supabaseClient.auth.onAuthStateChange((event, session) => {
+<FancyScriptTag>{`supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
     // delete cookies on sign out
     const expires = new Date(0).toUTCString()
@@ -223,8 +213,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     document.cookie = \u0060my-access-token=\${session.access_token}; path=/; domain=reeds-website-server.fly.dev; max-age=\${maxAge}; SameSite=Lax; secure\u0060
     document.cookie = \u0060my-refresh-token=\${session.refresh_token}; path=/; domain=reeds-website-server.fly.dev; max-age=\${maxAge}; SameSite=Lax; secure\u0060
   }
-})
-`}</MySpecialScriptCodeBlockRunnable>
+})`}</FancyScriptTag>
 </details>
 
 Then I followed their instructions on the server-side as well:
@@ -264,7 +253,7 @@ Repeating my button-to-make-a-request strategy from above, I supplied the `reque
 
 <details>
 <summary>Code</summary>
-<MySpecialScriptCodeBlockRunnable>{`
+<FancyScriptTag>{`
   window.fetchWithTokens = async function (event) {
     const supabaseAuthStorage = JSON.parse(localStorage.getItem(supabaseClient.auth.storageKey))
     const refreshToken = supabaseAuthStorage.refresh_token;
@@ -284,7 +273,7 @@ Repeating my button-to-make-a-request strategy from above, I supplied the `reque
        console.error("Error from fetch", error)
     }
   }
-`}</MySpecialScriptCodeBlockRunnable>
+`}</FancyScriptTag>
 </details>
 
 I played with the server code until I could successfully echo back those values. Then I attempted `supabase.auth.getUser()` on the server. It worked! Next I tried connecting to Supabase Postgres while correctly authenticated, and attempt to test my policies.
