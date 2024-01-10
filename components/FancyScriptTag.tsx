@@ -5,12 +5,20 @@
 export const FancyScriptTag = ({
   children,
   classes = "block",
+  type = "module",
+  defer = false,
+  async = false,
 }: {
   children: JSX.Children;
   classes?: string;
+  type?: string;
+  defer: boolean;
+  async: boolean;
 }) => (
   <>
-    {`<pre><code>&lt;script&gt;<script class="${classes}" type="module">${
+    {`<pre><code>&lt;script&gt;<script class="${classes}" type="${type}" ${
+      defer ? "defer" : ""
+    } ${async ? "async" : ""}>${
       typeof children == "string" ? children.trim() : children
     }</script>&lt;/script&gt;</code></pre>`}
   </>
