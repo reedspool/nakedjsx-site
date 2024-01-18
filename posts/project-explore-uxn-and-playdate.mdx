@@ -26,8 +26,131 @@ Downloaded the [PlayDate Mirror](https://play.date/mirror/) to run Playdate stuf
 
 I began reading [Inside Playdate](https://sdk.play.date/2.1.1/Inside%20Playdate.html), the Lua-based documentation.
 
-<Future>I also checked out [Inside the Playdate with C](https://sdk.play.date/2.1.1/Inside%20Playdate%20with%20C.html), the parallel, more indepth version of its Lua counterpart.</Future>
-
 ### Sat Jan  6 06:26:23 PM PST 2024
 
 Following some [Uxn](https://github.com/hundredrabbits/awesome-uxn) [links](https://wiki.xxiivv.com/site/left.html), got to [this instuctional video about LEAP technology](https://www.youtube.com/watch?v=o_TlE_U_X3c), which I'd never heard of, but I suppose was connected to the development of Vim's character search buttons which I use all the time. I didn't know which came first, though.
+
+### Fri Jan 12 02:39:28 PM PST 2024
+
+
+After reading about half of the extensive Lua documentation, I switched to [Inside the Playdate with C](https://sdk.play.date/2.1.1/Inside%20Playdate%20with%20C.html), the parallel docs for C. I read a bit to get the sense of the difference. I quickly realized that I needed to push towards compiling the example programs supplied with the SDK so that I could play with the system myself as I continued to learn.
+
+So I unpacked the SDK tar file with `tar -xvzf PlaydateSDK-2.1.1.tar.gz`. Then I followed the instructions in those docs to compile one of the examples.
+
+The Prerequisites section said I'd need the `arm-none-eabi-newlib` package for Linux. So I tried `apt install arm-none-eabi-newlib`. Unfortunately the package wasn't found. So I tried `apt search arm-none-eabi-newlib`. The only result was `libstdc++-arm-none-eabi-newlib`, a C++ library. I wasn't sure that was the same thing, so I searched online. I found ` libnewlib-arm-none-eabi` and tried to install it. Already at the newest version! Okay, so maybe I was good to go. I continued with the Playdate docs.
+
+I added the `export PLAYDATE_SDK_PATH=<path to SDK>` variable to my `.bashrc`, as well as adding the `/bin` to my PATH.
+
+I read the `README.md` file at the root of the SDK. Then I ran `./setup.sh` at the README's behest. It ran without error.
+
+I tried `cd Examples/FlippyFish` and then running the `cmake` commands that the docs suggested, but no luck. Turns out this was a Lua example, that needed to be compiled via `pdc`, one of the binaries which the SDK provided in the `bin` directory. After `pdc Source` from that directory, I now had a `Source.pdx` file! 
+
+So I tried `PlaydateSimulator Source.pdx`, and the Simulator started up! Unfortunately, the simulated Playdate didn't seem to have any games on it! I thought it should have the FlippyFish game, but alas!
+
+The Simulator informed me that there was a new version of the SDK, so I took a moment to remove the 2.1.1 SDK and install the new one, redoing some of the above for 2.2.0 instead.
+
+This time `PlaydateSimulator Source.pdx` worked, and I was playing FlippyFish from the simulator on my desktop, yay! So I moved on to attempting one of the C examples, which I found in the `C_API/Examples` directory.
+
+I picked one, the `3D library` example, and followed the instructions for CMake from the Command Line in that directory. It worked! I got a `3DLibrary.pdx` file, and I successfully ran it on the simulator. I'm in business now, woo!
+
+I read the code for the Game of Life C example. I had to remember how bit twiddling worked. To my surprise, I understood it! The code was straightforward, using the bits on the last frame to set the next frame. I thought this was called the "double frame buffer" approach? Though I thought it was a clever twist to use the last frame as the actual game data for the next frame! Neat.
+
+Now I wanted to see how fast the 3D library and the game of life ran on the actual device. The 3D library drew the FPS in the corner of the screen, and it got 50 FPS smoothly. The game of life example also looked very smooth. So how would they look on the device?
+
+The docs included instructions for building a `.pdx` file for the device, instead of for the simulator:
+
+```
+# From the project directory
+rm *.pdx
+rm -rf build_for_device;
+mkdir build_for_device;
+cd build_for_device;
+cmake -DCMAKE_TOOLCHAIN_FILE=$PLAYDATE_SDK_PATH/C_API/buildsupport/arm.cmake ..;
+make
+cd ..
+```
+
+But I couldn't find instructions anywhere for actually running that PDX file on the device. I searched the forum and after 10 or so posts, I found [this one](https://devforum.play.date/t/playdate-sdk-for-linux/628/31) with some answers:
+
+First, I had to locate my device on my machine. I determined it was `/dev/ttyACM0` because that file existed when the Playdate was plugged into my computer's USB port and the device was unlocked. When the Playdate locked, that file disappeared.
+
+This also relied on `pdutil` from the SDK's `bin/` directory. I added that to my PATH above.
+
+First I had to send a message to the Playdate device to switch it into "datadisk" mode. 
+
+```
+pdutil /dev/ttyACM0 datadisk
+```
+
+Then the Playdate's screen changed, and the device automatically mounted as a USB media device on my machine, as `/media/$(whoami)/PLAYDATE`. Next step, move my new `.pdx` directory into the `Games` directory on the device:
+
+```
+cp -r *.pdx /media/$(whoami)/PLAYDATE/Games/
+```
+
+Then I had to manually unplug the Playdate device and hit the A button to force it to restart. And voila, my new game was present in the Sideloaded section of the launcher!
+
+<Future>
+I figured out how to programmatically unmount the device without physically unplugging it. The forum post I linked above said [this might work](https://devforum.play.date/t/playdate-sdk-for-linux/628/23), but that seemed quite fiddly.
+</Future>
+
+So, I ran the 3D library example on the device and found the FPS to be consistently at 7! Wow, compared to a constant 50, that was enough to show me how severely underpowered the device was. 
+
+I tried the Game of Life example next. It was very choppy! Though it was cool to see how small the pixels were on the device, which the Game of Life's 1-pixel-per-cell implementation highlighted.
+
+Next I tried the Particles example. On the device, it stayed at a consistent 30fps until I went above 750 particles, at which point it dropped to 28. At 1500, it was consistently 16 fps. Would it go down to zero at 3000? Would my device light on fire? I had to find out! It went down to around 9fps and stayed there. I wasn't brave enough to go higher. On the simulator, I got bored when it wouldn't consistently drop below 30fps in after 25,000 particles! 
+
+<Future>I was eager to start on my own application, but I wanted to read more code before I decided on an approach. I looked into the other examples.</Future>
+
+<Future>Finally I felt ready to start my own thing. I copied the `???` example project because I felt it was closest to the approach I wanted to attempt.</Future>
+
+I took a diversion here to make LSP work with Doom Emacs for the C files in this project. I enabled the option in my Doom `init.el`:
+
+```lisp
+(
+  :lang
+  (cc +lsp +tree-sitter)
+)
+```
+
+I ran `doom sync -u` and restarted. When I opened the C file, Doom asked me to choose an LSP to install, and provided only one option, `clangd`. I installed that, and suddenly everything was red and squiggly. In `main.c`, `#include "pd_api.h"` was not found by the language server. I assumed there was some configuration necessary to point the LSP to the same include path that I had earlier set the `PLAYDATE_SDK_PATH` variable to in my `.bashrc`.
+
+The [official guide for Emacs LSP with C](https://emacs-lsp.github.io/lsp-mode/tutorials/CPP-guide/) recommended creating a `compile_commands.json` file, apparently standard for `clangd`. So I installed the tool Bear, which apparently did this with ease:
+
+```sh
+sudo apt-get install bear
+```
+
+Then I used `bear` on the same `make` command I'd used before, like so:
+
+```sh
+bear -- make
+```
+
+I did this in my `build_for_device` directory, since I had ran `cmake` with an extra argument for that one. Maybe that mattered? No clue. Anway, that created a `compile_commands.json` file in my `build_for_device` directory.
+
+Didn't help. I restarted the language server, but the new file didn't seem to do anything. I tried moving the new JSON file up one diretory, to the root of the project. Still no change after restarting my directory. So I looked in the JSON file to see what I was missing. There was nothing there! 
+
+That's when I realized that the instructions I was using, the [official guide for Emacs LSP with C](https://emacs-lsp.github.io/lsp-mode/tutorials/CPP-guide/), was actually the guide for working on Emacs core, not the generic LSP page. I backed up and just searched the internet for the generic "emacs lsp clangd library files" and I found [this forum answer](https://discourse.llvm.org/t/clangd-lsp-with-emacs-external-library/1593/2) with a link to [a nice "getting started" guide](https://clangd.llvm.org/installation.html#project-setup). That guide had a specific section for `cmake` projects. I tried the command it gave instead, adding a parameter to `cmake`.
+
+```
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+```
+
+That created a new `compile_commands.json` which had several good looking entries (though I didn't really know what I was looking for, something was better than nothing). I moved that JSON file again from the build directory to the project root and restarted the LSP server. Things changed!
+
+Now I had only two red squiggly errors in my buffer. The first one was at the top of the file:
+
+> main.c     1   1 error    drv_unknown_argument Unknown argument: '-mword-relocations' (lsp)
+
+I searched for that `-mword-relocations` in the JSON file. I found it in every entry, so I just tried removing it. That error disappeared. Next error:
+
+> main.c     9  10 error    pp_file_not_found 'stdio.h' file not found (lsp)
+
+Strange. Wasn't that a built-in? I searched online. I found [these instructions](https://stackoverflow.com/a/76186640) for VSCode promising because they referenced the same `arm-none-eabi-gcc` package which the Playdate docs had instructed me to install. I found `+cc-default-compiler-options` in the Doom docs for the C lang, and tried setting that the way the SO answer instructed. No change. Probably because, as the doc string for that variable said, "these are ignored if a compilation database is present in the project." I guessed that the "compilation database" was that `compile_commands.json` file. I saw in that `compile_commands.json` file that `/usr/bin/arm-none-eabi-gcc` was already the beginning of each `command` entry. 
+
+After a lot of fussing and too many searches to count, I finally found the LSP logs in Doom Emacs in the `*lsp-log*` buffer. That led me back to the [Doom docs for the C API](https://github.com/hlissner/doom-emacs/blob/master/modules/lang/cc/README.org?plain=1#L232), and the suggestion to configure the variable `lsp-clients-clangd-args`. If only I'd read those entire docs to start! Based on this answer on `clangd` GitHub, I set `--query-driver=/usr/bin/arm-none-eabi-gcc` with the configuration suggested there. Boom, language support! Unfortunately, if I ever opened the playdate header files, like `pd_api/pd_api_gfx.h`, then I got "too many errors to display", but as long as I stuck in the application files, things went swimmingly. I assumed that was due to those header files being outside of the project where my `compile_commands.json` file lay. Shrug. I asked the Playdate Discord #dev-c channel if they had similar struggles, and yes a couple people cited similar observations.
+
+### Sat Jan 13 10:47:35 AM PST 2024
+
+Read some more code from other C examples.

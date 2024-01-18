@@ -22,7 +22,6 @@ with the important note included:
 
 So the first order of business would be to take the string of hex and convert it to raw bytes.
 
-
 I had never extensively manipulated raw bytes in JavaScript beyond some experiments with bitwise operators. So I searched "using raw bytes in javascript" and started to read up. I found [this article](https://dev.to/lucasdamianjohnson/using-binary-data-in-javascript-3fn2) to have some good introductory overview.
 
 The API for `Uint8Array` made the most sense to me to manipulate raw bytes, so I tried that. I used `parseInt(n, 16)` to read in each couplet of hex digits, and write the resultant number to the next index in the typed array. Then I transformed it back into hex to verify if my head was on my shoulders. That worked! Next I tried changing `toString(16)` to `toString(64)`, because surely base64 is just as easy right? Nope! I got a fun, informative error:
@@ -195,3 +194,19 @@ I tried lowering the punishment I gave, and found I could go surprisingly low. I
 <div>Results</div>
 <div data-results></div>
 </details>
+
+### Sun Jan 14 11:59:30 AM PST 2024
+
+After the first RC meetup on the topic where I saw others' low-level language solutions, I decided to restart the challenges in C. Unfortunately, that meant I would lose my ability to run these in-browser. But that's just one more way I had to commit to escape my comfort zone! On the positive side, I had already set up my workspace for C for <Link slug="project-explore-uxn-and-playdate">Playdate development</Link>.
+
+I created a new project directory and [git & GitHub repository](https://github.com/reedspool/cryptopals-clang). Then I created and ran a Hello World C program. I installed `clang-format` which Doom Emacs picked up immediately.
+
+I also began reading [Beej's Guide to C Programming](http://docs.hfbk.net/beej.us/bgc/) as I began this, since I hadn't written significant C in a long time. I had to shake off a lot of mental cobwebs as I began, and also search for a lot of basic stuff, like `strlen`.
+
+I got through decoding hex to binary with few speed bumps. Encoding to base64 really stretched my brain. My strategy was to "unroll the loop in my head". That is, I immediately jumped to writing a for-loop, knowing that I'd have to loop through the whole input to produce the output. But I had no idea what to put there. So I write out C code to produce the first few characters with no loop, just a lot of numbers and indices. Once that worked, I tried to extract a pattern and refine it into a simpler loop. It took me a long time to puzzle it out, but when everything clicked into place, I wasn't displeased with my solution!
+
+I moved on to challenge 2. Again I had to hex decode the input. So I took a moment to refresh my memory on how to make, import, and use an external function in C so that I could start to build a library of reusable parts like hex decoding. That went smoothly enough. I had to make a new utility function to re-encode hex, and reversing the function I'd already written was a bigger stumbling block than the hex decoding itself.
+
+For challenge 3, I had to determine how to represent the expected frequency table form my JavaScript code. I ended up with an array of double-length floating point frequencies where the value for the letter "a" was the first entry. Over the years, I've forgotten just how much I take for granted with a dynamic language!
+
+<Future>I checked out other people's C solutions (Jacob V's!)</Future>
