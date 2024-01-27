@@ -162,7 +162,7 @@ I began to work on <Link slug="project-add-rss">RSS for my website which Bryan h
 
 ### Tue Oct 10 10:26:05 PM PDT 2023
 
-<Future>I wanted a list of all the posts on my site which were not linked anywhere so I could add new posts at-will and remember to add links to them later.</Future> 
+<Future>I wanted a list of all the posts on my site which were not linked anywhere so I could add new posts at-will and remember to add links to them later.</Future>
 
 
 ### Sat Oct 14 12:47:38 AM PDT 2023
@@ -175,12 +175,11 @@ I wanted a cleaner git diff for my generated file when I added a new post, so I 
 
 ### Sun Nov  5 08:47:26 PM PST 2023
 
-I made a new 
-<Link slug="project-supabase-authentication">project to try Supabase authentication</Link>.
+I made a new <Link slug="project-supabase-authentication">project to try Supabase authentication</Link>.
 
 ### Wed Nov 15 12:15:25 AM PST 2023
 
-<Future>I wanted to publish password-encrypted pages on my website alongside my public posts. I considered encrypting files in my public site repository on GitHub, via https://github.com/AGWA/git-crypt or similar, but it seemed simpler to pull the files from an external, private source. I could pull the files at build-time on Netlify. Then I still needed a solution to encrypt a webpage's contents there, then decrypt the webpage after one entered a password on the browser. One such option was https://github.com/Greenheart/pagecrypt.</Future> 
+<Future>I wanted to publish password-encrypted pages on my website alongside my public posts. I considered encrypting files in my public site repository on GitHub, via https://github.com/AGWA/git-crypt or similar, but it seemed simpler to pull the files from an external, private source. I could pull the files at build-time on Netlify. Then I still needed a solution to encrypt a webpage's contents there, then decrypt the webpage after one entered a password on the browser. One such option was https://github.com/Greenheart/pagecrypt.</Future>
 
 <HashTarget id="exploring-client-side-js-in-nakedjsx">Exploring client-side JS in NakedJSX</HashTarget>
 
@@ -189,7 +188,7 @@ I made a new
 I wanted to style and shape my client-side UI and text more easily, so I looked up how to use client-side JSX via NakedJSX, the library my site was built upon. The [documentation](https://nakedjsx.org/documentation/#client-js-jsx) was a little confusing. It proposed there was no special thing I needed to do to use JSX in my client-side JavaScript, but I found that hard to believe. I tried it out right here.
 
 ```
-<div client-side-jsx-test></div> 
+<div client-side-jsx-test></div>
 <script contenteditable class="block">document.querySelector('[client-side-jsx-test]').appendChild(<div>My div</div>)</script>
 ```
 
@@ -207,13 +206,13 @@ And again, that worked. Yay! So I suspected this only worked with the `onClick` 
 
 I experimented with the `Page.AppendJs` syntax and I was able to make a global function which appended a JSX element. Nice.
 
-I had a circuitous idea to achieve my goal of writing client-side JSX inline in my MDX articles: export a function from MDX, then import it along with the rest of my MDX file, and finally include it in the compiled page via `Page.AppendJs`. I got close, but the JSX wasn't transformed into JavaScript the way it was in `-client.jsx` and other literal calls to `Page.AppendJs`. 
+I had a circuitous idea to achieve my goal of writing client-side JSX inline in my MDX articles: export a function from MDX, then import it along with the rest of my MDX file, and finally include it in the compiled page via `Page.AppendJs`. I got close, but the JSX wasn't transformed into JavaScript the way it was in `-client.jsx` and other literal calls to `Page.AppendJs`.
 
 So I had a way forward, but it unfortunately involved authoring my client-side JavaScript in a separate file. I reported my results to the author of NakedJSX and we had a nice chat about it.
 
 <Future>After chatting with the creator of NakedJSX about my goals of writing more inline JavaScript and JSX for both the client and statically-generated server-side, he helped me understand that I might want to write my own implementation of a static site generator with vanilla JSX. [He gave me some pointers of how I might do that](https://discord.com/channels/1101319012673134614/1101319013285498882/1175275036312092722) and I committed to trying it out sometime in the future.</Future>
 
-On a different topic, I added the ability to my `Link` component to target an ID on an internal page (`HashTarget`) so that I could track my usage of internal links to specific places. 
+On a different topic, I added the ability to my `Link` component to target an ID on an internal page (`HashTarget`) so that I could track my usage of internal links to specific places.
 
 ### Thu Nov 23 15:48:27 PST 2023
 
@@ -244,7 +243,7 @@ I realized that my `Link` component had a similar issue: at this point, it only 
 
 ### Fri Dec  8 08:13:24 PM PST 2023
 
-<Future>I thought readers of my website might appreciate if my logbooks were in reverse chronological order instead of beginning-to-end. Maybe a button to reverse that order could be useful too. I thought I might be able to use CSS to reverse the visual order of each. Though for that I would probably need to convert my simple Markdown title+paragraph format for a JSX Logbook component with sub-LogbookEntry items. That way, I would be able to wrap each entry in custom HTML to target with my CSS.</Future> 
+<Future>I thought readers of my website might appreciate if my logbooks were in reverse chronological order instead of beginning-to-end. Maybe a button to reverse that order could be useful too. I thought I might be able to use CSS to reverse the visual order of each. Though for that I would probably need to convert my simple Markdown title+paragraph format for a JSX Logbook component with sub-LogbookEntry items. That way, I would be able to wrap each entry in custom HTML to target with my CSS.</Future>
 
 I wrote a small script to create a new project file since there were a handful of rote automate-able steps.
 
@@ -273,7 +272,7 @@ When I tried it, I found it took many steps
   1. some text to write to the page (because invisible elements are bad for accessibility, right?)
 2. Editing my `Link.json` to add the new link between the current article slug and the "hash id" I just created, as a stop-gap to throw an error if I mistype a hash ID or forget to add the target.
 
-So that was a lot of separate steps for something I wanted to do a lot. 
+So that was a lot of separate steps for something I wanted to do a lot.
 
 Furthermore, I realized that a lot of the time, I'd want to add a "backlink" as an equal and opposite link back to where I was writing my link. So that would double the steps to do it again.
 
@@ -299,3 +298,15 @@ So I learned I'd be using the word `hash` where `fragment` was the correct term.
 ### Sun Jan  7 09:40:21 AM PST 2024
 
 <Future>I realized that if I ever wanted to use this website like a Second Brain or a Zettelkasten (and I believed at the time that I did), that I would need to continue to reduce the friction for the steps of both creating new notes/entries/pages as well as linking and backlinking between them. There were too many steps for each and too much thinking. That thought about the creation of those documents would distract me from the thought which I was actually trying to transcribe into my note system.</Future>
+
+### Sat Jan 27 12:58:55 PM PST 2024
+
+My experience at Recurse Center shifted my relationship to computing. Before, outside of work I did not spend so much time on my computer. And when I did go on my computer, the possibilities of distraction pulled my attention away from the tasks I wanted to do. I adapted to that situation in the past with tools to support focus. After years of experiments based on the recommendations of self-helpers, I found two essential and sufficient tools for myself in that situation. The first tool was a pomodoro clock for my watch which would buzz me after 25 minutes. The second was the "log book" technique.
+
+My log book tool was the main force which drove me to this build website the way I did. This entry is in my log book! My log book is a tool for thought. When I wrote that last sentence, I took a break to search around for the phrase "tools for thought" and watch [some videos](https://www.youtube.com/watch?v=t6uhvFGPUE0).
+
+How was my behavior different since my experience at Recurse Center? Well, as per the organizations focus on training volition, my time on the computer was both more directed and more full. More directed because I had many immediate "next steps" to perform on a variety of efforts from hosting to homework for several weekly commitments I made for the duration of the program. And more full, as when I opened my computer each morning I found 22 tabs opened waiting for a curious glance.
+
+I no longer had the issue of distraction which led me to build this site. But the benefit of this site was more than just a tool for focus.
+
+So I wanted to keep using this website as a tool, but fix some of the specific frictions which my new behavior afforded.
