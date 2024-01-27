@@ -154,3 +154,15 @@ After a lot of fussing and too many searches to count, I finally found the LSP l
 ### Sat Jan 13 10:47:35 AM PST 2024
 
 Read some more code from other C examples.
+
+### Wed Jan 24 10:50:31 AM PST 2024
+
+Last week Quinten and I drew a line on the Playdate and made it rotate with the angle of the crank!
+
+Setting up `clangd` was easier in this new project. I just added the argument to `cmake`: `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1`. This project was simpler so far, since I'd stripped out all the bits and bobs of one of the examples (game of life). I spent some time creating a README and fiddling with some configuration so that I could put it up on GitHub. 
+
+I played with a stencil buffer for Creative Coding time. I had to create a bitmap with a white background, draw some text to it (via `pushContext`), then set it as a stencil.
+
+I decided to attempt to make a small Forth implementation for the Playdate, so I started a new project. I began to follow [these instructions](https://news.ycombinator.com/item?id=13082825).
+
+

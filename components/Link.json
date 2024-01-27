@@ -36,7 +36,9 @@
     "project-solve-cryptopals": "project-solve-cryptopals.html"
   },
   "slugsToHashes": {
-    "project-improve-this-website": ["exploring-client-side-js-in-nakedjsx"],
+    "project-improve-this-website": [
+      "exploring-client-side-js-in-nakedjsx"
+    ],
     "project-supabase-authentication": [
       "supabase-auth-starting-body-weight-app"
     ],

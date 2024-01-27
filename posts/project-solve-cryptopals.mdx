@@ -210,3 +210,37 @@ I moved on to challenge 2. Again I had to hex decode the input. So I took a mome
 For challenge 3, I had to determine how to represent the expected frequency table form my JavaScript code. I ended up with an array of double-length floating point frequencies where the value for the letter "a" was the first entry. Over the years, I've forgotten just how much I take for granted with a dynamic language!
 
 <Future>I checked out other people's C solutions (Jacob V's!)</Future>
+
+### Tue Jan 16 10:21:26 AM PST 2024
+
+As I began working on challenge 4, my plan was:
+
+1. Read the file in
+2. Split it into an array of `char *`
+3. Extract my analysis from challenge 3 into a utility which returns an array of structs `{ char byte, char *line, double score }`
+4. Run that analysis for each line of the input and compile the results into one big list
+5. Sort that list to raise the optimal scores to the top
+
+My first step was simple - I downloaded the input file. Then, I didn't know how to read a file in from C. These two SO answers got me on my feet, [1](https://stackoverflow.com/a/3501681) and then because I didn't understand that the `#define` line was important, [2](https://stackoverflow.com/a/59014150). 
+
+Then I took a moment to both extract analysis from challenge 3 as a utility function, and at the same time create the struct as a more usable return value. That took a lot of fiddling. Especially `malloc`ing structs and a list of structs was confusing. [This SO answer](https://stackoverflow.com/questions/14768230/malloc-for-struct-and-pointer-in-c) helped me understand.
+
+Hours later, I had a working answer to challenge 4. I had to fix many non-obvious errors with memory allocation. I couldn't say I concretely learned a lesson except that I was reminded thoroughly of the tedium of memory. This was the reason I was doing C, though, so it was good to have a practical reason to push through this retraining. After I thought I had every memory bug alleviated, my answer was still off. My calculation looked correct, but the answer was nonsense. I'm not sure how, but the thought occurred to me that I might be giving a bad score for spaces, which are a totally normal thing in English. I added a clause to not punish spaces specifically, and suddenly the answer jumped out at me! Still as exciting and relieving as the first time! Success reinvigorated me to keep pushing.
+
+Challenge 5 looked comparably straightforward. I wasn't sure whether I should not encrypt the newline in the input statement.
+
+> Burning 'em, if you ain't quick and nimble<newline>
+> I go crazy when I hear a cymbal
+
+Because the same newline existed in the expected output.
+
+> 0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272
+> a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f
+
+I tried with the newline in the input, but without the newline in the output. I figured that the newline would exist encoded in the binary, because this algorithm should be able to encode arbitrary binary, not just the rap lyric. That was correct! In just a few minutes, my solution succeeded on the first try!
+
+Challenge 6 seemed like an entirely different beast. I decided to do the first fun part and write the Hamming Distance function. I was proud of my observation that I could use XOR between the two inputs to get 1's for every differing bit. Then I just had to count the 1 bits. I thought there must be a more clever solution to count the number of 1's in a byte than the for loop I wrote which just shifted each bit down and masked it with 1. But it worked, and it compiled without error the first try!
+
+### Sat Jan 27 01:52:53 PM PST 2024
+
+Since I solved challenge 5, I fell off. I hoped to get back to Cryptopals soon or someday because it was immensely fun. I reflected on what kept me from proceeding in a conversation with Jacob and found it was too much of a challenge to use C when I felt so basic with it. I was learning C via other projects and having a lot of fun. But with Cryptopals, my lack of knowledge was an issue when I ran into a bug. Because I was also a beginner in the space of cryptography, I never knew if the issue was a bug in my program or with my cryptographic logic. So I thought I might go back to JavaScript or continue with C when I had more experience.
