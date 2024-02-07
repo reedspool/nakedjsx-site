@@ -1,0 +1,62 @@
+# Project: Explore Forth
+
+## Logbook
+
+### Sat Jan 20 14:22:37 PST 2024
+
+I absorbed a lot of Forth content over the past week. I made a short list of what I could remember of my browser tabs as their number grew and fell:
+
+- Read "Forth: The Language That Writes Itself" - this kicked it all off, thank you Kevin!
+- Read some of jonesforth.S
+- Watched SmithForth video - and the amazing videos on hand-crafted ELF files.
+- Read 3 chapters of Starting Forth by Brodie.
+- Watched several "what's forth?" videos at 2x speed.
+- A meeting of the Silicon Valley Forth Interest Group who organize on a Google Group and publish many videos of talks given.
+- Watched "Over the Shoulder: 1", grateful to see a skilled Forther in action  - Are there more Over the Shoulders?
+
+<Future>I kept coming back to this list until I got to everything. I searched for more stuff by the creators of the resources I enjoyed the most</Future>
+
+I wanted to make a project in Forth. I had some ideas. One was to attempt to make my own Forth in C or Assembly by hand as I followed the footsteps of jonesforth or SmithForth. Another idea was to make a JavaScript version. Either one for Node scripting or one for the web. What similarities and differences would they have? What could I learn by comparison to the Forths I've seen others use so far?
+
+Maybe I should finish reading Starting Forth before I began any other project in earnest?
+
+<Future>
+I split this out into its own project
+
+I started to build a forth in JavaScript. It felt weird calling it a Forth, since the only Forths I'd seen so far had been built in lower level languages. And so many of the common Forth words referred to locations in memory, which was off limits in JavaScript.
+
+I found other JavaScript Forths to emulate (in the sense of learning, not of computer emulation). Though, one side of me wanted to ignore them and see how I did on my own to begin. 
+
+I felt like there was a happy union between JavaScript and Forth because of JavaScript's single-threaded nature. I hadn't observed any non-single-threaded Forth. I was curious how a low-level Forth would handle software interrupts as that might inform a strategy for how to handle JavaScript's EventLoop. 
+
+I wanted to copy Hyperscript's cool strategy of applying scripts directly to elements as attributes. I admired how fit-for-purpose Hyperscript was as a web-focused language. I wanted similar for my language. I wanted it to be a convenient way to achieve common goals on web pages such as click handlers and API requests and the DOM updates which result from them.
+
+I considered what application I wanted to make as I built my Forth. I didn't want to arbitrarily build my language without a real-world application. Some improvement for my website? Some standalone application like my body weight recording? What about a "development environment" for the library itself? Would that be too circular to be a real-world application?
+</Future>
+
+<Future>
+I considered using Forth to make a TUI application similar to what Quinten was building in Rust.
+</Future>
+
+<Future>
+I had a thought about an action game where power ups were more Forth Words to put into the quotations which ran when the player hit a button. For example, if your "B" button was assigned to the word "SHOOT" which was defined as 
+
+```
+: SHOOT   AMMUNITION FIRE ;
+```
+
+Where `AMMUNITION` pushes one "bullet" onto the stack, and `FIRE` consumes it to fire into the game world. Then if the player acquires a "POWERFUL" spell, that can go between `AMMUNITION` and `FIRE` and pop the ammo off the stack and push a more powerful version.
+</Future>
+
+<Future>I considered a Forth development environment as a Playdate application. If I did this, it might help me understand the Uxn project. It might also be fun to work towards building something on the Playdate in general. How cool would it be to crack the cryptopals challenges coded on a Playdate?</Future>
+
+<Future>I considered restarting the cryptopals challenges in Forth.</Future>
+
+### Tue Feb  6 09:31:44 PM PST 2024
+
+At Kevin's encouragement, I set up a time to talk with some RC'rs about Forth. We worked through writing an implementation of factorial in `gForth`. We came up with this:
+
+```
+: fac ( n -- nfac ) 1 swap 1+ 1 do I * .s cr loop ;
+5 fac . ( expected 120 )
+```
