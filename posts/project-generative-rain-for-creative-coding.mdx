@@ -1,0 +1,46 @@
+# Project: Generative Rain for Creative Coding
+
+For Genuary's prompt "generative sound," I thought of generating some cascade of sound which emulated rain, with varying intensity.
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha512-jduERlz7En1IUZR54bqzpNI64AbffZWR//KJgF71SJ8D8/liKFZ+s1RxmUmB+bhCnIfzebdZsULwOrbVB5f3nQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<button id="play" class="cpnt-button mb-4 block">Play Sound</button>
+<button id="increase-frequency" class="cpnt-button mb-4 block">Increase Frequency</button>
+<button id="random-duration" class="cpnt-button block">Random Duration</button>
+<FancyScriptTag type="application/javascript" async>{`let polySynth = new Tone.PolySynth(Tone.Synth).toDestination()
+let rootFrequency = 220;
+let chordSemitones = [0, 3, 4, 5, 7, 12];
+let durationRange = [0.002, 0.01];
+let delay = durationRange[1] + 0.07;
+document.querySelector("#play").addEventListener("click", () => {
+    function playNextTone() {
+        delay = durationRange[1] + 0.07;
+        const pitch = rootFrequency * Math.pow(2, (Math.floor(Math.random() * 12)) / 12);
+        const duration = (Math.random() * (durationRange[1] - durationRange[0])) + durationRange[0];
+        console.log("duration", duration)
+        polySynth.triggerAttackRelease(pitch, duration, Tone.now());
+        setTimeout(playNextTone, delay * 1000);
+    }
+    setTimeout(playNextTone, delay * 1000);
+})
+document.querySelector("#increase-frequency").addEventListener("click", () => {
+    rootFrequency += 40;
+})
+document.querySelector("#random-duration").addEventListener("click", () => {
+    durationRange[0] = (Math.random() * 0.05) + 0.001;
+    durationRange[1] = (Math.random() * 0.05) + 0.001;
+    
+    if (durationRange[1] < durationRange[0]) {
+        let swap = durationRange[1];
+        durationRange[1] = durationRange[0];
+        durationRange[0] = swap;
+    }
+})
+`}</FancyScriptTag>
+
+
+## Logbook
+
+### Wed Jan 31 10:38:38 PST 2024
+
+Generated this page with my script. Working with Jen Hsin. 
