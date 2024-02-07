@@ -1,0 +1,120 @@
+# Project: Concatenative JavaScript
+
+After I explored Forth, I wondered if I could apply some of what I learned to my comfort zone of JavaScript in a browser environment. 
+
+## Progress
+
+<details>
+<summary>Code</summary>
+<FancyScriptTag type="module">{`
+let dictionary = null;
+const ctx = {
+  parameterStack: [],
+  inputStream: "",
+  inputStreamPointer: 0,
+  pop: () => ctx.parameterStack.pop(),
+  push: (...args) => ctx.parameterStack.push(...args),
+  me: null
+}
+
+function addDictionaryWord({ name, impl }) {
+  const prev = dictionary;
+  dictionary = { prev, name, impl }
+}
+
+addDictionaryWord({ name: "me", impl: ({ ctx }) => ctx.push(ctx.me) })
+addDictionaryWord({ name: "'", impl: ({ ctx }) => {
+    ctx.push(consume({ until: "'", including: true }))
+} })
+addDictionaryWord({ name: ">text", impl: ({ ctx }) => ctx.pop().innerText = ctx.pop() })
+
+function findDictionaryEntry({ word }) {
+  let entry = dictionary;
+  
+  while (entry) {
+    if (entry.name == word) return entry;
+    entry = entry.prev
+  }
+}
+
+function wordAsPrimitive({ word }) {
+  const toReturn = { isPrimitive: true };
+  if (word.match(/^-?\d+$/)) { 
+    toReturn.value = parseInt(word, 10);
+  } else if (word.match(/^-?\d+(\.\d+)?$/)) { 
+    toReturn.value = parseFloat(word, 10);
+  } else {
+    toReturn.isPrimitive = false;
+  }
+  
+  return toReturn;
+}
+
+function execute({ word }) {
+  const dictionaryEntry = findDictionaryEntry({ word })
+  
+  if (dictionaryEntry) {
+    dictionaryEntry.impl({ ctx });
+  } else {
+    const primitiveMaybe = wordAsPrimitive({ word });
+    
+    if (primitiveMaybe.isPrimitive) {
+        ctx.push(primitiveMaybe.value)
+    } else {
+        throw new Error(\u0060Couldn't comprehend word '\${word}'\u0060);
+    }
+  }
+}
+
+function consume({ until, including }) {
+    let value = '';
+    while (ctx.inputStreamPointer < ctx.inputStream.length) {
+      const char = ctx.inputStream[ctx.inputStreamPointer];
+      if (typeof until === "string" && char === until) break;
+      if (RegExp.prototype.isPrototypeOf(until) && until.test(char)) break;
+      ctx.inputStreamPointer++;
+      value += char;
+    }
+    if (including) ctx.inputStreamPointer++;
+    return value;
+}
+
+function query({ input, me }) {
+  ctx.me = me;
+  ctx.inputStream += input;
+
+  while (ctx.inputStreamPointer < ctx.inputStream.length) {
+    // Consume any beginning whitespace
+    consume({ until: /\\S/ })
+    
+    // Input only had whitespace
+    if (ctx.inputStreamPointer >= ctx.inputStream.length) return;
+    
+    const word = consume({ until: /\\s/ })
+  
+    if (word.length > 0) {
+      execute({ word })
+    }
+  }
+}
+
+document.querySelectorAll("[c]").forEach(el => query({ input: el.getAttribute('c'), me: el }))
+`}</FancyScriptTag>
+</details>
+
+## Tests
+
+<div>First test: <span c="' Success' me >text">This text should change</span></div>
+<div>Leading and extra whitespace don't change anything: <span c="    ' Success'    me    >text   ">This text should change</span></div>
+
+## Logbook
+
+### Tue Feb 06 21:53:03 PST 2024
+
+I reflected on [Hyperscript](https://hyperscript.org) and how it added a convenient layer on top of JavaScript. In my experience with Hyperscript, I was frustrated with extending the language. And that was one of the main strengths of what I'd learned of Forth. So I started this experiment as a way to explore some universe where a library as convenient as Hyperscript was as extensible as Forth.
+
+I started with a script on this page.
+
+### Wed Feb  7 10:46:08 AM PST 2024
+
+I continued making progress in the time normally allotted for creative coding. Today's creative coding prompt was "some of my favorite things." JavaScript, exploring programming languages, and putting energy towards creative interfaces felt aligned with the prompt.
