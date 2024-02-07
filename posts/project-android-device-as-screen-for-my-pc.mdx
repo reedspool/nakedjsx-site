@@ -1,0 +1,55 @@
+# Project: Android Device As Screen For My PC
+
+I really like looking at my Android e-ink phone, and I really like typing on my USB keyboard. My e-ink phone doesn't have a full USB port like my computer, so I can't just plug in my keyboard. I do have a bluetooth keyboard which I use with the phone, which is great as a travel device, but not as great of an actual keyboard.
+
+## Logbook
+
+### Sat Jan 27 02:33:27 PM PST 2024
+
+I had succeeded with SSH, `tmux`, and `emacs`'s no-window mode (`-nw`) together before to type on my USB keyboard and use my e-ink phone as a screen. The setup was a bit hairy, so I started this doc to describe my process and hopefully work towards a more streamlined version.
+
+I began with a new `tmux` session on my main machine in a new terminal.
+
+```sh
+tmux new -s mysession
+```
+
+Then, to test, in another terminal on my main machine I connected with
+
+```sh
+tmux attach -t mysession
+```
+
+Then I opened emacs in no window mode.
+
+```sh
+emacs -nw
+```
+
+Once all that worked, after some tweaking and reading of the `man tmux` documentation, I used Termux and my bluetooth keyboard to SSH from my e-ink device to my main machine and connect to the `tmux` session.
+
+There were a few weird moments. First of all was the screen size. Second, some key presses were consumed by `tmux` instead of applying to Emacs.
+
+<Future>I researched the lost keypresses. I had faced this issue before. I figured I simply had to configure `tmux` to not worry about those commands. Or so I thought. I isolated one such issue: I found that when I hit `Control-[` to exit insert mode, Emacs was not receiving that keypress until I lifted my finger off the control key. Outside of the `tmux` context, Emacs received that keystroke as soon as both keys were struck.</Future>
+
+I searched my screen size problem on Google. For some reason, every time I typed, the `tmux` pane resized to take up all the available space in the terminal window on my computer. Invariably, this was bigger than the e-ink screen size. What I wanted was for `tmux` to always use the smallest connected screen's size as the maximum for all the panes, so that the smaller size of e-ink screen was the main constraint.
+
+I found a setting for this `set -g window-size smallest` from this [stack exchange answer]( https://unix.stackexchange.com/questions/622210/tmux-how-to-always-resize-all-windows-to-maximum-available-size#comment1178672_622211)
+
+And from the [`tmux` docs](https://github.com/tmux/tmux/wiki/Getting-Started#the-command-prompt) I learned I could call that `set` command in the `tmux` command prompt via `C-b :`. That seemed to do the trick! Once I ran that, my `tmux` pane no longer auto-adjusted to the size of the terminal my USB keyboard was typing on my machine. It made the illusion of typing on my e-ink screen almost flawless!
+
+I researched how to create a `tmux` config file so that I didn't have to apply this setting every time I started a session like this.
+
+So, with that I had a consistent process to connect to my e-ink device. However, it took a lot of steps and effort.
+
+<Future>I explored how this could be simpler. I could make some aliases. Could I also start the process via my e-ink screen somehow? Like, run a bash script through SSH to start a new terminal on my machine, start a new `tmux` session in it (or don't do any of this if a session already exists?) and start emacs in it, then on the e-ink device (from the context which I issue this command - well actually it's just another shell on my machine because it's through SSH) connect to that `tmux` session and start emacs if Emacs isn't already running on that persistent `tmux` session.</Future>
+
+<Future>When I started the `tmux` session and opened Emacs, that Emacs was a new Daemon session and not connecting to the Emacs Daemon which was already running to support the GUI Emacs which I used directly on my machine. I wanted to use the same daemon session. I wasn't exactly why I wanted to use the same daemon, so I explored that concept more. Well, one reason was that it increased friction going back to my GUI when I wanted to. Because they were two separate editors, I had to make sure I saved everything on one and refreshed the buffer from disk on the other and manage all that. If they connected to the same daemon, none of that would be bothersome and I couldn't have conflicts.</Future>
+
+Another friction I found is when my computer auto-locked after some period, since my monitor was off, I couldn't see the login screen. Now, I'd unlocked my computer so many times it was automatic. But if I messed it up, I knew I'd have to turn on my monitor and distract myself. So I considered turning off my PC's auto lock. Fortunately, even when my computer auto-locked, as long as it didn't go to sleep, the SSH and `tmux` connections would be stable throughout. I simply had to unlock.
+
+<Future>I researched a way to set my computer to not auto-lock in this context, and easily switch back to my normal auto-locking profile</Future>
+
+### Tue Feb  6 08:47:30 PM PST 2024
+
+<Future>I tried a male USB C to female USB dongle I'd found to plug my USB keyboard directly into my e-ink phone.</Future>

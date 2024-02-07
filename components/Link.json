@@ -33,7 +33,9 @@
     "project-useful-new-tab-page": "project-useful-new-tab-page.html",
     "project-switch-main-google-account": "project-switch-main-google-account.html",
     "project-explore-uxn-and-playdate": "project-explore-uxn-and-playdate.html",
-    "project-solve-cryptopals": "project-solve-cryptopals.html"
+    "project-solve-cryptopals": "project-solve-cryptopals.html",
+    "impossible-day-project-edit-from-live-to-local": "impossible-day-project-edit-from-live-to-local.html",
+    "project-android-device-as-screen-for-my-pc": "project-android-device-as-screen-for-my-pc.html"
   },
   "slugsToHashes": {
     "project-improve-this-website": [
