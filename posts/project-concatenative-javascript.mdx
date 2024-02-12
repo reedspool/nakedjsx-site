@@ -8,6 +8,7 @@ After I explored Forth, I wondered if I could apply some of what I learned to my
 <summary>Code</summary>
 <FancyScriptTag type="module">{`
 let dictionary = null;
+let compilingMode = false;
 const ctx = {
   parameterStack: [],
   inputStream: "",
@@ -18,9 +19,9 @@ const ctx = {
   me: null
 }
 
-function addDictionaryWord({ name, impl }) {
+function addDictionaryWord({ name, impl, immediateImpl }) {
   const prev = dictionary;
-  dictionary = { prev, name, impl }
+  dictionary = { prev, name, impl, immediateImpl }
 }
 
 addDictionaryWord({ name: "swap", impl: ({ ctx }) => {
@@ -48,10 +49,40 @@ addDictionaryWord({ name: "rot", impl: ({ ctx }) => {
 addDictionaryWord({ name: "dup", impl: ({ ctx }) => ctx.push(ctx.peek())})
 addDictionaryWord({ name: "drop", impl: ({ ctx }) => ctx.pop()})
 addDictionaryWord({ name: "me", impl: ({ ctx }) => ctx.push(ctx.me) })
-addDictionaryWord({ name: "'", impl: ({ ctx }) => {
+addDictionaryWord({ 
+  name: "'",
+  impl: ({ ctx }) => {
     ctx.push(consume({ until: "'", including: true }))
-} })
+  },
+  immediateImpl: ({ ctx }) => {
+    const text = consume({ until: "'", including: true });
+    dictionary.compiledWordImpls.push(() => ctx.push(text));
+  }
+})
 addDictionaryWord({ name: ">text", impl: ({ ctx }) => ctx.pop().innerText = ctx.pop() })
+addDictionaryWord({ name: "&&", impl: ({ ctx }) => {
+  const b = ctx.pop();
+  const a = ctx.pop();
+  ctx.push(a && b);
+}})
+
+addDictionaryWord({ name: ":", impl: ({ ctx }) => {
+  let dictionaryEntry;
+
+  // Consume any beginning whitespace
+  consume({ until: /\\S/ })
+  const name = consume({ until: /\\s/ })
+  // TODO: How will we continue to call each after calling the first one? Need to implement the return stack
+  console.log("Name:", \u0060'$\{name}'\u0060)
+  addDictionaryWord({ name, impl: ({ ctx }) => { dictionaryEntry.compiledWordImpls[0]({ ctx }) } })
+  dictionaryEntry = dictionary;
+  dictionaryEntry.compiledWordImpls = [];
+  compilingMode = true;
+}})
+
+addDictionaryWord({ name: ";", immediateImpl: ({ ctx }) => {
+  compilingMode = false;
+}})
 
 function findDictionaryEntry({ word }) {
   let entry = dictionary;
@@ -68,6 +99,10 @@ function wordAsPrimitive({ word }) {
     toReturn.value = parseInt(word, 10);
   } else if (word.match(/^-?\d+(\.\d+)?$/)) { 
     toReturn.value = parseFloat(word, 10);
+  } else if (word === "true") { 
+    toReturn.value = true;
+  } else if (word === "false") { 
+    toReturn.value = false;
   } else {
     toReturn.isPrimitive = false;
   }
@@ -79,12 +114,24 @@ function execute({ word }) {
   const dictionaryEntry = findDictionaryEntry({ word })
   
   if (dictionaryEntry) {
-    dictionaryEntry.impl({ ctx });
+    if (compilingMode) {
+      if (dictionaryEntry.immediateImpl) {
+        dictionaryEntry.immediateImpl({ ctx })
+      } else {
+        dictionary.compiledWordImpls.push(dictionaryEntry.impl)
+      }
+    } else {
+      dictionaryEntry.impl({ ctx });
+    }
   } else {
     const primitiveMaybe = wordAsPrimitive({ word });
     
     if (primitiveMaybe.isPrimitive) {
+      if (compilingMode) {
+        dictionary.compiledWordImpls.push(() => ctx.push(primitiveMaybe.value))
+      } else {
         ctx.push(primitiveMaybe.value)
+      }
     } else {
         throw new Error(\u0060Couldn't comprehend word '\${word}'\u0060);
     }
@@ -147,7 +194,9 @@ If you see ❌ or 🚧, then that test has failed.
 
 <div>`rot`: <span c="' ✅' ' ❌' ' ❌' rot me >text">🚧</span></div>
 
-<div>`&&`: <span c="' ✅' true = ">🚧</span></div>
+<div>`&&`: <span c="true ' ✅' && me >text">🚧</span></div>
+
+<div>`:` and `;`: <span c=": test ' ✅' ; test me >text">🚧</span></div>
 
 <div>Click event: <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span></div>
 
