@@ -1,10 +1,15 @@
 # Project: Android Device As Screen For My PC
 
-I really like looking at my Android e-ink phone, and I really like typing on my USB keyboard. My e-ink phone doesn't have a full USB port like my computer, so I can't just plug in my keyboard. I do have a bluetooth keyboard which I use with the phone, which is great as a travel device, but not as great of an actual keyboard.
+To use my USB keyboard with my Android device, I simply use a male USB-C to female USB 2.0 dongle I have. It works great!
+
+But I didn't think of that simple solution at first. Instead I did my normal over-engineering. That was a fun dive into `tmux` and SSH documented in the logbook below.
 
 ## Logbook
 
 ### Sat Jan 27 02:33:27 PM PST 2024
+
+I like looking at my Android e-ink phone, and I like typing on my USB keyboard. My e-ink phone doesn't have a full USB port like my computer, so I can't just plug in my keyboard. I do have a bluetooth keyboard which I use with the phone, which is great as a travel device, but not as great of an actual keyboard.
+
 
 I had succeeded with SSH, `tmux`, and `emacs`'s no-window mode (`-nw`) together before to type on my USB keyboard and use my e-ink phone as a screen. The setup was a bit hairy, so I started this doc to describe my process and hopefully work towards a more streamlined version.
 
@@ -50,6 +55,8 @@ Another friction I found is when my computer auto-locked after some period, sinc
 
 <Future>I researched a way to set my computer to not auto-lock in this context, and easily switch back to my normal auto-locking profile</Future>
 
-### Tue Feb  6 08:47:30 PM PST 2024
+### Wed Feb 14 08:03:17 PM PST 2024
 
-<Future>I tried a male USB C to female USB dongle I'd found to plug my USB keyboard directly into my e-ink phone.</Future>
+I tried a male USB-C to female USB dongle I'd found to plug my USB keyboard directly into my e-ink phone.
+
+It worked perfectly. I was moderately embarrassed that I had spent so much time over-engineering a less-fun solution, but the process sure was fun.
