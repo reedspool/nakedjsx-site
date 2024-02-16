@@ -24,6 +24,10 @@ const dataForPages = [
     output: "build/record.js",
   },
   {
+    clientSrc: "src/project-concatenative-javascript.tsx",
+    output: "build/project-concatenative-javascript.js",
+  },
+  {
     pageJsxOrTsxSrc: "pages/log-game.tsx",
     output: "build/log-game.html",
     layout: "EmptyLayout",
