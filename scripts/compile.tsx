@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
 import { compile as compileMdx } from "@mdx-js/mdx";
+import remarkGfm from "remark-gfm";
 import { reporter } from "vfile-reporter";
 import esbuild from "esbuild";
 import chokidar from "chokidar";
@@ -80,6 +81,7 @@ async function compilePageFromMdx({
       jsx: true,
       development: true,
       elementAttributeNameCase: "html",
+      remarkPlugins: [remarkGfm],
     },
   ).then((result) => {
     console.log("Writing MDX:", reporter(result));

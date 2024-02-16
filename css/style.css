@@ -166,6 +166,10 @@ blockquote {
   }
 }
 
+th {
+  text-align: start;
+}
+
 /* Components */
 
 .cpnt-logo {
