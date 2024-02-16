@@ -15,7 +15,7 @@
     "static:dev:generate-new-post": "esbuild scripts/generate-new-post.tsx --outfile=tmp/generate-new-post.mjs --format=esm && node tmp/generate-new-post.mjs",
     "static:dev:css": "npm run static:build:css -- --watch --verbose",
     "static:dev:compile": "npm run static:build:compile -- --watch",
-    "static:dev:serve": "npx serve build/",
+    "static:dev:serve": "npx http-server build/ -o",
     "all:dev:checkTypes": "tsc --noEmit",
     "all:dev:downloadGeneratedDatabaseTypes": "npx supabase gen types typescript --linked > server/src/supabaseGeneratedTypes.ts",
     "server:dev:build": "docker build --file Dockerfile.server -t reeds-website-server .",
@@ -44,11 +44,12 @@
     "cssnano": "^6.0.1",
     "esbuild": "0.19.9",
     "feed": "^4.2.2",
+    "http-server": "^14.1.1",
     "postcss": "^8.4.28",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
     "postcss-nesting": "^12.0.1",
-    "serve": "^14.2.1",
+    "remark-gfm": "^4.0.0",
     "supabase": "^1.127.4",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.3.3",
@@ -57,7 +58,6 @@
   "dependencies": {
     "@supabase/ssr": "^0.0.10",
     "@supabase/supabase-js": "^2.39.1",
-    "dayjs": "^1.11.10",
-    "remark-gfm": "^4.0.0"
+    "dayjs": "^1.11.10"
   }
 }
