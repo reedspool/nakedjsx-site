@@ -6,7 +6,7 @@
 
 I absorbed a lot of Forth content over the past week. I made a short list of what I could remember of my browser tabs as their number grew and fell:
 
-- Read "Forth: The Language That Writes Itself" - this kicked it all off, thank you Kevin!
+- Read ["Forth: The Language That Writes Itself"](https://ratfactor.com/forth/the_programming_language_that_writes_itself.html) - this kicked it all off, thank you Kevin!
 - Read some of jonesforth.S
 - Watched SmithForth video - and the amazing videos on hand-crafted ELF files.
 - Read 3 chapters of Starting Forth by Brodie.
@@ -59,4 +59,54 @@ At Kevin's encouragement, I set up a time to talk with some RC'rs about Forth. W
 ```
 : fac ( n -- nfac ) 1 swap 1+ 1 do I * .s cr loop ;
 5 fac . ( expected 120 )
+```
+
+### Tue Feb 13 02:45:54 PM PST 2024
+
+I signed up to talk about Forth at this week's RC presentations. I named my talk "Four Things About Forthing" because I can't let such wordplay go. I didn't know what I was going to actually talk about, though, so I started brainstorming here. 
+
+With four things to get through in 5 minutes, I knew I'd have only a small amount of time to talk about each. So I decided to be more rigorous about my slide-making than I otherwise would be.
+
+I wanted to avoid ideas which I'd seen in ["Forth: The Language That Writes Itself"](https://ratfactor.com/forth/the_programming_language_that_writes_itself.html) because I wanted to use this opportunity to synthesize what I'd learned and explore why I was so interested in this topic. To that end, I glanced over that document again. Below I had written an idea, "Forth is so complex, it's easier to write it yourself than to read someone else's." but I found that exact sentiment in that document so I left it out of my list. Of course, just expressing a better understanding of this incredibly complicated article would represent synthesis for me but I kept pushing for slight differences.
+
+Here were some ideas I was ruminating on to talk about:
+
+- Forth has no [information hiding](https://en.wikipedia.org/wiki/Information_hiding)
+  - Forth is a [Rube Goldberg machine](https://en.wikipedia.org/wiki/Rube_Goldberg_machine)
+  - This means you have to clean up after yourself and prepare the stage for what comes next.
+  - This means you have to learn about internals of Forth to do things which are "free" in other languages, e.g. the equivalent of a "for loop" in Forth requires juggling items between two different stacks
+- The availability of the parser to steal off the same input stream that the main loop uses means that extending the language is practical and realistic
+  - And 'forget' means you can perform syntactical tricks for some portion of time then stop
+- With the default interpreter, you enter commands in the order of execution
+  - There's an old joke, I don't remember where it's from: "In New England, we give directions around landmarks that no longer exist where you don't want to be. For example, 'if you get to where the old barn was, you've gone too far'." 
+  - Order always matters. E.g. in `foo(bar(h), chi(a))`, we're supposed to be able to ignore whether `bar` or `chi` executes first. That relies on the assumption that `bar` and `chi` are pure functions, or don't interact, which can be a faulty assumption.
+
+After a long time, I only had three things, and they felt pretty week.
+
+### Thu Feb 15 11:03:33 AM PST 2024
+
+I had some good thoughts. First was that I might talk about cognitive load and the 7+-2 number and how that feels really difficult when you start learning Forth but everyone says if you keep going that gets easier because you keep your stack tiny (~ the number of interstitial variables you use in a function) and you get more comfortable with the language constructs. But that still seems wild.
+
+I also thought I should reveal my dark past with this type of language and building my own a decade ago.
+
+I started a [google slides slideshow](https://docs.google.com/presentation/d/1GM3ISzvUgtOEwQ5YSeyuzS01qWcKMV3sGdKwdKEHFKI/edit?usp=sharing).
+
+I also started writing a 5 minute timer in gforth because why not.
+
+```gforth
+( A 5 minute timer for my presentation in GForth )
+( Got this definition from gforth docs https://gforth.org/manual/Keeping-track-of-Time.html )
+: utime2sec #1000000 um/mod nip ; 
+: now utime utime2sec ;
+variable start_time 
+variable minutes_elapsed
+: reset now start_time ! 0 minutes_elapsed ! ;
+: elapsed now start_time @ - ;
+( The word ms is my conception of sleep in other languages. It does the pausing )
+: sleep 300 ms ;
+: maybe_call_minute elapsed 60 / minutes_elapsed @ > if 1 minutes_elapsed +! ." Minute "  minutes_elapsed ? then ;
+: timer ( seconds -- ) 
+  reset page begin maybe_call_minute sleep elapsed over >= until page ." Time's up!" ;
+: minutes 60 * ;
+( Usage: 5 minutes timer )
 ```
