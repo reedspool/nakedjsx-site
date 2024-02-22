@@ -15,7 +15,7 @@
     "static:dev:generate-new-post": "esbuild scripts/generate-new-post.tsx --outfile=tmp/generate-new-post.mjs --format=esm && node tmp/generate-new-post.mjs",
     "static:dev:css": "npm run static:build:css -- --watch --verbose",
     "static:dev:compile": "npm run static:build:compile -- --watch",
-    "static:dev:serve": "npx http-server build/ -o",
+    "static:dev:serve": "npx http-server -c-1 build/ -o",
     "all:dev:checkTypes": "tsc --noEmit",
     "all:dev:downloadGeneratedDatabaseTypes": "npx supabase gen types typescript --linked > server/src/supabaseGeneratedTypes.ts",
     "server:dev:build": "docker build --file Dockerfile.server -t reeds-website-server .",

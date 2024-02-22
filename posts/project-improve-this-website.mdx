@@ -327,3 +327,12 @@ I thought about how the dumb/primitive version of a tool could be the gold stand
 
 So I used the dumb gold standard tool to skirt around the friction of my own tool (my website and a script which generates new pages). It was a good exercise, because it allowed me to test the difference in the feeling of using this simple tool versus my own tool. If my tool is significantly more difficult or more complicated than my original tool, then I will feel friction which will cause me to stop using it, which defeats the goal of my investment into my tool.
 
+### Tue Feb 20 09:20:08 AM PST 2024
+
+<Future>An RC alum shared [this blog post](https://tailscale.dev/blog/configuring-emacs-mdx) which suggested that Prettier could format MDX files. I had become frustrated with tailing whitespace in my MDX files, but not enough to do anything about it, but maybe a simple Prettier configuration would yield benefits. So I tried it out.</Future>
+
+### Wed Feb 21 11:18:56 AM PST 2024
+
+<Future>I noticed an issue where if I had an opening tag in one of my MDX files but no closing tag, and then more literal tags beneath that, then the error which MDX gave me could be about the wrong closing tag. E.g., it would say "no closing tag for `span`" when all my spans were properly closed, because there was a missing closing tag for a `div` earlier in the document, not a `span`! I wanted to fix this.</Future>
+
+I was unsure why Tailwind CSS changes seemed to be cached in local development. Perhaps it had to do with the recent change to `http-server` from `npx serve`? I checked `npx http-server --help` and found the `-c-1` option to disable caching and I gave that a try. It worked!
