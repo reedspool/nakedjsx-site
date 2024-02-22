@@ -7,26 +7,28 @@
     init
       log 'Game installed' 
       set $completed to the first <span /> in me
-      set $toType to $completed.nextSibling
-      getNextLetter()
+      set $nextCharacterContainer to the next <span /> from $completed
+      set $allRemaining to the next <span /> from $nextCharacterContainer
+      getNextCharacter()
     end
-    def getNextLetter
-      get $toType.data
-      get result.replaceAll("\n", "")
+    def getNextCharacter
+      get $allRemaining.innerText
+      get result.replaceAll("\\n", "")
       get result[0]
-      set $nextLetter to result
-      log $nextLetter
+      set $nextCharacter to result
+      get $allRemaining.innerText.replace($nextCharacter, "")
+      set $allRemaining.innerText to the result
+      put $nextCharacter into $nextCharacterContainer
     end
     on keydown 
+        if event.ctrlKey then exit end -- let ctrl+r thru
         halt the event
-        log $nextLetter
-        log $event.key
-        if event.key is $nextLetter
-            log "yes!"
-            set $completed.innerHTML to $completed.innerHTML + $nextLetter
-            set $toType.data to $toType.data.replace($nextLetter, "")
-            getNextLetter()
-            if $nextLetter is undefined then alert('You win!') end
+        if event.key is $nextCharacter
+            set $completed.innerHTML to $completed.innerHTML + $nextCharacter
+            getNextCharacter()
+            if $nextCharacter is undefined 
+              put "You win!" into me
+            end
         end
     end
     
@@ -40,17 +42,17 @@ end
 
 # Game
 
-<p>Focus on the list of random words by clicking on it. Then type the next black character.</p>
+<p>Click on the list of <span class="outline-dashed outline-1 outline-amber-600">random words</span> below. If you see the <span class="outline outline-1 outline-green-600">green outline</span>, you're ready to type. Then type the next character, with an amber-colored underline.</p>
 
-<p _="install game" tabindex="0">
+<blockquote _="install game" tabindex="0" class="outline-dashed outline-1 outline-amber-600 focus:outline focus:outline-green-600">
 {`
-<span class="text-green-600"></span>
-hunt breezy smelly hurried dependent punch whole
-sleep uninterested beds night private accessible
-optimal bare married defiant receipt incandescent
-needy rigid spiky fair
+<span class="!text-green-600"></span><span class="!text-amber-600 !underline !underline-offset-1 "></span><span class="">
+hunt breezy smelly hurried dependent punch whole sleep 
+uninterested beds night private accessible optimal bare 
+married defiant receipt incandescent needy rigid spiky fair
+</span>
 `}
-</p>
+</blockquote>
 
 
 ## Logbook
@@ -80,3 +82,6 @@ For some reason, Hyperscript didn't love when I put my script blog inside anothe
 </details>
 ```
 
+It was relatively quick to see the progress of typing by manipulation of the text nodes. This first version was confusing since there was some whitespace issues. I played with the CSS whitespace mode to see if I could match reality to how I felt the whitespace should work. I fixed the whitespace problem not with CSS but by not putting newlines between the span elements.
+
+I implemented outlines and an underline on the next letter and a consistent color scheme that I liked quite a bit. Then I did some renaming.
