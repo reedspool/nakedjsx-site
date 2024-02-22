@@ -29,6 +29,8 @@ If you see ❌ or 🚧, then that test has failed.
 | `typeof`        | <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span>                  |
 | `now`           | <span c="now ' number' typeof ' ✅' && me >text">🚧</span>                      |
 | `@` and `!`     | <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span>                   |
+| `sleep`         | <span c="750 sleep ' ✅' me >text ">🚧</span>                                   |
+| After `sleep`   | <span c="' ✅' me >text">🚧</span>                                              |
 | Click event     | <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> |
 
 ## Logbook
@@ -58,3 +60,11 @@ Both of these ideas were pressing today since I wanted to give a presentation on
 I started taking incremental steps towards those things, to see how far I could get before the presentation. Since my hyperscript example relied heavily on variables, and I wasn't immediately sure how I'd implement the same thing in my language, I started with the forth example. I implemented `now` to get the current milliseconds and `typeof` to quickly test if the result was a number. Then, of course, I noticed that my Forth code also uses variables. But these are Forth-type variables, which are much more straightforward (now that I've read Starting Forth) than Hyperscript variables. So I pushed forward.
 
 I got an implementation of variables that matched the most basic semantics from Forth. That is, my new words `@` and `!` could act successfully on the result of a variable. But pointer arithmetic would not work, since there was no linear memory behind it. In short, I faked it.
+
+The next thing I had to tackle was waiting. Dot dot dot. Silence. Do nothing. Up to this point, my interpreter would execute every single bit of code as quickly as it could without pause or interruption. To do so, I'd have to hook my language in to JavaScript's event loop somehow. I wasn't sure how, but I created a dictionary word `sleep` to stare at where the implementation should go.
+
+I got my basic test passing, and in the process I found a lot of inadequacies in my interpreter implementation. I had made many assumptions in order to move quickly towards the next incremental step. I felt good about the decisions I made up to this point, but also daunted by the challenges. And there was still yet more features to add! I still had my failing click event test, which now wasn't being executed at all.
+
+Up to this point, I used the same interpreter for every distinct piece of code on the page. This worked until I introduced asynchronicity. The problem was that the interpreter was stateful, and each piece of code on the page (i.e. each `c=` HTML attribute) needed to set a different state. Previously this worked smoothly because each script would block until completion, and the next one could set the internal variables for itself without any conflict.
+
+The solution I had in mind was to use a separate instance of each interpreter for each distinct script. And a pattern I'd already been using without understanding why became clear - I'd been passing around a "context object", `ctx`, where I was storing all the state. Well, not every piece of state, I hadn't been perfectly consistent. But if I refactored to make my use of the context object consistently, and make every other function entirely pure, then I could simply switch to a separate `ctx` for each script, and isolate all state therein. That worked! 

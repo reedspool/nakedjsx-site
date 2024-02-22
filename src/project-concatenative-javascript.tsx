@@ -5,20 +5,27 @@
 type Dictionary = {
   name: string;
   prev: Dictionary | null;
-  impl?: ({ ctx }: { ctx: Context }) => void;
-  immediateImpl?: ({ ctx }: { ctx: Context }) => void;
+  impl?: ({ ctx }: { ctx: Context }) => void | false;
+  immediateImpl?: Dictionary["impl"];
   compiledWordImpls?: Dictionary["impl"][];
 };
 let dictionary: Dictionary | null = null;
 let compilingMode = false;
-type Context = typeof ctx;
-const ctx = {
+type Context = typeof ctxTemplate;
+const ctxTemplate = {
   parameterStack: [] as unknown[],
   inputStream: "",
+  paused: false,
   inputStreamPointer: 0,
-  pop: () => ctx.parameterStack.pop(),
-  peek: () => ctx.parameterStack[ctx.parameterStack.length - 1],
-  push: (...args: unknown[]) => ctx.parameterStack.push(...args),
+  pop() {
+    return this.parameterStack.pop();
+  },
+  peek() {
+    return this.parameterStack[this.parameterStack.length - 1];
+  },
+  push(...args: unknown[]) {
+    this.parameterStack.push(...args);
+  },
   me: null as Element | unknown,
 };
 
@@ -58,27 +65,45 @@ define({
     ctx.push(a);
   },
 });
-define({ name: "dup", impl: ({ ctx }) => ctx.push(ctx.peek()) });
-define({ name: "drop", impl: ({ ctx }) => ctx.pop() });
-define({ name: "me", impl: ({ ctx }) => ctx.push(ctx.me) });
+define({
+  name: "dup",
+  impl: ({ ctx }) => {
+    ctx.push(ctx.peek());
+  },
+});
+define({
+  name: "drop",
+  impl: ({ ctx }) => {
+    ctx.pop();
+  },
+});
+define({
+  name: "me",
+  impl: ({ ctx }) => {
+    ctx.push(ctx.me);
+  },
+});
 define({
   name: "'",
   impl: ({ ctx }) => {
     // Move cursor past the blank space between
     ctx.inputStreamPointer++;
-    const text = consume({ until: "'", including: true });
+    const text = consume({ until: "'", including: true, ctx });
     ctx.push(text);
   },
   immediateImpl: ({ ctx }) => {
-    const text = consume({ until: "'", including: true });
+    const text = consume({ until: "'", including: true, ctx });
 
-    dictionary!.compiledWordImpls!.push(() => ctx.push(text));
+    dictionary!.compiledWordImpls!.push(() => {
+      ctx.push(text);
+    });
   },
 });
 define({
   name: ">text",
-  impl: ({ ctx }) =>
-    ((ctx.pop() as HTMLElement).innerText = ctx.pop()!.toString()),
+  impl: ({ ctx }) => {
+    (ctx.pop() as HTMLElement).innerText = ctx.pop()!.toString();
+  },
 });
 define({
   name: "&&",
@@ -114,12 +139,12 @@ define({
 
 define({
   name: ":",
-  impl: () => {
+  impl: ({ ctx }) => {
     let dictionaryEntry: typeof dictionary;
 
     // Consume any beginning whitespace
-    consume({ until: /\S/ });
-    const name = consume({ until: /\s/ });
+    consume({ until: /\S/, ctx });
+    const name = consume({ until: /\s/, ctx });
     // TODO: How will we continue to call each after calling the first one? Need to implement the return stack
     define({
       name,
@@ -142,10 +167,10 @@ define({
 
 define({
   name: "variable",
-  impl: () => {
+  impl: ({ ctx }) => {
     // Consume any beginning whitespace
-    consume({ until: /\S/ });
-    const name = consume({ until: /\s/ });
+    consume({ until: /\S/, ctx });
+    const name = consume({ until: /\s/, ctx });
     // This variable is actually going to be the
     // value of the variable, via JavaScript closures
     let value: unknown;
@@ -193,6 +218,24 @@ define({
   },
 });
 
+define({
+  name: "sleep",
+  impl: ({ ctx }) => {
+    const a = ctx.pop();
+    // TODO: Pause execution for a # of milliseconds
+    setTimeout(() => {
+      ctx.paused = false;
+      query({ input: "", me: ctx.me as Element, ctx });
+    }, a as number);
+
+    // Using exact value `false` (not just falsy) to signal that execution
+    // should not continue.
+    // TODO: Maybe this could just be a setting/flag in the dictionary entry?
+    //       But also maybe this allows it to be dynamic and that's maybe good?
+    return false;
+  },
+});
+
 function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
   let entry = dictionary;
 
@@ -221,7 +264,7 @@ function wordAsPrimitive({ word }: { word: Dictionary["name"] }) {
   return { isPrimitive: true, value };
 }
 
-function execute({ word }: { word: Dictionary["name"] }) {
+function execute({ word, ctx }: { word: Dictionary["name"]; ctx: Context }) {
   const dictionaryEntry = findDictionaryEntry({ word });
 
   if (dictionaryEntry) {
@@ -232,16 +275,16 @@ function execute({ word }: { word: Dictionary["name"] }) {
         dictionary!.compiledWordImpls!.push(dictionaryEntry.impl);
       }
     } else {
-      dictionaryEntry!.impl!({ ctx });
+      return dictionaryEntry!.impl!({ ctx });
     }
   } else {
     const primitiveMaybe = wordAsPrimitive({ word });
 
     if (primitiveMaybe.isPrimitive) {
       if (compilingMode) {
-        dictionary!.compiledWordImpls!.push(() =>
-          ctx.push(primitiveMaybe.value),
-        );
+        dictionary!.compiledWordImpls!.push(() => {
+          ctx.push(primitiveMaybe.value);
+        });
       } else {
         ctx.push(primitiveMaybe.value);
       }
@@ -254,9 +297,11 @@ function execute({ word }: { word: Dictionary["name"] }) {
 function consume({
   until,
   including,
+  ctx,
 }: {
   until: RegExp | string;
   including?: boolean;
+  ctx: Context;
 }) {
   let value = "";
   while (ctx.inputStreamPointer < ctx.inputStream.length) {
@@ -271,25 +316,46 @@ function consume({
   return value;
 }
 
-function query({ input, me }: { input: string; me: Element }) {
+function query({
+  input,
+  me,
+  ctx,
+}: {
+  input: string;
+  me: Element;
+  ctx: Context;
+}) {
+  if (ctx.paused) return;
+
+  // TODO: Just pausing doesn't work, we need to reschedule
+  // the call to this query function in order to manage the
+  // value of me
   ctx.me = me;
   ctx.inputStream += input;
 
   while (ctx.inputStreamPointer < ctx.inputStream.length) {
     // Consume any beginning whitespace
-    consume({ until: /\S/ });
+    consume({ until: /\S/, ctx });
 
     // Input only had whitespace
     if (ctx.inputStreamPointer >= ctx.inputStream.length) return;
 
-    const word = consume({ until: /\s/ });
+    const word = consume({ until: /\s/, ctx });
 
     if (word.length > 0) {
-      execute({ word });
+      const shouldContinue = execute({ word, ctx });
+      if (shouldContinue === false) {
+        ctx.paused = true;
+        break;
+      }
     }
   }
 }
 
-document
-  .querySelectorAll("[c]")
-  .forEach((el: Element) => query({ input: el.getAttribute("c")!, me: el }));
+document.querySelectorAll("[c]").forEach((el: Element) =>
+  query({
+    input: el.getAttribute("c")!,
+    me: el,
+    ctx: { ...ctxTemplate },
+  }),
+);
