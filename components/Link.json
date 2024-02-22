@@ -51,6 +51,9 @@
     "topic-recurse-center": [
       "recurse-center-starting-uxn-and-playdate",
       "recurse-center-starting-cryptopals"
+    ],
+    "project-explore-forth": [
+      "five-minute-timer-in-forth"
     ]
   }
 }
