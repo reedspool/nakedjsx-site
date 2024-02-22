@@ -22,16 +22,12 @@ const ctx = {
   me: null as Element | unknown,
 };
 
-function addDictionaryWord({
-  name,
-  impl,
-  immediateImpl,
-}: Omit<Dictionary, "prev">) {
+function define({ name, impl, immediateImpl }: Omit<Dictionary, "prev">) {
   const prev = dictionary;
   dictionary = { prev, name, impl, immediateImpl };
 }
 
-addDictionaryWord({
+define({
   name: "swap",
   impl: ({ ctx }) => {
     const a = ctx.pop();
@@ -40,7 +36,7 @@ addDictionaryWord({
     ctx.push(b);
   },
 });
-addDictionaryWord({
+define({
   name: "over",
   impl: ({ ctx }) => {
     const a = ctx.pop();
@@ -51,7 +47,7 @@ addDictionaryWord({
   },
 });
 
-addDictionaryWord({
+define({
   name: "rot",
   impl: ({ ctx }) => {
     const c = ctx.pop();
@@ -62,10 +58,10 @@ addDictionaryWord({
     ctx.push(a);
   },
 });
-addDictionaryWord({ name: "dup", impl: ({ ctx }) => ctx.push(ctx.peek()) });
-addDictionaryWord({ name: "drop", impl: ({ ctx }) => ctx.pop() });
-addDictionaryWord({ name: "me", impl: ({ ctx }) => ctx.push(ctx.me) });
-addDictionaryWord({
+define({ name: "dup", impl: ({ ctx }) => ctx.push(ctx.peek()) });
+define({ name: "drop", impl: ({ ctx }) => ctx.pop() });
+define({ name: "me", impl: ({ ctx }) => ctx.push(ctx.me) });
+define({
   name: "'",
   impl: ({ ctx }) => {
     ctx.push(consume({ until: "'", including: true }));
@@ -76,12 +72,12 @@ addDictionaryWord({
     dictionary!.compiledWordImpls!.push(() => ctx.push(text));
   },
 });
-addDictionaryWord({
+define({
   name: ">text",
   impl: ({ ctx }) =>
     ((ctx.pop() as HTMLElement).innerText = ctx.pop()!.toString()),
 });
-addDictionaryWord({
+define({
   name: "&&",
   impl: ({ ctx }) => {
     const b = ctx.pop();
@@ -90,7 +86,7 @@ addDictionaryWord({
   },
 });
 
-addDictionaryWord({
+define({
   name: ":",
   impl: () => {
     let dictionaryEntry: typeof dictionary;
@@ -100,7 +96,7 @@ addDictionaryWord({
     const name = consume({ until: /\s/ });
     // TODO: How will we continue to call each after calling the first one? Need to implement the return stack
     console.log("Name:", `'${name}'`);
-    addDictionaryWord({
+    define({
       name,
       impl: ({ ctx }) => {
         dictionaryEntry!.compiledWordImpls![0]!({ ctx });
@@ -112,7 +108,7 @@ addDictionaryWord({
   },
 });
 
-addDictionaryWord({
+define({
   name: ";",
   immediateImpl: () => {
     compilingMode = false;
