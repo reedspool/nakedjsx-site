@@ -64,7 +64,10 @@ define({ name: "me", impl: ({ ctx }) => ctx.push(ctx.me) });
 define({
   name: "'",
   impl: ({ ctx }) => {
-    ctx.push(consume({ until: "'", including: true }));
+    // Move cursor past the blank space between
+    ctx.inputStreamPointer++;
+    const text = consume({ until: "'", including: true });
+    ctx.push(text);
   },
   immediateImpl: ({ ctx }) => {
     const text = consume({ until: "'", including: true });
@@ -87,6 +90,29 @@ define({
 });
 
 define({
+  name: "log",
+  impl: ({ ctx }) => {
+    console.log(ctx.pop());
+  },
+});
+
+define({
+  name: "typeof",
+  impl: ({ ctx }) => {
+    const b = ctx.pop();
+    const a = ctx.pop();
+    ctx.push(typeof a === b);
+  },
+});
+
+define({
+  name: "now",
+  impl: ({ ctx }) => {
+    ctx.push(Date.now());
+  },
+});
+
+define({
   name: ":",
   impl: () => {
     let dictionaryEntry: typeof dictionary;
@@ -95,7 +121,6 @@ define({
     consume({ until: /\S/ });
     const name = consume({ until: /\s/ });
     // TODO: How will we continue to call each after calling the first one? Need to implement the return stack
-    console.log("Name:", `'${name}'`);
     define({
       name,
       impl: ({ ctx }) => {
