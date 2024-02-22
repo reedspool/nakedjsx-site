@@ -1,0 +1,82 @@
+# Project: Typing Game with Feedback Loops
+
+# Source
+
+<FancyScriptTag type="text/hyperscript">
+{`behavior game
+    init
+      log 'Game installed' 
+      set $completed to the first <span /> in me
+      set $toType to $completed.nextSibling
+      getNextLetter()
+    end
+    def getNextLetter
+      get $toType.data
+      get result.replaceAll("\n", "")
+      get result[0]
+      set $nextLetter to result
+      log $nextLetter
+    end
+    on keydown 
+        halt the event
+        log $nextLetter
+        log $event.key
+        if event.key is $nextLetter
+            log "yes!"
+            set $completed.innerHTML to $completed.innerHTML + $nextLetter
+            set $toType.data to $toType.data.replace($nextLetter, "")
+            getNextLetter()
+            if $nextLetter is undefined then alert('You win!') end
+        end
+    end
+    
+    on click
+        call focus() on me
+        log me
+    end
+end
+`}
+</FancyScriptTag>
+
+# Game
+
+<p>Focus on the list of random words by clicking on it. Then type the next black character.</p>
+
+<p _="install game" tabindex="0">
+{`
+<span class="text-green-600"></span>
+hunt breezy smelly hurried dependent punch whole
+sleep uninterested beds night private accessible
+optimal bare married defiant receipt incandescent
+needy rigid spiky fair
+`}
+</p>
+
+
+## Logbook
+
+### Wed Feb 21 11:05:13 PST 2024
+
+Today's prompt for the RC Creative Coding group was:
+
+> Go to an extreme, move back to a more comfortable place
+
+I chewed on it while I ate my lunch. I was reading an article about feedback loops the night before and I thought to play with that idea. I'm not sure how I jumped from there to typing games. But the vision in my head was of a typing game with a goal, and that goal being in a feedback loop with your current typing speed. The faster you typed, the faster the target speed would get. So in order to continue to hit your goal, you'd probably want a consistent pace, to keep the goal consistent.
+
+Since I took time for lunch, I only gave myself some 40 minutes to work on this which included writing out this idea.
+
+I had never made a typing game before. I assumed I would take a some large list of words, and randomize them, and ask the user to type them in order, tracking their progress. I decided to start there and add my concept of speed tracking and goals only after. I didn't want to take too much time planning.
+
+I didn't want to think about where my random words were coming from, so I just [searched online for a generator](https://www.randomlists.com/random-words).
+
+For some reason, Hyperscript didn't love when I put my script blog inside another element. Apparently it only respected top level script tags? This didn't work, but the "FancyScriptTag" outside of the details element did work correctly?
+
+```
+<details>
+<summary>Code</summary>
+<FancyScriptTag type="text/hyperscript">
+{`log 'Online'`}
+</FancyScriptTag>
+</details>
+```
+

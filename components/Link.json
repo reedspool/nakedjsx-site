@@ -38,7 +38,8 @@
     "project-generative-rain-for-creative-coding": "project-generative-rain-for-creative-coding.html",
     "project-explore-forth": "project-explore-forth.html",
     "project-android-device-as-screen-for-my-pc": "project-android-device-as-screen-for-my-pc.html",
-    "project-concatenative-javascript": "project-concatenative-javascript.html"
+    "project-concatenative-javascript": "project-concatenative-javascript.html",
+    "project-typing-game-with-feedback-loops": "project-typing-game-with-feedback-loops.html"
   },
   "slugsToHashes": {
     "project-improve-this-website": [
