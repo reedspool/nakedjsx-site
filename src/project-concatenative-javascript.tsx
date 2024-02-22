@@ -140,6 +140,59 @@ define({
   },
 });
 
+define({
+  name: "variable",
+  impl: () => {
+    // Consume any beginning whitespace
+    consume({ until: /\S/ });
+    const name = consume({ until: /\s/ });
+    // This variable is actually going to be the
+    // value of the variable, via JavaScript closures
+    let value: unknown;
+    define({
+      name,
+      impl: ({ ctx }) => {
+        // Naming the variable puts this special
+        // getter/setter object onto the stack
+        // and then the @ word will access the getter
+        // and the ! word will use the setter
+        // TODO Could we use the dictionary entry object itself for this?
+        const variable: Variable = {
+          getter: () => value,
+          setter: (_value: unknown) => (value = _value),
+        };
+        ctx.push(variable);
+      },
+    });
+  },
+});
+
+type Variable = {
+  getter: () => unknown;
+  setter: (_value: unknown) => void;
+};
+
+define({
+  name: "!",
+  impl: ({ ctx }) => {
+    const b = ctx.pop() as Variable;
+    const a = ctx.pop();
+    if (!b.setter || typeof b.setter !== "function")
+      throw new Error("Can only use word '!' on a variable");
+    b.setter(a);
+  },
+});
+
+define({
+  name: "@",
+  impl: ({ ctx }) => {
+    const a = ctx.pop() as Variable;
+    if (!a.getter || typeof a.getter !== "function")
+      throw new Error("Can only use word '@' on a variable");
+    ctx.push(a.getter());
+  },
+});
+
 function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
   let entry = dictionary;
 

@@ -29,6 +29,7 @@ If you see ❌ or 🚧, then that test has failed.
 | `:` and `;` | <span c=": test ' ✅' ; test me >text">🚧</span>                                |
 | `typeof` | <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span>                                |
 | `now` | <span c="now ' number' typeof ' ✅' && me >text">🚧</span>                                |
+| `@` and `!` | <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span>                                |
 | Click event | <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> |
 
 ## Logbook
@@ -56,3 +57,5 @@ There were two different things I wanted to implement in my language. Well, re-i
 Both of these ideas were pressing today since I wanted to give a presentation on this concept. I signed up to give the presentation to give me an accountability target for the day, and I had to admit that was motivating me!
 
 I started taking incremental steps towards those things, to see how far I could get before the presentation. Since my hyperscript example relied heavily on variables, and I wasn't immediately sure how I'd implement the same thing in my language, I started with the forth example. I implemented `now` to get the current milliseconds and `typeof` to quickly test if the result was a number. Then, of course, I noticed that my Forth code also uses variables. But these are Forth-type variables, which are much more straightforward (now that I've read Starting Forth) than Hyperscript variables. So I pushed forward.
+
+I got an implementation of variables that matched the most basic semantics from Forth. That is, my new words `@` and `!` could act successfully on the result of a variable. But pointer arithmetic would not work, since there was no linear memory behind it. In short, I faked it.
