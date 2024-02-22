@@ -14,23 +14,22 @@ If you see ❌ or 🚧, then that test has failed.
 
 <div>Leading and extra whitespace don't change anything: <span c="    ' Success'    me    >text   ">🚧</span></div>
 
-<div>Emojis work: <span c="' ✅' me >text">🚧</span></div>
-
 <div>Look in the console to see if this logs a checkmark: <span c="' Log test: ✅' log">🚧</span></div>
 
-| Word(s)        | ✅ / ❌ / 🚧                                                                            |
-|-------------|---------------------------------------------------------------------------------|
-| `swap`      | <span c="' ✅' ' ❌' swap me >text">🚧</span>                                   |
-| `dup`       | <span c="' ✅' dup me >text me >text">🚧</span>                                 |
-| `drop`      | <span c="' ✅' ' ❌' drop me >text">🚧</span>                                   |
-| `over`      | <span c="' ✅' ' ❌' over me >text">🚧</span>                                   |
-| `rot`       | <span c="' ✅' ' ❌' ' ❌' rot me >text">🚧</span>                              |
-| `&&`        | <span c="true ' ✅' && me >text">🚧</span>                                      |
-| `:` and `;` | <span c=": test ' ✅' ; test me >text">🚧</span>                                |
-| `typeof` | <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span>                                |
-| `now` | <span c="now ' number' typeof ' ✅' && me >text">🚧</span>                                |
-| `@` and `!` | <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span>                                |
-| Click event | <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> |
+| Word(s)/feature | ✅ / ❌ / 🚧                                                                    |
+|-----------------|---------------------------------------------------------------------------------|
+| Emoji           | <span c="' ✅' me >text">🚧</span>                                              |
+| `swap`          | <span c="' ✅' ' ❌' swap me >text">🚧</span>                                   |
+| `dup`           | <span c="' ✅' dup me >text me >text">🚧</span>                                 |
+| `drop`          | <span c="' ✅' ' ❌' drop me >text">🚧</span>                                   |
+| `over`          | <span c="' ✅' ' ❌' over me >text">🚧</span>                                   |
+| `rot`           | <span c="' ✅' ' ❌' ' ❌' rot me >text">🚧</span>                              |
+| `&&`            | <span c="true ' ✅' && me >text">🚧</span>                                      |
+| `:` and `;`     | <span c=": test ' ✅' ; test me >text">🚧</span>                                |
+| `typeof`        | <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span>                  |
+| `now`           | <span c="now ' number' typeof ' ✅' && me >text">🚧</span>                      |
+| `@` and `!`     | <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span>                   |
+| Click event     | <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> |
 
 ## Logbook
 
