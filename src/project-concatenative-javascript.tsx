@@ -141,6 +141,29 @@ define({
   },
 });
 
+function defineBinaryExactlyAsInJS({ name }: { name: Dictionary["name"] }) {
+  const binary = new Function("a", "b", `return a ${name} b;`);
+  define({
+    name,
+    impl: ({ ctx }) => {
+      const b = ctx.pop();
+      const a = ctx.pop();
+      ctx.push(binary(a, b));
+    },
+  });
+}
+
+defineBinaryExactlyAsInJS({ name: "==" });
+defineBinaryExactlyAsInJS({ name: "===" });
+defineBinaryExactlyAsInJS({ name: "+" });
+defineBinaryExactlyAsInJS({ name: "-" });
+defineBinaryExactlyAsInJS({ name: "*" });
+defineBinaryExactlyAsInJS({ name: "/" });
+defineBinaryExactlyAsInJS({ name: "<" });
+defineBinaryExactlyAsInJS({ name: ">" });
+defineBinaryExactlyAsInJS({ name: ">=" });
+defineBinaryExactlyAsInJS({ name: "<=" });
+
 define({
   name: ":",
   impl: ({ ctx }) => {
