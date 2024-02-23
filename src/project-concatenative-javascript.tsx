@@ -13,6 +13,7 @@ let dictionary: Dictionary | null = null;
 let compilingMode = false;
 type Context = typeof ctxTemplate;
 const ctxTemplate = {
+  me: null as Element | unknown,
   parameterStack: [] as unknown[],
   inputStream: "",
   paused: false,
@@ -26,10 +27,13 @@ const ctxTemplate = {
   push(...args: unknown[]) {
     this.parameterStack.push(...args);
   },
-  me: null as Element | unknown,
 };
 
 function define({ name, impl, immediateImpl }: Omit<Dictionary, "prev">) {
+  // TODO: Right now, there's only one global dictionary which is shared
+  //       across all contexts. Considering how this might be isolated to
+  //       a context object. Seems wasteful to copy "core" functions like those
+  //       defined in JavaScript below across many dictionaries.
   const prev = dictionary;
   dictionary = { prev, name, impl, immediateImpl };
 }
@@ -222,17 +226,12 @@ define({
   name: "sleep",
   impl: ({ ctx }) => {
     const a = ctx.pop();
-    // TODO: Pause execution for a # of milliseconds
     setTimeout(() => {
       ctx.paused = false;
       query({ ctx });
     }, a as number);
 
-    // Using exact value `false` (not just falsy) to signal that execution
-    // should not continue.
-    // TODO: Maybe this could just be a setting/flag in the dictionary entry?
-    //       But also maybe this allows it to be dynamic and that's maybe good?
-    return false;
+    ctx.paused = true;
   },
 });
 
@@ -317,9 +316,9 @@ function consume({
 }
 
 function query({ ctx }: { ctx: Context }) {
-  if (ctx.paused) return;
-
   while (ctx.inputStreamPointer < ctx.inputStream.length) {
+    if (ctx.paused) return;
+
     // Consume any beginning whitespace
     consume({ until: /\S/, ctx });
 
@@ -329,11 +328,7 @@ function query({ ctx }: { ctx: Context }) {
     const word = consume({ until: /\s/, ctx });
 
     if (word.length > 0) {
-      const shouldContinue = execute({ word, ctx });
-      if (shouldContinue === false) {
-        ctx.paused = true;
-        break;
-      }
+      execute({ word, ctx });
     }
   }
 }
