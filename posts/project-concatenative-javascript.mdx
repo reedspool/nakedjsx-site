@@ -68,3 +68,22 @@ I got my basic test passing, and in the process I found a lot of inadequacies in
 Up to this point, I used the same interpreter for every distinct piece of code on the page. This worked until I introduced asynchronicity. The problem was that the interpreter was stateful, and each piece of code on the page (i.e. each `c=` HTML attribute) needed to set a different state. Previously this worked smoothly because each script would block until completion, and the next one could set the internal variables for itself without any conflict.
 
 The solution I had in mind was to use a separate instance of each interpreter for each distinct script. And a pattern I'd already been using without understanding why became clear - I'd been passing around a "context object", `ctx`, where I was storing all the state. Well, not every piece of state, I hadn't been perfectly consistent. But if I refactored to make my use of the context object consistently, and make every other function entirely pure, then I could simply switch to a separate `ctx` for each script, and isolate all state therein. That worked! 
+
+I was missing a lot of the functionality still to replicate my timer in Forth, but I realized I could do a different version of the same thing with separate scripts in separate HTML elements.
+
+I made a rough-and-tumble, ad-hoc area to present this at RC:
+
+<button class="cpnt-button mb-4" _="on click put the next <blockquote /> into document.body then remove me">Kinda fullscreenify</button>
+
+<blockquote>
+  <h1>`4 1 + . ." languages"`</h1>
+    <div c="240000 sleep ' Time is up!' me >text">
+        <div c=" ' Breathe out'  me >text 2500 sleep ' Breathe in' me >text 2500 sleep ' ' me >text"></div>
+
+        <div c=" 60000 sleep ' 1 minute'  me >text"></div>
+        <div c="120000 sleep ' 2 minutes' me >text"></div>
+        <div c="180000 sleep ' 3 minutes' me >text"></div>
+    </div>
+</blockquote>
+
+In my rush to prepare the above presentation, I accidentally made the timers all 10 times the duration, so one minute actually took 10 minutes to trigger. Whoops! Anyway, the presentation went very well.

@@ -109,4 +109,5 @@ variable minutes_elapsed
   reset page begin maybe_call_minute sleep elapsed over >= until page ." Time's up!" ;
 : minutes 60 * ;
 ( Usage: 5 minutes timer )
+page ." Breathe out. " 2500 ms ." Breathe in." 2500 ms 4 minutes timer
 ```

@@ -225,7 +225,7 @@ define({
     // TODO: Pause execution for a # of milliseconds
     setTimeout(() => {
       ctx.paused = false;
-      query({ input: "", me: ctx.me as Element, ctx });
+      query({ ctx });
     }, a as number);
 
     // Using exact value `false` (not just falsy) to signal that execution
@@ -316,22 +316,8 @@ function consume({
   return value;
 }
 
-function query({
-  input,
-  me,
-  ctx,
-}: {
-  input: string;
-  me: Element;
-  ctx: Context;
-}) {
+function query({ ctx }: { ctx: Context }) {
   if (ctx.paused) return;
-
-  // TODO: Just pausing doesn't work, we need to reschedule
-  // the call to this query function in order to manage the
-  // value of me
-  ctx.me = me;
-  ctx.inputStream += input;
 
   while (ctx.inputStreamPointer < ctx.inputStream.length) {
     // Consume any beginning whitespace
@@ -352,10 +338,16 @@ function query({
   }
 }
 
-document.querySelectorAll("[c]").forEach((el: Element) =>
-  query({
-    input: el.getAttribute("c")!,
-    me: el,
-    ctx: { ...ctxTemplate },
-  }),
-);
+document.querySelectorAll("[c]").forEach((el: Element) => {
+  const inputStream = el.getAttribute("c")!;
+
+  try {
+    query({
+      ctx: { ...ctxTemplate, me: el, inputStream },
+    });
+  } catch (error) {
+    console.error(`Error in script:\n\n'${inputStream}'`);
+    console.error(error);
+    console.error("DOM element:", el);
+  }
+});
