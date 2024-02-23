@@ -1,6 +1,8 @@
-# Project: Typing Game with Feedback Loops
+# Typing Game
 
-# Source
+<div class="hidden">
+
+## Source
 
 <FancyScriptTag type="text/hyperscript">
 {`behavior game
@@ -40,7 +42,7 @@ end
 `}
 </FancyScriptTag>
 
-# Game
+</div>
 
 <p>Click on the list of <span class="outline-dashed outline-1 outline-amber-600">random words</span> below. If you see the <span class="outline outline-1 outline-green-600">green outline</span>, you're ready to type. Then type the next character, with an amber-colored underline.</p>
 
@@ -85,3 +87,15 @@ For some reason, Hyperscript didn't love when I put my script blog inside anothe
 It was relatively quick to see the progress of typing by manipulation of the text nodes. This first version was confusing since there was some whitespace issues. I played with the CSS whitespace mode to see if I could match reality to how I felt the whitespace should work. I fixed the whitespace problem not with CSS but by not putting newlines between the span elements.
 
 I implemented outlines and an underline on the next letter and a consistent color scheme that I liked quite a bit. Then I did some renaming.
+
+### Fri Feb 23 02:59:06 PM PST 2024
+
+Based on some positive feedback from the RC game dev interest group, I made a few adjustments to the page and to the instructions. First I made the code hidden by default, with a button to unhide it. 
+
+<Future>I wanted to put the code after the game in the HTML, but I didn't know how to do that with Hyperscript. It seemed like Hyperscript required the behavior to be defined prior to the `install`, and that could only happen by putting it higher in the document order. I thought about alternatively using the CSS `order` property, but that seemed like a lot of hubub.</Future>
+
+I had second thoughts about the button, however. My main call to action was to play the game, not to see the source code! Instead I entirely hid the code.
+
+Next I wanted to work on the instructions. Why have the instructions outside the box of the game? This isn't 1985 with game manuals sold in jewel cases alongside cartridges. So I put the instructions inside the box.
+
+I ran into a very annoying bug in my code to do with my extensive use of [`innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText), where new lines were swapped for `<br />` when I set the current `innerText` back to itself with minor modifications. That was mixed with another confusing bug where the visibility and display CSS values were affecting my game code. Because I was using DOM manipulations, somehow using `display:none;` caused `innerText` to not see and manipulate items. I wasn't sure how to deal with that. Maybe I should switch to the less confusing, simpler `innerHTML`?
