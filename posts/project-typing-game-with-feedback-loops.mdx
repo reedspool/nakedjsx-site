@@ -36,8 +36,10 @@
       put "You win!" into $gameplayArea
       exit
     end
-    on keydown 
+    on every keydown 
         if event.ctrlKey then exit end -- let ctrl+r thru
+        -- don't respond to special keys being pressed like shift, ctrl, etc.
+        if event.key.length is greater than 1 then exit end 
         halt the event
         if event.key is $nextCharacter
             set $completed.innerHTML to $completed.innerHTML + $nextCharacter
@@ -45,6 +47,10 @@
             if $nextCharacter is undefined 
               nextLevel()
             end
+        else 
+            $nextCharacterContainer.classList.add("!text-red-600")
+            wait for transitionend from $nextCharacterContainer or 1s
+            $nextCharacterContainer.classList.remove("!text-red-600")
         end
     end
     on focus
@@ -66,7 +72,7 @@ end
 <div _="install game" tabindex="0" class="py-md px-xl bg-gray-300 text-gray-700 my-xl cursor-pointer focus:cursor-text outline-dashed outline-1 outline-amber-600 focus:outline focus:outline-green-600">
 <p class="w-full h-full flex flex-row justify-center items-center whitespace-pre"><span class="hidden">Game paused. </span>Click <span class="outline-dashed outline-1 outline-amber-600 px-sm">here</span> to play.</p>
 <div hs-gameplay-area class="hidden font-mono">{`
-<span class="!text-green-600"></span><span class="!text-amber-600 !underline !underline-offset-1 whitespace-pre-wrap"></span><span class="">Type the next character with an amber underline.</span>
+<span class="!text-green-600"></span><span class="!text-amber-600 !underline !underline-offset-1 whitespace-pre-wrap transition-colors"></span><span class="">Type the next character with an amber underline.</span>
 `}</div>
 
 </div>
@@ -121,3 +127,7 @@ I ran into a very annoying bug in my code to do with my extensive use of [`inner
 After my challenges with newlines, I decided to ensure all my words in the source file were on one line so that no newlines were introduced and thus no surprising `<br />` appeared. I also applied `white-space: pre;` to the `span` which held the next letter to type, as that prevented it from disappearing when it only had a space in it. Additionally, I added a monospace font to my site so that each space character would take up a consistent amount of horizontal room. This also had the effect of differentiating the instructions from the typing game which felt right.
 
 Next I made a bit of a progression system. Instead of having the instructions outside the game, I had the player type the instructions themselves. When they finished with that, they'd automatically progress to the next stage.
+
+I wanted some visual feedback when I typed the wrong letter, so I made a small CSS animation. This required an interesting dive into both Hyperscript and Tailwind documentation. If I were not using either of these tools, or only one of them, it would have been simpler, but instead I had to add a Tailwind class, then wait for the `transitionend` event, and then remove it. Perhaps a Hyperscript afficionado could tell me how to do it in a more straightforward manner.
+
+I also had to adjust my `keydown` handler to not take the press of a shift key or control key as a mistaken character. And i found that if I hit the space bar twice quickly, I'd screw up Hyperscript's event synchronization, so I disabled that by saying `on every keydown` instead of just `on keydown`. This worked swimmingly.
