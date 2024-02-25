@@ -8,7 +8,9 @@
 {`behavior game
     init
       log 'Game installed' 
-      set $completed to the first <span /> in me
+      set $level to 0
+      set $gameplayArea to first <[hs-gameplay-area] />
+      set $completed to the first <span /> in $gameplayArea
       set $nextCharacterContainer to the next <span /> from $completed
       set $allRemaining to the next <span /> from $nextCharacterContainer
       getNextCharacter()
@@ -22,6 +24,18 @@
       set $allRemaining.innerText to the result
       put $nextCharacter into $nextCharacterContainer
     end
+    def nextLevel
+      set $level to $level + 1
+      if $level is 1
+        put "" into $completed
+        put "" into $nextCharacterContainer
+        put "hunt cheesy smelly hurried dependent punch whole sleep uninterested beds night private accessible optimal bare married defiant receipt incandescent needy rigid spiky fair" into $allRemaining
+        getNextCharacter()
+        exit
+      end
+      put "You win!" into $gameplayArea
+      exit
+    end
     on keydown 
         if event.ctrlKey then exit end -- let ctrl+r thru
         halt the event
@@ -29,14 +43,19 @@
             set $completed.innerHTML to $completed.innerHTML + $nextCharacter
             getNextCharacter()
             if $nextCharacter is undefined 
-              put "You win!" into me
+              nextLevel()
             end
         end
     end
-    
-    on click
-        call focus() on me
-        log me
+    on focus
+      remove .hidden from the $gameplayArea
+      add .hidden to the first <p /> in me
+    end
+    on blur
+      add .hidden to the $gameplayArea
+      get the first <p /> in me
+      remove .hidden from it
+      remove .hidden from the first <span /> in it
     end
 end
 `}
@@ -44,17 +63,14 @@ end
 
 </div>
 
-<p>Click on the list of <span class="outline-dashed outline-1 outline-amber-600">random words</span> below. If you see the <span class="outline outline-1 outline-green-600">green outline</span>, you're ready to type. Then type the next character, with an amber-colored underline.</p>
+<div _="install game" tabindex="0" class="py-md px-xl bg-gray-300 text-gray-700 my-xl cursor-pointer focus:cursor-text outline-dashed outline-1 outline-amber-600 focus:outline focus:outline-green-600">
+<p class="w-full h-full flex flex-row justify-center items-center whitespace-pre"><span class="hidden">Game paused. </span>Click <span class="outline-dashed outline-1 outline-amber-600 px-sm">here</span> to play.</p>
+<div hs-gameplay-area class="hidden font-mono">{`
+<span class="!text-green-600"></span><span class="!text-amber-600 !underline !underline-offset-1 whitespace-pre-wrap"></span><span class="">Type the next character with an amber underline.</span>
+`}</div>
 
-<blockquote _="install game" tabindex="0" class="outline-dashed outline-1 outline-amber-600 focus:outline focus:outline-green-600">
-{`
-<span class="!text-green-600"></span><span class="!text-amber-600 !underline !underline-offset-1 "></span><span class="">
-hunt breezy smelly hurried dependent punch whole sleep 
-uninterested beds night private accessible optimal bare 
-married defiant receipt incandescent needy rigid spiky fair
-</span>
-`}
-</blockquote>
+</div>
+
 
 
 ## Logbook
@@ -99,3 +115,9 @@ I had second thoughts about the button, however. My main call to action was to p
 Next I wanted to work on the instructions. Why have the instructions outside the box of the game? This isn't 1985 with game manuals sold in jewel cases alongside cartridges. So I put the instructions inside the box.
 
 I ran into a very annoying bug in my code to do with my extensive use of [`innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText), where new lines were swapped for `<br />` when I set the current `innerText` back to itself with minor modifications. That was mixed with another confusing bug where the visibility and display CSS values were affecting my game code. Because I was using DOM manipulations, somehow using `display:none;` caused `innerText` to not see and manipulate items. I wasn't sure how to deal with that. Maybe I should switch to the less confusing, simpler `innerHTML`?
+
+### Sat Feb 24 09:19:08 PM PST 2024
+
+After my challenges with newlines, I decided to ensure all my words in the source file were on one line so that no newlines were introduced and thus no surprising `<br />` appeared. I also applied `white-space: pre;` to the `span` which held the next letter to type, as that prevented it from disappearing when it only had a space in it. Additionally, I added a monospace font to my site so that each space character would take up a consistent amount of horizontal room. This also had the effect of differentiating the instructions from the typing game which felt right.
+
+Next I made a bit of a progression system. Instead of having the instructions outside the game, I had the player type the instructions themselves. When they finished with that, they'd automatically progress to the next stage.

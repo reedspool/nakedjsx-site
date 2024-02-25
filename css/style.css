@@ -23,6 +23,7 @@ html {
 
   --flashy-font: "Jost", sans-serif;
   --prose-font: "Karla", sans-serif;
+  --mono-font: "IBM Plex Mono", monospace;
 
   @apply flex flex-col items-center;
   @apply text-primaryfg bg-primarybg;

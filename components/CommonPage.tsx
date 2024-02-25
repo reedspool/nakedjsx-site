@@ -24,7 +24,7 @@ export const CommonPage = ({
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
           <link
-            href="https://fonts.googleapis.com/css2?family=Jost&family=Karla&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Jost&family=Karla&family=IBM+Plex+Mono&display=swap"
             rel="stylesheet"
           />
           <link rel="stylesheet" href="/build.css" />

@@ -27,6 +27,7 @@ module.exports = {
       fontFamily: {
         flashy: ["var(--flashy-font)"],
         prose: ["var(--prose-font)"],
+        mono: ["var(--mono-font)"],
       },
     },
   },
