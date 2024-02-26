@@ -25,16 +25,46 @@
       put $nextCharacter into $nextCharacterContainer
     end
     def nextLevel
+      if $timerOn then recordLastTime($level) end
       set $level to $level + 1
       if $level is 1
-        put "" into $completed
-        put "" into $nextCharacterContainer
-        put "hunt cheesy smelly hurried dependent punch whole sleep uninterested beds night private accessible optimal bare married defiant receipt incandescent needy rigid spiky fair" into $allRemaining
-        getNextCharacter()
+        setupLevel("hunt cheesy smelly hurried dependent punch whole sleep uninterested beds night private")
+        exit
+      end
+      if $level is 2
+        setupLevel("accessible optimal bare married defiant receipt incandescent needy rigid spiky fair")
+        exit
+      end
+      if $level is 3
+        setupLevel("argument face idea loutish wreck soup maniacal test daily art slip rotten equable")
+        exit
+      end
+      if $level is 4
+        setupLevel("brainy receive chew cute bump rapid peace railway visit lovely")
         exit
       end
       put "You win!" into $gameplayArea
       exit
+    end
+    def recordLastTime(levelNum) 
+        get Date.now() - $levelStartTime
+        get it / 1000 -- seconds
+        get it / 60   -- minutes
+        set totalTimeForLevel1 to it
+        get $levelCharacters.length / 5
+        set $numWords to it
+        log 'Results for level ' + levelNum
+        log 'Level characters #' + $levelCharacters.length + ' (divided by 5 is #' + $numWords + ') in minutes ' + totalTimeForLevel1
+        log 'Raw WPM is ' + ($numWords / totalTimeForLevel1)
+    end
+    def setupLevel(words)
+        put "" into $completed
+        put "" into $nextCharacterContainer
+        set $levelCharacters to words
+        put $levelCharacters into $allRemaining
+        getNextCharacter()
+        set $levelStartTime to Date.now()
+        set $timerOn to true
     end
     on every keydown 
         if event.ctrlKey then exit end -- let ctrl+r thru
@@ -131,3 +161,31 @@ Next I made a bit of a progression system. Instead of having the instructions ou
 I wanted some visual feedback when I typed the wrong letter, so I made a small CSS animation. This required an interesting dive into both Hyperscript and Tailwind documentation. If I were not using either of these tools, or only one of them, it would have been simpler, but instead I had to add a Tailwind class, then wait for the `transitionend` event, and then remove it. Perhaps a Hyperscript afficionado could tell me how to do it in a more straightforward manner.
 
 I also had to adjust my `keydown` handler to not take the press of a shift key or control key as a mistaken character. And i found that if I hit the space bar twice quickly, I'd screw up Hyperscript's event synchronization, so I disabled that by saying `on every keydown` instead of just `on keydown`. This worked swimmingly.
+
+Finally I had complete-feeling basis for a typing game. So I felt comfortable stepping forward towards my lofty ideas about feedback loops. First I researched a bit about how typing speed calculators usually handle typing speed. It would be simple to simply measure the amount of time between when the player began typing a particular word and finished typing that word, disregarding spaces, and then average those times together, but that felt strange given the random nature of word lengths. Perhaps there was some ideal or average word length, and that's what most "words-per-minute" measurements were based on? 
+
+The search "how is words per minute calculated" yielded many articles. I started with [the Wikipedia entry](https://en.wikipedia.org/wiki/Words_per_minute). As I'd predicted (maybe I already knew this in the depths of my subconscious? I'm not usually this clever), the article confirmed that, "the definition of each "word" is often standardized to be five characters or keystrokes long in English." A detailed article on how to calculate "Raw WPM" at [100utils.com](https://www.100utils.com/how-to-calculate-typing-speed-wpm-and-accuracy/) was illuminating as well. Also, the page itself was amazing with an unironic [marquee](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/marquee) and a lovely textured background image. I was thankful for the math being spelled out so dilligently, and I was doubly thankful that the site pointed out the importance of penalizing errors in typing speeds. The site called the calculation which included error penalties "Net WPM".
+
+The Raw WPM calculation was spelled out as "all keystrokes divided by 5, further divided by the total time".
+
+The Net WPM was "all keystrokes divided by 5, minus the number of uncorrected errors left, all divided by the total time".
+
+The article also pointed out that accuracy alone may be an interesting metric, which was simply the percentage of the number of correct keystrokes divided by the total keystrokes.
+
+Note that when I said keystrokes, I meant characters on the keyboard. I did not mean to propose that when the shift key is pressed that be counted as a separate keystroke. Maybe "characters" would be better, or as the 100utils people say, "typed entities." Either way, I think you catch my meaning.
+
+<Future>I hadn't considered the effect errors might have on my feedback loop concept. I circled back to the idea once I had tried out my original idea.</Future>
+
+I wanted to measure a rolling average WPM so that it would update as the player changed their speed in real time. I'd use the change in the rolling average over time as a slope, and I'd set a goal based on the trajectory of that slope. So, if the player typed faster in the current second than the last second, they'd be encouraged to go faster still in the next second via an even higher goal. 
+
+<Future>Since I wasn't sure how this would work in practice, I wanted to start by visualizing these calculations on a running graph. I thought I'd try out d3.js, which I had used a long time ago but not recently.</Future>
+
+### Mon Feb 26 09:58:02 AM PST 2024
+
+I started by timing the total amount of time it took to complete each stage. Then I thought I'd count how many characters were in the stage, and divide that by five, then divide that by the time. That wouldn't be the rolling average I wanted yet, but it would be a good start. All the pieces on the game board.
+
+That seemed to work well. I guess the only verification I could make on the math was my own beliefs about my typing speed, which seemed to hover between 75 and 100 (raw) WPM depending on my focus.
+
+<Future>I was eager to make a chart, but I determined that the chart wouldn't be too interesting until I had a rolling average, and thus more data points to put on that chart. Right now my chart would only have one data point after every level. So I changed to a rolling average.</Future>
+
+<Future>I found a bug where if I blurred the game (which displayed the pause screen) while the "wrong character" CSS transition was occurring, then the class would never be erased and the indicator would stay in the bad state (red) forever! How dreadful. I also observed this same problem by some combination of hitting too many wrong answers and write answers together quickly. I wasn't easily able to reproduce this situation though.</Future>
