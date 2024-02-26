@@ -19,6 +19,7 @@ const ctxTemplate = {
   paused: false,
   inputStreamPointer: 0,
   pop() {
+    if (this.parameterStack.length < 1) throw new Error("Stack underflow");
     return this.parameterStack.pop();
   },
   peek() {
@@ -27,6 +28,12 @@ const ctxTemplate = {
   push(...args: unknown[]) {
     this.parameterStack.push(...args);
   },
+};
+const newCtx: () => Context = () => {
+  return {
+    ...ctxTemplate,
+    parameterStack: [],
+  };
 };
 
 function define({ name, impl, immediateImpl }: Omit<Dictionary, "prev">) {
@@ -98,7 +105,7 @@ define({
   immediateImpl: ({ ctx }) => {
     const text = consume({ until: "'", including: true, ctx });
 
-    dictionary!.compiledWordImpls!.push(() => {
+    dictionary!.compiledWordImpls!.push(({ ctx }) => {
       ctx.push(text);
     });
   },
@@ -176,7 +183,9 @@ define({
     define({
       name,
       impl: ({ ctx }) => {
-        dictionaryEntry!.compiledWordImpls![0]!({ ctx });
+        for (let i = 0; i < dictionaryEntry!.compiledWordImpls!.length; i++) {
+          dictionaryEntry!.compiledWordImpls![i]!({ ctx });
+        }
       },
     });
     dictionaryEntry = dictionary;
@@ -258,6 +267,13 @@ define({
   },
 });
 
+define({
+  name: "debugger",
+  impl: ({ ctx }) => {
+    debugger;
+  },
+});
+
 function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
   let entry = dictionary;
 
@@ -304,7 +320,7 @@ function execute({ word, ctx }: { word: Dictionary["name"]; ctx: Context }) {
 
     if (primitiveMaybe.isPrimitive) {
       if (compilingMode) {
-        dictionary!.compiledWordImpls!.push(() => {
+        dictionary!.compiledWordImpls!.push(({ ctx }) => {
           ctx.push(primitiveMaybe.value);
         });
       } else {
@@ -361,7 +377,7 @@ document.querySelectorAll("[c]").forEach((el: Element) => {
 
   try {
     query({
-      ctx: { ...ctxTemplate, me: el, inputStream },
+      ctx: { ...newCtx(), me: el, inputStream },
     });
   } catch (error) {
     console.error(`Error in script:\n\n'${inputStream}'`);
