@@ -14,6 +14,10 @@ type Context = typeof ctxTemplate;
 const ctxTemplate = {
   me: null as Element | unknown,
   parameterStack: [] as unknown[],
+  returnStack: [] as {
+    dictionaryEntry: Dictionary;
+    i: number;
+  }[],
   inputStream: "",
   paused: false,
   halted: false,
@@ -193,15 +197,11 @@ define({
     // Consume any beginning whitespace
     consume({ until: /\S/, ctx });
     const name = consume({ until: /\s/, ctx });
-    // TODO: How will we continue to call each after calling the first one? Need to implement the return stack
     define({
       name,
       impl: ({ ctx }) => {
-        for (let i = 0; i < dictionaryEntry!.compiledWordImpls!.length; i++) {
-          dictionaryEntry!.compiledWordImpls![i]!({ ctx });
-        }
-        // TODO Implement return stack
-        // ctx.interpreter = "executeColonDefinition";
+        ctx.interpreter = "executeColonDefinition";
+        ctx.returnStack.push({ dictionaryEntry: dictionaryEntry!, i: 0 });
       },
     });
     dictionaryEntry = dictionary;
@@ -213,10 +213,12 @@ define({
 define({
   name: ";",
   immediateImpl: ({ ctx }) => {
-    // TODO Implement return stack
-    // dictionary!.compiledWordImpls!.push(({ ctx }) => {
-    //   ctx.returnStack.pop();
-    // });
+    dictionary!.compiledWordImpls!.push(({ ctx }) => {
+      ctx.returnStack.pop();
+
+      // If we're back to the top-level, outside colon definitions
+      if (ctx.returnStack.length < 1) ctx.interpreter = "queryWord";
+    });
 
     // TODO: Should this instead be a stack and pop to the last interpreter?
     //       That is, was it ever a different interpeter previously?
@@ -370,7 +372,11 @@ function compileWord({
 }
 
 function executeColonDefinition({ ctx }: { ctx: Context }) {
-  const { dictionaryEntry, i } = ctx.returnStack.pop();
+  if (ctx.returnStack.length < 1) throw new Error("Return stack underflow");
+  const stackFrame = ctx.returnStack.pop();
+  if (!stackFrame) throw new Error("Return stack underflow ?");
+  const { dictionaryEntry, i } = stackFrame;
+  ctx.returnStack.push({ dictionaryEntry, i: i + 1 });
   dictionaryEntry!.compiledWordImpls![i]!({ ctx });
 }
 

@@ -16,34 +16,34 @@ If you see ❌ or 🚧, then that test has failed.
 
 <div>Look in the console to see if this logs a checkmark: <span c="' Log test: ✅' log">🚧</span></div>
 
-| Word(s)/feature | ✅ / ❌ / 🚧                                                                          |
-|-----------------|---------------------------------------------------------------------------------------|
-| Emoji           | <span c="' ✅' me >text">🚧</span>                                                    |
-| `swap`          | <span c="' ✅' ' ❌' swap me >text">🚧</span>                                         |
-| `dup`           | <span c="' ✅' dup me >text me >text">🚧</span>                                       |
-| `drop`          | <span c="' ✅' ' ❌' drop me >text">🚧</span>                                         |
-| `over`          | <span c="' ✅' ' ❌' over me >text">🚧</span>                                         |
-| `rot`           | <span c="' ✅' ' ❌' ' ❌' rot me >text">🚧</span>                                    |
-| `&&`            | <span c="true ' ✅' && me >text">🚧</span>                                            |
-| `\|\|`          | <span c="false ' ✅' \|\| me >text">🚧</span>                                         |
-| `:` and `;`     | <span c=": single ' ✅' ; single me >text">🚧</span>                                  |
-| Multi-word `:`  | <span c=": multi 4 ' ❌' ' ❌' ' ✅' ; multi me >text">🚧</span>                      |
-| Multi-level `:` | <span c=": levels 1 2 3 multi ; levels me >text">🚧</span>                            |
-| `typeof`        | <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span>                        |
-| `now`           | <span c="now ' number' typeof ' ✅' && me >text">🚧</span>                            |
-| `@` and `!`     | <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span>                         |
-| numeric `==`    | <span c="5 5 == dup ' boolean' typeof && ' ✅' && me >text">🚧</span>                 |
-| numeric `===`   | <span c="5 5 === dup ' boolean' typeof && ' ✅' && me >text">🚧</span>                |
-| `+` and `-`     | <span c="5 4 3 + - -2 == ' ✅' && me >text">🚧</span>                                 |
-| `*` and `/`     | <span c="10 1.5 * 5 / 3 == ' ✅' && me >text">🚧</span>                               |
-| `>` and `<`     | <span c="4 5 < 5 4 > && ' ✅' && me >text">🚧</span>                                  |
-| `>=` and `<=`   | <span c="4 5 <= 4 4 <= && 5 4 >= 5 5 >= && && ' ✅' && me >text">🚧</span>            |
+| Word(s)/feature | ✅ / ❌ / 🚧                                                                               |
+|-----------------|--------------------------------------------------------------------------------------------|
+| Emoji           | <span c="' ✅' me >text">🚧</span>                                                         |
+| `swap`          | <span c="' ✅' ' ❌' swap me >text">🚧</span>                                              |
+| `dup`           | <span c="' ✅' dup me >text me >text">🚧</span>                                            |
+| `drop`          | <span c="' ✅' ' ❌' drop me >text">🚧</span>                                              |
+| `over`          | <span c="' ✅' ' ❌' over me >text">🚧</span>                                              |
+| `rot`           | <span c="' ✅' ' ❌' ' ❌' rot me >text">🚧</span>                                         |
+| `&&`            | <span c="true ' ✅' && me >text">🚧</span>                                                 |
+| `\|\|`          | <span c="false ' ✅' \|\| me >text">🚧</span>                                              |
+| `:` and `;`     | <span c=": single ' ✅' ; single me >text">🚧</span>                                       |
+| Multi-word `:`  | <span c=": multi 4 ' ❌' ' ❌' ' ✅' ; multi me >text">🚧</span>                           |
+| Multi-level `:` | <span c=": levels 1 2 3 multi ; levels me >text">🚧</span>                                 |
+| `typeof`        | <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span>                             |
+| `now`           | <span c="now ' number' typeof ' ✅' && me >text">🚧</span>                                 |
+| `@` and `!`     | <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span>                              |
+| numeric `==`    | <span c="5 5 == dup ' boolean' typeof && ' ✅' && me >text">🚧</span>                      |
+| numeric `===`   | <span c="5 5 === dup ' boolean' typeof && ' ✅' && me >text">🚧</span>                     |
+| `+` and `-`     | <span c="5 4 3 + - -2 == ' ✅' && me >text">🚧</span>                                      |
+| `*` and `/`     | <span c="10 1.5 * 5 / 3 == ' ✅' && me >text">🚧</span>                                    |
+| `>` and `<`     | <span c="4 5 < 5 4 > && ' ✅' && me >text">🚧</span>                                       |
+| `>=` and `<=`   | <span c="4 5 <= 4 4 <= && 5 4 >= 5 5 >= && && ' ✅' && me >text">🚧</span>                 |
 | `sleep`         | <span c="now 750 sleep now swap - 749 > ' ✅' && me >text ">🚧</span>                      |
-| After `sleep`   | <span c="' ✅' me >text">🚧</span>                                                    |
+| After `sleep`   | <span c="' ✅' me >text">🚧</span>                                                         |
 | `:` and `sleep` | <span c=": sleepier now 750 sleep now swap - 749 > ' ✅' && ; sleepier me >text">🚧</span> |
-| `true if`       | <span c="' ❌' true if ' ✅' then me >text">🚧</span>                                 |
-| `false if`      | <span c="' ✅' false if ' ❌' then me >text">🚧</span>                                |
-| Click event     | <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span>       |
+| `true if`       | <span c="' ❌' true if ' ✅' then me >text">🚧</span>                                      |
+| `false if`      | <span c="' ✅' false if ' ❌' then me >text">🚧</span>                                     |
+| Click event     | <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span>            |
 
 ## Logbook
 
@@ -116,4 +116,4 @@ Unfortunately, I couldn't determine how to write a test which would fail accurat
 
 I wrote the test I described above and it failed successfully. That is, `now 750 sleep now swap - 749 >` was true for my `sleep` test at the top level, but it failed when `sleep` was used in a colon definition. Again, I expected this because I knew my implementation was incomplete.
 
-The solution I imagined was for my colon definition implementation to change the state of the interpreter. As it was, the colon definition implementation simply looped synchronously.
+The solution I imagined was for my colon definition implementation to change the state of the interpreter. As it was, the colon definition implementation simply looped synchronously. So I added a return stack and changed the interpreter as a state machine. I was utterly surprised at how effective it was!
