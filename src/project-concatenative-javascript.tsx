@@ -10,14 +10,18 @@ type Dictionary = {
   compiledWordImpls?: Dictionary["impl"][];
 };
 let dictionary: Dictionary | null = null;
-let compilingMode = false;
 type Context = typeof ctxTemplate;
 const ctxTemplate = {
   me: null as Element | unknown,
   parameterStack: [] as unknown[],
   inputStream: "",
   paused: false,
+  halted: false,
   inputStreamPointer: 0,
+  interpreter: "queryWord" as
+    | "queryWord"
+    | "compileWord"
+    | "executeColonDefinition",
   pop() {
     if (this.parameterStack.length < 1) throw new Error("Stack underflow");
     return this.parameterStack.pop();
@@ -196,18 +200,27 @@ define({
         for (let i = 0; i < dictionaryEntry!.compiledWordImpls!.length; i++) {
           dictionaryEntry!.compiledWordImpls![i]!({ ctx });
         }
+        // TODO Implement return stack
+        // ctx.interpreter = "executeColonDefinition";
       },
     });
     dictionaryEntry = dictionary;
     dictionaryEntry!.compiledWordImpls = [];
-    compilingMode = true;
+    ctx.interpreter = "compileWord";
   },
 });
 
 define({
   name: ";",
-  immediateImpl: () => {
-    compilingMode = false;
+  immediateImpl: ({ ctx }) => {
+    // TODO Implement return stack
+    // dictionary!.compiledWordImpls!.push(({ ctx }) => {
+    //   ctx.returnStack.pop();
+    // });
+
+    // TODO: Should this instead be a stack and pop to the last interpreter?
+    //       That is, was it ever a different interpeter previously?
+    ctx.interpreter = "queryWord";
   },
 });
 
@@ -312,34 +325,53 @@ function wordAsPrimitive({ word }: { word: Dictionary["name"] }) {
   return { isPrimitive: true, value };
 }
 
-function execute({ word, ctx }: { word: Dictionary["name"]; ctx: Context }) {
+function queryWord({ word, ctx }: { word: Dictionary["name"]; ctx: Context }) {
   const dictionaryEntry = findDictionaryEntry({ word });
 
   if (dictionaryEntry) {
-    if (compilingMode) {
-      if (dictionaryEntry.immediateImpl) {
-        dictionaryEntry.immediateImpl({ ctx });
-      } else {
-        dictionary!.compiledWordImpls!.push(dictionaryEntry.impl);
-      }
+    return dictionaryEntry!.impl!({ ctx });
+  } else {
+    const primitiveMaybe = wordAsPrimitive({ word });
+
+    if (primitiveMaybe.isPrimitive) {
+      ctx.push(primitiveMaybe.value);
     } else {
-      return dictionaryEntry!.impl!({ ctx });
+      throw new Error(`Couldn't comprehend word '${word}'`);
+    }
+  }
+}
+
+function compileWord({
+  word,
+  ctx,
+}: {
+  word: Dictionary["name"];
+  ctx: Context;
+}) {
+  const dictionaryEntry = findDictionaryEntry({ word });
+
+  if (dictionaryEntry) {
+    if (dictionaryEntry.immediateImpl) {
+      dictionaryEntry.immediateImpl({ ctx });
+    } else {
+      dictionary!.compiledWordImpls!.push(dictionaryEntry.impl);
     }
   } else {
     const primitiveMaybe = wordAsPrimitive({ word });
 
     if (primitiveMaybe.isPrimitive) {
-      if (compilingMode) {
-        dictionary!.compiledWordImpls!.push(({ ctx }) => {
-          ctx.push(primitiveMaybe.value);
-        });
-      } else {
+      dictionary!.compiledWordImpls!.push(({ ctx }) => {
         ctx.push(primitiveMaybe.value);
-      }
+      });
     } else {
       throw new Error(`Couldn't comprehend word '${word}'`);
     }
   }
+}
+
+function executeColonDefinition({ ctx }: { ctx: Context }) {
+  const { dictionaryEntry, i } = ctx.returnStack.pop();
+  dictionaryEntry!.compiledWordImpls![i]!({ ctx });
 }
 
 function consume({
@@ -369,10 +401,15 @@ function consume({
   return value;
 }
 
-function query({ ctx }: { ctx: Context }) {
-  while (ctx.inputStreamPointer < ctx.inputStream.length) {
-    if (ctx.paused) return;
+function execute({ ctx }: { ctx: Context }) {
+  const { interpreter } = ctx;
 
+  if (interpreter === "queryWord" || interpreter === "compileWord") {
+    if (ctx.inputStreamPointer >= ctx.inputStream.length) {
+      // No input left to process
+      ctx.halted = true;
+      return;
+    }
     // Consume any beginning whitespace
     consume({ until: /\S/, ctx });
 
@@ -381,9 +418,16 @@ function query({ ctx }: { ctx: Context }) {
 
     const word = consume({ until: /\s/, ctx });
 
-    if (word.length > 0) {
-      execute({ word, ctx });
-    }
+    if (interpreter === "queryWord") return queryWord({ word, ctx });
+    return compileWord({ word, ctx });
+  } else if (interpreter === "executeColonDefinition") {
+    executeColonDefinition({ ctx });
+  }
+}
+
+function query({ ctx }: { ctx: Context }) {
+  while (!ctx.halted && !ctx.paused) {
+    execute({ ctx });
   }
 }
 
