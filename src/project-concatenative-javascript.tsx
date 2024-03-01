@@ -116,12 +116,22 @@ define({
     (ctx.pop() as HTMLElement).innerText = ctx.pop()!.toString();
   },
 });
+
 define({
   name: "&&",
   impl: ({ ctx }) => {
     const b = ctx.pop();
     const a = ctx.pop();
     ctx.push(a && b);
+  },
+});
+
+define({
+  name: "||",
+  impl: ({ ctx }) => {
+    const b = ctx.pop();
+    const a = ctx.pop();
+    ctx.push(a || b);
   },
 });
 
@@ -351,6 +361,11 @@ function consume({
     value += char;
   }
   if (including) ctx.inputStreamPointer++;
+  // Strip out escape sequences
+  value = value.replaceAll(
+    /\\([^\\])/g,
+    (_: string, nonEscapeChar: string) => nonEscapeChar,
+  );
   return value;
 }
 
