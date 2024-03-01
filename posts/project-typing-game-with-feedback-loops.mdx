@@ -9,6 +9,7 @@
     init
       log 'Game installed' 
       set $level to 0
+      set $statsArea to first <[hs-stats-area] />
       set $gameplayArea to first <[hs-gameplay-area] />
       set $completed to the first <span /> in $gameplayArea
       set $nextCharacterContainer to the next <span /> from $completed
@@ -51,11 +52,10 @@
         get it / 1000 -- seconds
         get it / 60   -- minutes
         set totalTimeForLevel1 to it
-        get $levelCharacters.length / 5
-        set $numWords to it
-        log 'Results for level ' + levelNum
-        log 'Level characters #' + $levelCharacters.length + ' (divided by 5 is #' + $numWords + ') in minutes ' + totalTimeForLevel1
-        log 'Raw WPM is ' + ($numWords / totalTimeForLevel1)
+        get $levelCharacters.length / 5 -- standard word size
+        get it / totalTimeForLevel1
+        get Math.round(it)
+        put the result into <[hs-raw-wpm] />
     end
     def setupLevel(words)
         put "" into $completed
@@ -85,10 +85,12 @@
     end
     on focus
       remove .hidden from the $gameplayArea
+      remove .hidden from the $statsArea
       add .hidden to the first <p /> in me
     end
     on blur
       add .hidden to the $gameplayArea
+      add .hidden to the $statsArea
       get the first <p /> in me
       remove .hidden from it
       remove .hidden from the first <span /> in it
@@ -101,6 +103,9 @@ end
 
 <div _="install game" tabindex="0" class="py-md px-xl bg-gray-300 text-gray-700 my-xl cursor-pointer focus:cursor-text outline-dashed outline-1 outline-amber-600 focus:outline focus:outline-green-600">
 <p class="w-full h-full flex flex-row justify-center items-center whitespace-pre"><span class="hidden">Game paused. </span>Click <span class="outline-dashed outline-1 outline-amber-600 px-sm">here</span> to play.</p>
+<div hs-stats-area class="hidden mb-4 flex justify-end text-xs">
+  <span><span hs-raw-wpm class="text-base">--</span> Raw WPM (Words Per Minute)</span>
+</div>
 <div hs-gameplay-area class="hidden font-mono">{`
 <span class="!text-green-600"></span><span class="!text-amber-600 !underline !underline-offset-1 whitespace-pre-wrap transition-colors"></span><span class="">Type the next character with an amber underline.</span>
 `}</div>
@@ -186,6 +191,10 @@ I started by timing the total amount of time it took to complete each stage. The
 
 That seemed to work well. I guess the only verification I could make on the math was my own beliefs about my typing speed, which seemed to hover between 75 and 100 (raw) WPM depending on my focus.
 
-<Future>I was eager to make a chart, but I determined that the chart wouldn't be too interesting until I had a rolling average, and thus more data points to put on that chart. Right now my chart would only have one data point after every level. So I changed to a rolling average.</Future>
-
 <Future>I found a bug where if I blurred the game (which displayed the pause screen) while the "wrong character" CSS transition was occurring, then the class would never be erased and the indicator would stay in the bad state (red) forever! How dreadful. I also observed this same problem by some combination of hitting too many wrong answers and write answers together quickly. I wasn't easily able to reproduce this situation though.</Future>
+
+<Future>One improvement I wanted to make was when my timer started. I didn't want to start the timer on a particular level until the player typed their first character. Right now, I could feel when I played a sense of urgency when a new set of words appeared to start typing right away. Instead, I'd like to know that I could take a moment and stretch my fingers or prepare myself otherwise before I started typing, and I wouldn't be penalized for that. So in addition to changing when I started timing, I also felt I needed to convey that to the player some how. Perhaps with a visual queue of a timer. I didn't immediately make this change because it felt like some complex state, where my keydown tracker would also have to understand if it were game-time. I felt the need from this and other sources to change my game to use a statechart like XState. I wasn't ready to do that yet.</Future>
+
+I was eager to make a chart, but I determined that the chart wouldn't be too interesting until I had a rolling average, and thus more data points to put on that chart. Right now my chart would only have one data point after every level. So I changed to a rolling average. Up to this point I was logging the WPM to the console, so I first changed that to display in the play area itself.
+
+<Future>I changed from a separate WPM calculation per stage to a rolling average every 5 characters</Future>
