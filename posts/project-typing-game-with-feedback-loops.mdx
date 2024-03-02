@@ -12,8 +12,9 @@
       set $statsArea to first <[hs-stats-area] />
       set $gameplayArea to first <[hs-gameplay-area] />
       set $completed to the first <span /> in $gameplayArea
-      set $nextCharacterContainer to the next <span /> from $completed
-      set $allRemaining to the next <span /> from $nextCharacterContainer
+      set $nextCharacterContainerContainer to the next <span /> from $completed
+      set $nextCharacterContainer to the first <span /> in $nextCharacterContainerContainer
+      set $allRemaining to the next <span /> from $nextCharacterContainerContainer
       getNextCharacter()
     end
     def getNextCharacter
@@ -72,15 +73,27 @@
         if event.key.length is greater than 1 then exit end 
         halt the event
         if event.key is $nextCharacter
+            trigger correctCharacter on $nextCharacterContainer
             set $completed.innerHTML to $completed.innerHTML + $nextCharacter
             getNextCharacter()
-            if $nextCharacter is undefined 
+            if $nextCharacter is undefined
               nextLevel()
             end
         else 
             $nextCharacterContainer.classList.add("!text-red-600")
-            wait for transitionend from $nextCharacterContainer or 1s
+            $nextCharacterContainer.classList.add("!-left-px")
+            wait for transitionend or correctCharacter from $nextCharacterContainer or 1s
+            if the result's type is 'transitionend'
+                wait a tick
+                $nextCharacterContainer.classList.remove("!-left-px")
+                $nextCharacterContainer.classList.add("!left-px")
+                wait for transitionend or correctCharacter from $nextCharacterContainer or 1s
+            end
+
+            -- Always wipe out all the "bad character" indicators
             $nextCharacterContainer.classList.remove("!text-red-600")
+            $nextCharacterContainer.classList.remove("!left-px")
+            $nextCharacterContainer.classList.remove("!-left-px")
         end
     end
     on focus
@@ -107,12 +120,10 @@ end
   <span><span hs-raw-wpm class="text-base">--</span> Raw WPM (Words Per Minute)</span>
 </div>
 <div hs-gameplay-area class="hidden font-mono">{`
-<span class="!text-green-600"></span><span class="!text-amber-600 !underline !underline-offset-1 whitespace-pre-wrap transition-colors"></span><span class="">Type the next character with an amber underline.</span>
+<span class="!text-green-600"></span><span class="relative"><span class="relative !text-amber-600 !underline !underline-offset-1 whitespace-pre-wrap transition-[color,left] duration-75 left-0"></span></span><span class="">Type the next character with an amber underline.</span>
 `}</div>
 
 </div>
-
-
 
 ## Logbook
 
@@ -198,3 +209,16 @@ That seemed to work well. I guess the only verification I could make on the math
 I was eager to make a chart, but I determined that the chart wouldn't be too interesting until I had a rolling average, and thus more data points to put on that chart. Right now my chart would only have one data point after every level. So I changed to a rolling average. Up to this point I was logging the WPM to the console, so I first changed that to display in the play area itself.
 
 <Future>I changed from a separate WPM calculation per stage to a rolling average every 5 characters</Future>
+
+### Fri Mar  1 04:46:20 PM PST 2024
+
+At Game Dev Interest Group at RC someone made the comment that the visual indication was too subtle. At the time, the indicator was a quick color tween from the normal amber to red. I agreed it was likely too little contrast especially if someone had colorblindness. I had the idea to add some motion to the indicator as well. Yannick suggested that motion be only horizontal, to suggest the letter was shaking its head "no" at the player. So I tried that out quickly. I tried out Tailwind's `transition-transform`. 
+
+Because I was transforming two properties, I had to specify both of them in one rule. If I used two `transition-` rules, the latter overrode the former. So I had to use `transition-[color,transform]` to allow both to work.
+
+Unfortunately, to get the `transition-transform` to work, I had to set the span to `inline-block` which set me back to some of my previous whitespace related woes. Now the space character shifted around depending on where it was.
+
+
+### Sat Mar  2 03:58:33 PM PST 2024
+
+After much play and feeling annoyed, I realized I could avoid the use of `inline-block` if instead of using `transform`, I used `position: relative;` and `left: -1;` to shake the character. It worked smoothly!
