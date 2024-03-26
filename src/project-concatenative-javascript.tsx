@@ -194,9 +194,7 @@ define({
   impl: ({ ctx }) => {
     let dictionaryEntry: typeof dictionary;
 
-    // Consume any beginning whitespace
-    consume({ until: /\S/, ctx });
-    const name = consume({ until: /\s/, ctx });
+    const name = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
     define({
       name,
       impl: ({ ctx }) => {
@@ -229,9 +227,7 @@ define({
 define({
   name: "variable",
   impl: ({ ctx }) => {
-    // Consume any beginning whitespace
-    consume({ until: /\S/, ctx });
-    const name = consume({ until: /\s/, ctx });
+    const name = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
     // This variable is actually going to be the
     // value of the variable, via JavaScript closures
     let value: unknown;
@@ -384,11 +380,16 @@ function consume({
   until,
   including,
   ctx,
+  ignoreLeadingWhitespace,
 }: {
   until: RegExp | string;
   including?: boolean;
   ctx: Context;
+  ignoreLeadingWhitespace?: boolean;
 }) {
+  if (ignoreLeadingWhitespace) {
+    consume({ until: /\S/, ctx });
+  }
   let value = "";
   while (ctx.inputStreamPointer < ctx.inputStream.length) {
     const char = ctx.inputStream[ctx.inputStreamPointer];
@@ -396,6 +397,7 @@ function consume({
     if (typeof until === "string" && char === until) break;
     if (typeof until !== "string" && until.test(char)) break;
     ctx.inputStreamPointer++;
+    // TODO I bet this could be optimized a lot simply by first searching for the first instance of until and then taking a substring.
     value += char;
   }
   if (including) ctx.inputStreamPointer++;
@@ -416,13 +418,11 @@ function execute({ ctx }: { ctx: Context }) {
       ctx.halted = true;
       return;
     }
-    // Consume any beginning whitespace
-    consume({ until: /\S/, ctx });
+
+    const word = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
 
     // Input only had whitespace
-    if (ctx.inputStreamPointer >= ctx.inputStream.length) return;
-
-    const word = consume({ until: /\s/, ctx });
+    if (!word.match(/\S/)) return;
 
     if (interpreter === "queryWord") return queryWord({ word, ctx });
     return compileWord({ word, ctx });

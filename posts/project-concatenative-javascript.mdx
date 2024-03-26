@@ -38,8 +38,8 @@ Here are some tests which don't make much sense in the table below. First test: 
         <tr> <td> <code>sleep</code> </td> <td> <span c="now 750 sleep now swap - 749 > ' ✅' && me >text ">🚧</span> </td> </tr> 
         <tr> <td> After <code>sleep</code> </td> <td> <span c="' ✅' me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>:</code> and <code>sleep</code> </td> <td> <span c=": sleepier now 750 sleep now swap - 749 > ' ✅' && ; sleepier me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>true if</code> </td> <td> <span c="' ❌' true if ' ✅' then me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>false if</code> </td> <td> <span c="' ✅' false if ' ❌' then me >text">🚧</span> </td> </tr> 
+        <tr> <td> <code>true if</code> </td> <td> <span c="' ❌' true if ' ✅' endif me >text">🚧</span> </td> </tr> 
+        <tr> <td> <code>false if</code> </td> <td> <span c="' ✅' false if ' ❌' endif me >text">🚧</span> </td> </tr> 
         <tr> <td>Click event</td> <td> <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> </td> </tr> 
     </tbody>
 </table>
@@ -101,7 +101,7 @@ In my rush to prepare the above presentation, I accidentally made the timers all
 
 ### Sun Feb 25 09:14:19 PM PST 2024
 
-I wanted control flow via `if` and `else`, and loops like Forth's `begin ... until`. I struggled to understand how one does this, but [this reddit comment](https://www.reddit.com/r/Forth/comments/tativh/comment/i04bytd/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) unlocked it for me. The missing link for me was that Forth uses the parameter stack during compilation to save, recall, and point back to memory locations earlier in the definition. So during compilation, when `if` runs, it compiles some code that will jump to a place, but it also leaves an empty spot in the compiled code and puts the address of that empty space on the data stack. When later `then` is compiled, it grabs the address off the data stack and sets the current compilation address back into it. Thus, `if` now has the address it needs to jump to if the condition is false. With that level of understanding, I tried to make it work.
+I wanted control flow via `if` and `else`, and loops like Forth's `begin until`. I struggled to understand how one does this, but [this reddit comment](https://www.reddit.com/r/Forth/comments/tativh/comment/i04bytd/) unlocked it for me. The missing link for me was that Forth uses the parameter stack during compilation to save, recall, and point back to memory locations earlier in the definition. So during compilation, when `if` runs, it compiles some code that will jump to a place, but it also leaves an empty spot in the compiled code and puts the address of that empty space on the data stack. When later `endif` is compiled, it grabs the address off the data stack and sets the current compilation address back into it. Thus, `if` now has the address it needs to jump to if the condition is false. With that level of understanding, I tried to make it work.
 
 My attempt at this revealed a handful of missing pieces in my design. For example, I had no way to run user-defined words containing multiple words. That would be a prerequisite to jumping around in a multi-word definition! So I had to implement that first. 
 
@@ -121,3 +121,13 @@ The solution I imagined was for my colon definition implementation to change the
 ### Fri Mar  1 10:49:31 AM PST 2024
 
 I traded the Markdown table for a HTML table, because a huge markdown table makes for really terrible git diffs - When you reformat to make the columns wider or skinnier, every line changes! Very confusing when mixed with semantic changes as well.
+
+### Sun Mar  3 03:53:28 PM PST 2024
+
+I finally felt ready to implement `if` and `endif`. There were still some decisions to make about memory representation, but I felt I understood the problem enough to make those decisions as I went. 
+
+<Future>I had an idea about compiling words. Perhaps I could append vanilla JS to a string to build a new function. So every time I run `:`, a global function is actually constructed. I'm not sure how I could do that with JavaScript return statements. So I think I'd have to do some careful management of return statements. However it works, it will be different from Forth because it has to compile JavaScript instead of assembly, and JS and assembly have very different operations. </Future>
+
+### Mon Mar  4 07:44:28 AM PST 2024
+
+In Forth, the return stack and parameter stack hold arbitrary data of any type. In this language, I wanted similar semantics. And by now my parameter stack already worked this way. But the return stack was different, because it had one 'normal' kind of data for which the return type was consistent, but if users could push and pop any data from it, then those structured chunks would be interspersed with anything. Obviously, this made Typescript freak out. But that's the correct response to interspersing structured data with arbitrary data. One example of a nasty issue which might arise from this is that users could push things which kind of look like the structured return pointers but not really, and so bugs could get extremely confusing.
