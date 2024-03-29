@@ -9,7 +9,7 @@ type Dictionary = {
   immediateImpl?: Dictionary["impl"];
   compiledWordImpls?: (Dictionary["impl"] | unknown)[];
 };
-let dictionary: Dictionary | null = null;
+let latest: Dictionary | null = null;
 type Context = {
   me: Element | unknown;
   parameterStack: unknown[];
@@ -54,8 +54,8 @@ function define({ name, impl, immediateImpl }: Omit<Dictionary, "prev">) {
   //       across all contexts. Considering how this might be isolated to
   //       a context object. Seems wasteful to copy "core" functions like those
   //       defined in JavaScript below across many dictionaries.
-  const prev = dictionary;
-  dictionary = { prev, name, impl, immediateImpl };
+  const prev = latest;
+  latest = { prev, name, impl, immediateImpl };
 }
 
 define({
@@ -130,7 +130,7 @@ define({
   immediateImpl: ({ ctx }) => {
     const text = consume({ until: "'", including: true, ctx });
 
-    dictionary!.compiledWordImpls!.push((({ ctx }) => {
+    latest!.compiledWordImpls!.push((({ ctx }) => {
       ctx.push(text);
     }) as Dictionary["impl"]);
   },
@@ -209,7 +209,7 @@ defineBinaryExactlyAsInJS({ name: "<=" });
 define({
   name: ":",
   impl: ({ ctx }) => {
-    let dictionaryEntry: typeof dictionary;
+    let dictionaryEntry: typeof latest;
 
     const name = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
     define({
@@ -219,7 +219,7 @@ define({
         ctx.returnStack.push({ dictionaryEntry: dictionaryEntry!, i: 0 });
       },
     });
-    dictionaryEntry = dictionary;
+    dictionaryEntry = latest;
     dictionaryEntry!.compiledWordImpls = [];
     ctx.interpreter = "compileWord";
   },
@@ -228,7 +228,7 @@ define({
 define({
   name: ";",
   immediateImpl: ({ ctx }) => {
-    dictionary!.compiledWordImpls!.push((({ ctx }) => {
+    latest!.compiledWordImpls!.push((({ ctx }) => {
       ctx.returnStack.pop();
 
       // If we're back to the top-level, outside colon definitions
@@ -327,7 +327,7 @@ define({
 });
 
 function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
-  let entry = dictionary;
+  let entry = latest;
 
   while (entry) {
     if (entry.name == word) return entry;
@@ -383,16 +383,16 @@ function compileWord({
     if (dictionaryEntry.immediateImpl) {
       dictionaryEntry.immediateImpl({ ctx });
     } else {
-      dictionary!.compiledWordImpls!.push(dictionaryEntry.impl);
+      latest!.compiledWordImpls!.push(dictionaryEntry.impl);
     }
   } else {
     const primitiveMaybe = wordAsPrimitive({ word });
 
     if (primitiveMaybe.isPrimitive) {
-      dictionary!.compiledWordImpls!.push(
+      latest!.compiledWordImpls!.push(
         findDictionaryEntry({ word: "lit" })!.impl,
       );
-      dictionary!.compiledWordImpls!.push(primitiveMaybe.value);
+      latest!.compiledWordImpls!.push(primitiveMaybe.value);
     } else {
       throw new Error(`Couldn't comprehend word '${word}'`);
     }

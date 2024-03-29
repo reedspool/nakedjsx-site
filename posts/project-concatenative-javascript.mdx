@@ -132,3 +132,7 @@ I finally felt ready to implement `if` and `endif`. There were still some decisi
 ### Mon Mar  4 07:44:28 AM PST 2024
 
 In Forth, the return stack and parameter stack hold arbitrary data of any type. In this language, I wanted similar semantics. And by now my parameter stack already worked this way. But the return stack was different, because it had one 'normal' kind of data for which the return type was consistent, but if users could push and pop any data from it, then those structured chunks would be interspersed with anything. Obviously, this made Typescript freak out. But that's the correct response to interspersing structured data with arbitrary data. One example of a nasty issue which might arise from this is that users could push things which kind of look like the structured return pointers but not really, and so bugs could get extremely confusing.
+
+### Fri Mar 29 02:39:42 PM EDT 2024
+
+I started reading [Jonesforth](https://github.com/nornagon/jonesforth.) Implemented `lit` and compiled numeric primitives using it as Jonesforth does. I also renamed my internal dictionary variable to `latest`. Jonesforth is already an invaluable resource and I feel like I've only just begun to study it.
