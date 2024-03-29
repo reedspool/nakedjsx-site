@@ -135,6 +135,7 @@ define({
     }) as Dictionary["impl"]);
   },
 });
+
 define({
   name: ">text",
   impl: ({ ctx }) => {
@@ -322,6 +323,14 @@ define({
   name: "debugger",
   impl: ({ ctx }) => {
     console.log("Interpreter paused with context:", ctx);
+    debugger;
+  },
+});
+
+define({
+  name: "'debugger",
+  immediateImpl: ({ ctx }) => {
+    console.log("Interpreter immediately paused with context:", ctx);
     debugger;
   },
 });
