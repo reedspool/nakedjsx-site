@@ -76,12 +76,24 @@ define({
 define({
   name: "rot",
   impl: ({ ctx }) => {
-    const c = ctx.pop();
-    const b = ctx.pop();
     const a = ctx.pop();
+    const b = ctx.pop();
+    const c = ctx.pop();
     ctx.push(b);
-    ctx.push(c);
     ctx.push(a);
+    ctx.push(c);
+  },
+});
+
+define({
+  name: "-rot",
+  impl: ({ ctx }) => {
+    const a = ctx.pop();
+    const b = ctx.pop();
+    const c = ctx.pop();
+    ctx.push(a);
+    ctx.push(c);
+    ctx.push(b);
   },
 });
 define({
