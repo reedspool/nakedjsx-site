@@ -7,40 +7,45 @@ type Dictionary = {
   prev: Dictionary | null;
   impl?: ({ ctx }: { ctx: Context }) => void | false;
   immediateImpl?: Dictionary["impl"];
-  compiledWordImpls?: Dictionary["impl"][];
+  compiledWordImpls?: (Dictionary["impl"] | unknown)[];
 };
 let dictionary: Dictionary | null = null;
-type Context = typeof ctxTemplate;
-const ctxTemplate = {
-  me: null as Element | unknown,
-  parameterStack: [] as unknown[],
-  returnStack: [] as {
+type Context = {
+  me: Element | unknown;
+  parameterStack: unknown[];
+  returnStack: {
     dictionaryEntry: Dictionary;
     i: number;
-  }[],
-  inputStream: "",
-  paused: false,
-  halted: false,
-  inputStreamPointer: 0,
-  interpreter: "queryWord" as
-    | "queryWord"
-    | "compileWord"
-    | "executeColonDefinition",
-  pop() {
-    if (this.parameterStack.length < 1) throw new Error("Stack underflow");
-    return this.parameterStack.pop();
-  },
-  peek() {
-    return this.parameterStack[this.parameterStack.length - 1];
-  },
-  push(...args: unknown[]) {
-    this.parameterStack.push(...args);
-  },
+  }[];
+  inputStream: string;
+  paused: boolean;
+  halted: boolean;
+  inputStreamPointer: number;
+  interpreter: "queryWord" | "compileWord" | "executeColonDefinition";
+  pop: () => Context["parameterStack"][0];
+  push: (...args: Context["parameterStack"]) => void;
+  peek: () => Context["parameterStack"][0];
 };
 const newCtx: () => Context = () => {
   return {
-    ...ctxTemplate,
+    me: null,
     parameterStack: [],
+    returnStack: [],
+    inputStream: "",
+    paused: false,
+    halted: false,
+    inputStreamPointer: 0,
+    interpreter: "queryWord",
+    pop() {
+      if (this.parameterStack.length < 1) throw new Error("Stack underflow");
+      return this.parameterStack.pop();
+    },
+    peek() {
+      return this.parameterStack[this.parameterStack.length - 1];
+    },
+    push(...args: unknown[]) {
+      this.parameterStack.push(...args);
+    },
   };
 };
 
@@ -125,9 +130,9 @@ define({
   immediateImpl: ({ ctx }) => {
     const text = consume({ until: "'", including: true, ctx });
 
-    dictionary!.compiledWordImpls!.push(({ ctx }) => {
+    dictionary!.compiledWordImpls!.push((({ ctx }) => {
       ctx.push(text);
-    });
+    }) as Dictionary["impl"]);
   },
 });
 define({
@@ -223,12 +228,12 @@ define({
 define({
   name: ";",
   immediateImpl: ({ ctx }) => {
-    dictionary!.compiledWordImpls!.push(({ ctx }) => {
+    dictionary!.compiledWordImpls!.push((({ ctx }) => {
       ctx.returnStack.pop();
 
       // If we're back to the top-level, outside colon definitions
       if (ctx.returnStack.length < 1) ctx.interpreter = "queryWord";
-    });
+    }) as Dictionary["impl"]);
 
     // TODO: Should this instead be a stack and pop to the last interpreter?
     //       That is, was it ever a different interpeter previously?
@@ -236,6 +241,19 @@ define({
   },
 });
 
+
+define({
+  name: "lit",
+  impl: ({ ctx }) => {
+    const { dictionaryEntry, i } = ctx.returnStack.pop()!;
+
+    const literal = dictionaryEntry?.compiledWordImpls![i];
+
+    ctx.push(literal);
+
+    ctx.returnStack.push({ dictionaryEntry, i: i + 1 });
+  },
+});
 define({
   name: "variable",
   impl: ({ ctx }) => {
@@ -303,6 +321,7 @@ define({
 define({
   name: "debugger",
   impl: ({ ctx }) => {
+    console.log("Interpreter paused with context:", ctx);
     debugger;
   },
 });
@@ -370,9 +389,10 @@ function compileWord({
     const primitiveMaybe = wordAsPrimitive({ word });
 
     if (primitiveMaybe.isPrimitive) {
-      dictionary!.compiledWordImpls!.push(({ ctx }) => {
-        ctx.push(primitiveMaybe.value);
-      });
+      dictionary!.compiledWordImpls!.push(
+        findDictionaryEntry({ word: "lit" })!.impl,
+      );
+      dictionary!.compiledWordImpls!.push(primitiveMaybe.value);
     } else {
       throw new Error(`Couldn't comprehend word '${word}'`);
     }
@@ -385,7 +405,10 @@ function executeColonDefinition({ ctx }: { ctx: Context }) {
   if (!stackFrame) throw new Error("Return stack underflow ?");
   const { dictionaryEntry, i } = stackFrame;
   ctx.returnStack.push({ dictionaryEntry, i: i + 1 });
-  dictionaryEntry!.compiledWordImpls![i]!({ ctx });
+  const callable = dictionaryEntry!.compiledWordImpls![i]!;
+  if (typeof callable !== "function")
+    throw new Error("Attempted to execute a non-function definition");
+  callable({ ctx });
 }
 
 function consume({
