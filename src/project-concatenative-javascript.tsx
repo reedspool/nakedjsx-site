@@ -474,14 +474,14 @@ function query({ ctx }: { ctx: Context }) {
 
 document.querySelectorAll("[c]").forEach((el: Element) => {
   const inputStream = el.getAttribute("c")!;
-
+  const ctx = { ...newCtx(), me: el, inputStream };
   try {
     query({
-      ctx: { ...newCtx(), me: el, inputStream },
+      ctx,
     });
   } catch (error) {
     console.error(`Error in script:\n\n'${inputStream}'`);
     console.error(error);
-    console.error("DOM element:", el);
+    console.error("Context after error", ctx);
   }
 });
