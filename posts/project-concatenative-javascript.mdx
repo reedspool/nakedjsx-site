@@ -40,6 +40,7 @@ Here are some tests which don't make much sense in the table below. First test: 
         <tr> <td> <code>sleep</code> </td> <td> <span c="now 750 sleep now swap - 749 > ' ✅' && me >text ">🚧</span> </td> </tr> 
         <tr> <td> After <code>sleep</code> </td> <td> <span c="' ✅' me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>:</code> and <code>sleep</code> </td> <td> <span c=": sleepier now 750 sleep now swap - 749 > ' ✅' && ; sleepier me >text">🚧</span> </td> </tr> 
+        <tr> <td> <code>branch</code></td> <td> <span c=": 3, immediate 3 , ; : branchy ' ✅' branch 3, ' ❌1' ' ❌2' drop ; branchy me >text">🚧</span> </td> </tr>
         <tr> <td> <code>true if</code> </td> <td> <span c="' ❌' true if ' ✅' endif me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>false if</code> </td> <td> <span c="' ✅' false if ' ❌' endif me >text">🚧</span> </td> </tr> 
         <tr> <td>Click event</td> <td> <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> </td> </tr> 

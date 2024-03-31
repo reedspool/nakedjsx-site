@@ -239,10 +239,14 @@ define({
 define({
   name: ";",
   immediateImpl: ({ ctx }) => {
-    latest!.compiledWordImpls!.push((({ ctx }) => {
+    const impl: Dictionary["impl"] = ({ ctx }) => {
       const { prevInterpreter } = ctx.returnStack.pop()!;
       ctx.interpreter = prevInterpreter;
-    }) as Dictionary["impl"]);
+    };
+
+    // @ts-ignore debug info
+    if (impl) impl.__debug__originalWord = "exit";
+    latest!.compiledWordImpls!.push(impl);
 
     // TODO: If this is always the case, then `:` should throw an error if
     //       run from outside queryWord mode (i.e. can't define a word inside
@@ -307,6 +311,21 @@ define({
     ctx.push(literal);
 
     ctx.returnStack.push({ dictionaryEntry, i: i + 1, prevInterpreter });
+  },
+});
+
+define({
+  name: "branch",
+  impl: ({ ctx }) => {
+    const { dictionaryEntry, i, prevInterpreter } = ctx.returnStack.pop()!;
+
+    const value = dictionaryEntry.compiledWordImpls![i];
+
+    if (typeof value !== "number" || Number.isNaN(value)) {
+      throw new Error("`branch` must be followed by a number");
+    }
+
+    ctx.returnStack.push({ dictionaryEntry, i: i + value, prevInterpreter });
   },
 });
 define({
