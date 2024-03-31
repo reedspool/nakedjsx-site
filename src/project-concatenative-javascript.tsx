@@ -342,6 +342,52 @@ define({
     ctx.advanceCurrentFrame(value);
   },
 });
+
+define({
+  name: "0branch",
+  impl: ({ ctx }) => {
+    const { dictionaryEntry, i } = ctx.peekReturnStack();
+
+    const condition = ctx.pop();
+    const value = dictionaryEntry.compiledWordImpls![i];
+
+    if (typeof condition !== "number" || Number.isNaN(condition)) {
+      throw new Error(
+        `\`0branch\` found a non-number on the stack (${condition}) which indicates an error. If you want to use arbitrary values, try falsyBranch instead.`,
+      );
+    }
+    if (typeof value !== "number" || Number.isNaN(value)) {
+      throw new Error("`0branch` must be followed by a number");
+    }
+
+    if (condition === 0) {
+      ctx.advanceCurrentFrame(value);
+    } else {
+      ctx.advanceCurrentFrame();
+    }
+  },
+});
+
+define({
+  name: "falsyBranch",
+  impl: ({ ctx }) => {
+    const { dictionaryEntry, i } = ctx.peekReturnStack();
+
+    const condition = ctx.pop();
+    const value = dictionaryEntry.compiledWordImpls![i];
+
+    if (typeof value !== "number" || Number.isNaN(value)) {
+      throw new Error("`0branch` must be followed by a number");
+    }
+
+    if (!condition) {
+      ctx.advanceCurrentFrame(value);
+    } else {
+      ctx.advanceCurrentFrame();
+    }
+  },
+});
+
 define({
   name: "variable",
   impl: ({ ctx }) => {
