@@ -329,6 +329,53 @@ define({
 });
 
 define({
+  name: "here",
+  impl: ({ ctx }) => {
+    const dictionaryEntry = latest;
+    const i = dictionaryEntry?.compiledWordImpls?.length || 0;
+    ctx.push({
+      dictionaryEntry,
+      i,
+      getter: () => dictionaryEntry!.compiledWordImpls![i],
+      setter: (_value: unknown) =>
+        (dictionaryEntry!.compiledWordImpls![i] = _value),
+    });
+  },
+});
+
+define({
+  name: "-stackFrame",
+  impl: ({ ctx }) => {
+    const b = ctx.pop();
+    const a = ctx.pop();
+
+    // TODO: All this mess is just to assert that the parameters are the correct
+    //       kind of objects for Typescript. Maybe this is what typeguard functions
+    //       are for? Still, it's a sign that the idea of typescript with the mix
+    //       of structured data and unknown data on the parameter stack is tenuous
+    if (
+      !a ||
+      typeof a !== "object" ||
+      !("dictionaryEntry" in a) ||
+      !("i" in a) ||
+      typeof a.i !== "number" ||
+      !b ||
+      typeof b !== "object" ||
+      !("dictionaryEntry" in b) ||
+      !("i" in b) ||
+      typeof b.i !== "number"
+    ) {
+      throw new Error("`-stackFrame` requires two stackFrame parameters");
+    }
+    if (a.dictionaryEntry !== b.dictionaryEntry) {
+      throw new Error(
+        "`-stackFrame` across different dictionary entries not supported",
+      );
+    }
+    ctx.push(a.i - b.i);
+  },
+});
+define({
   name: "branch",
   impl: ({ ctx }) => {
     const { dictionaryEntry, i } = ctx.peekReturnStack();
@@ -619,6 +666,16 @@ function query({ ctx }: { ctx: Context }) {
   }
 }
 
+// Words written in the language!
+query({
+  ctx: {
+    ...newCtx(),
+    inputStream: `
+  : if immediate    tick falsyBranch , here 0 , ;
+  : endif immediate here over -stackFrame swap ! ;
+ `,
+  },
+});
 document.querySelectorAll("[c]").forEach((el: Element) => {
   const inputStream = el.getAttribute("c")!;
   const ctx = { ...newCtx(), me: el, inputStream };

@@ -45,8 +45,8 @@ Here are some tests which don't make much sense in the table below. First test: 
         <tr> <td> <code>1 0branch</code></td> <td> <span c=": branchy ' ❌1' 1 0branch 3, ' ✅' ' ❌2' drop ; branchy me >text">🚧</span> </td> </tr>
         <tr> <td>Falsy <code> falsyBranch</code></td> <td> <span c=": branchy ' ✅' ' ' falsyBranch 3, ' ❌1' ; branchy me >text">🚧</span> </td> </tr>
         <tr> <td>Truthy <code> falsyBranch</code></td> <td> <span c=": branchy ' ❌1' true falsyBranch 3, ' ✅' ; branchy me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>true if</code> </td> <td> <span c="' ❌' true if ' ✅' endif me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>false if</code> </td> <td> <span c="' ✅' false if ' ❌' endif me >text">🚧</span> </td> </tr> 
+        <tr> <td> <code>true if</code> </td> <td> <span c=": iffy ' ❌' true if ' ✅' endif ; iffy me >text">🚧</span> </td> </tr> 
+        <tr> <td> <code>false if</code> </td> <td> <span c=": iffy ' ✅' false if ' ❌' endif ; iffy me >text">🚧</span> </td> </tr> 
         <tr> <td>Click event</td> <td> <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> </td> </tr> 
     </tbody>
 </table>
