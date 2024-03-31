@@ -8,6 +8,7 @@ type Dictionary = {
   impl?: ({ ctx }: { ctx: Context }) => void | false;
   immediateImpl?: Dictionary["impl"];
   compiledWordImpls?: (Dictionary["impl"] | unknown)[];
+  isImmediate?: boolean;
 };
 let latest: Dictionary | null = null;
 type Context = {
@@ -16,6 +17,7 @@ type Context = {
   returnStack: {
     dictionaryEntry: Dictionary;
     i: number;
+    prevInterpreter: Context["interpreter"];
   }[];
   inputStream: string;
   paused: boolean;
@@ -122,17 +124,17 @@ define({
 define({
   name: "'",
   impl: ({ ctx }) => {
-    // Move cursor past the blank space between
+    // Move cursor past the single blank space between
     ctx.inputStreamPointer++;
     const text = consume({ until: "'", including: true, ctx });
     ctx.push(text);
   },
   immediateImpl: ({ ctx }) => {
+    // Move cursor past the single blank space between
+    ctx.inputStreamPointer++;
     const text = consume({ until: "'", including: true, ctx });
-
-    latest!.compiledWordImpls!.push((({ ctx }) => {
-      ctx.push(text);
-    }) as Dictionary["impl"]);
+    latest!.compiledWordImpls!.push(findDictionaryEntry({ word: "lit" })!.impl);
+    latest!.compiledWordImpls!.push(text);
   },
 });
 
@@ -216,8 +218,12 @@ define({
     define({
       name,
       impl: ({ ctx }) => {
+        ctx.returnStack.push({
+          dictionaryEntry: dictionaryEntry!,
+          i: 0,
+          prevInterpreter: ctx.interpreter,
+        });
         ctx.interpreter = "executeColonDefinition";
-        ctx.returnStack.push({ dictionaryEntry: dictionaryEntry!, i: 0 });
       },
     });
     dictionaryEntry = latest;
@@ -230,29 +236,73 @@ define({
   name: ";",
   immediateImpl: ({ ctx }) => {
     latest!.compiledWordImpls!.push((({ ctx }) => {
-      ctx.returnStack.pop();
-
-      // If we're back to the top-level, outside colon definitions
-      if (ctx.returnStack.length < 1) ctx.interpreter = "queryWord";
+      const { prevInterpreter } = ctx.returnStack.pop()!;
+      ctx.interpreter = prevInterpreter;
     }) as Dictionary["impl"]);
 
-    // TODO: Should this instead be a stack and pop to the last interpreter?
-    //       That is, was it ever a different interpeter previously?
+    // TODO: If this is always the case, then `:` should throw an error if
+    //       run from outside queryWord mode (i.e. can't define a word inside
+    //       another word definition), right? Need to look at Jonesforth
     ctx.interpreter = "queryWord";
   },
 });
 
+define({
+  name: "immediate",
+  immediateImpl: () => {
+    latest!.isImmediate = true;
+  },
+  impl: () => {
+    latest!.isImmediate = true;
+  },
+});
+
+define({
+  name: ",",
+  impl: ({ ctx }) => {
+    latest?.compiledWordImpls!.push(ctx.pop());
+  },
+});
+
+// TODO: Standard Forth has a useful and particular meaning for `'`, aka `tick`,
+//       which is to
+//       push a pointer to the dictionary definiton (or CFA?) of the next word
+//       onto the stack.
+//       Problem I'm having is that I have too many quotation delimeters in use.
+//       I like writing my HTML in MDX, and backtick `\`` has a special meaning
+//       in Markdown. Also, I want to write code in this language in HTML attributes,
+//       which are normally delimeted by double quotes. So all three normal string
+//       quotation methods are already in use. One by MDX, one by Forth, and one
+//       by HTML. Hmmm. I could write strings in parentheses or curly braces or
+//       percent signs. I'm not sure what to do.
+define({
+  name: "tick",
+  // TODO: This will only work in a word flagged `immediate`
+  //       non-immediate impl should be possible via WORD, FIND, and >CFA according to Jonesforth
+  impl: ({ ctx }) => {
+    const { dictionaryEntry, i, prevInterpreter } = ctx.returnStack.pop()!;
+
+    const compiled = dictionaryEntry?.compiledWordImpls![i];
+
+    if (!compiled || typeof compiled !== "function")
+      throw new Error("tick must be followed by a word");
+
+    ctx.push(compiled);
+
+    ctx.returnStack.push({ dictionaryEntry, i: i + 1, prevInterpreter });
+  },
+});
 
 define({
   name: "lit",
   impl: ({ ctx }) => {
-    const { dictionaryEntry, i } = ctx.returnStack.pop()!;
+    const { dictionaryEntry, i, prevInterpreter } = ctx.returnStack.pop()!;
 
     const literal = dictionaryEntry?.compiledWordImpls![i];
 
     ctx.push(literal);
 
-    ctx.returnStack.push({ dictionaryEntry, i: i + 1 });
+    ctx.returnStack.push({ dictionaryEntry, i: i + 1, prevInterpreter });
   },
 });
 define({
@@ -391,6 +441,14 @@ function compileWord({
   if (dictionaryEntry) {
     if (dictionaryEntry.immediateImpl) {
       dictionaryEntry.immediateImpl({ ctx });
+    } else if (dictionaryEntry.isImmediate) {
+      if (typeof dictionaryEntry.impl !== "function")
+        throw new Error("immediate word requires impl");
+      if (typeof dictionaryEntry.immediateImpl === "function")
+        throw new Error(
+          "I got confused because a word had the immediate flag set and it had an immediateImpl",
+        );
+      dictionaryEntry.impl({ ctx });
     } else {
       latest!.compiledWordImpls!.push(dictionaryEntry.impl);
     }
@@ -409,11 +467,18 @@ function compileWord({
 }
 
 function executeColonDefinition({ ctx }: { ctx: Context }) {
-  if (ctx.returnStack.length < 1) throw new Error("Return stack underflow");
   const stackFrame = ctx.returnStack.pop();
-  if (!stackFrame) throw new Error("Return stack underflow ?");
-  const { dictionaryEntry, i } = stackFrame;
-  ctx.returnStack.push({ dictionaryEntry, i: i + 1 });
+  if (!stackFrame) throw new Error("Return stack underflow");
+  const { dictionaryEntry, i, prevInterpreter } = stackFrame;
+  // TODO: Popping the stack frame to read it and then increment index is a
+  //       common enough occurence that I should probably implement "peakReturnStack"
+  //       and "incrementReturnStackIndex" methods to not risk accidental
+  //       state change (like forgetting to put the whole stack frame in order)
+  ctx.returnStack.push({
+    dictionaryEntry,
+    i: i + 1,
+    prevInterpreter,
+  });
   const callable = dictionaryEntry!.compiledWordImpls![i]!;
   if (typeof callable !== "function")
     throw new Error("Attempted to execute a non-function definition");

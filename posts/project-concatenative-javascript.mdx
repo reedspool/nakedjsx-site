@@ -27,6 +27,7 @@ Here are some tests which don't make much sense in the table below. First test: 
         <tr> <td> <code>:</code> and <code>;</code> </td> <td> <span c=": single ' ✅' ; single me >text">🚧</span> </td> </tr> 
         <tr> <td> Multi-word <code>:</code> </td> <td> <span c=": multi 4 ' ❌' ' ❌' ' ✅' ; multi me >text">🚧</span> </td> </tr> 
         <tr> <td> Multi-level <code>:</code> </td> <td> <span c=": levels 1 2 3 multi ; levels me >text">🚧</span> </td> </tr> 
+        <tr> <td> <code>immediate</code>, <code>,</code>, <code>tick</code>, <code>lit</code> </td> <td> <span c=": check immediate tick lit , ' ✅' , ; : pushCheck ' ❌' check ; pushCheck me >text">🚧</span> </td> </tr>
         <tr> <td> <code>typeof</code> </td> <td> <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>now</code> </td> <td> <span c="now ' number' typeof ' ✅' && me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>@</code> and <code>!</code> </td> <td> <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span> </td> </tr> 
