@@ -27,6 +27,8 @@ type Context = {
   pop: () => Context["parameterStack"][0];
   push: (...args: Context["parameterStack"]) => void;
   peek: () => Context["parameterStack"][0];
+  peekReturnStack: () => Context["returnStack"][0];
+  advanceCurrentFrame: (value?: number) => void;
 };
 const newCtx: () => Context = () => {
   return {
@@ -47,6 +49,18 @@ const newCtx: () => Context = () => {
     },
     push(...args: unknown[]) {
       this.parameterStack.push(...args);
+    },
+    // Unlike Jonesforth, when executing a word, we put all the relevant
+    // current information at the top of the stack. In Jonesforth, there's only
+    // one relevant piece of information, but we've got more.
+    peekReturnStack() {
+      const stackFrame = this.returnStack[this.returnStack.length - 1];
+      if (!stackFrame) throw new Error("Return stack underflow");
+      return stackFrame;
+    },
+    advanceCurrentFrame(value = 1) {
+      const stackFrame = this.peekReturnStack();
+      stackFrame.i += value;
     },
   };
 };
@@ -288,7 +302,7 @@ define({
   // TODO: This will only work in a word flagged `immediate`
   //       non-immediate impl should be possible via WORD, FIND, and >CFA according to Jonesforth
   impl: ({ ctx }) => {
-    const { dictionaryEntry, i, prevInterpreter } = ctx.returnStack.pop()!;
+    const { dictionaryEntry, i } = ctx.peekReturnStack();
 
     const compiled = dictionaryEntry?.compiledWordImpls![i];
 
@@ -297,27 +311,27 @@ define({
 
     ctx.push(compiled);
 
-    ctx.returnStack.push({ dictionaryEntry, i: i + 1, prevInterpreter });
+    ctx.advanceCurrentFrame();
   },
 });
 
 define({
   name: "lit",
   impl: ({ ctx }) => {
-    const { dictionaryEntry, i, prevInterpreter } = ctx.returnStack.pop()!;
+    const { dictionaryEntry, i } = ctx.peekReturnStack();
 
     const literal = dictionaryEntry?.compiledWordImpls![i];
 
     ctx.push(literal);
 
-    ctx.returnStack.push({ dictionaryEntry, i: i + 1, prevInterpreter });
+    ctx.advanceCurrentFrame();
   },
 });
 
 define({
   name: "branch",
   impl: ({ ctx }) => {
-    const { dictionaryEntry, i, prevInterpreter } = ctx.returnStack.pop()!;
+    const { dictionaryEntry, i } = ctx.peekReturnStack();
 
     const value = dictionaryEntry.compiledWordImpls![i];
 
@@ -325,7 +339,7 @@ define({
       throw new Error("`branch` must be followed by a number");
     }
 
-    ctx.returnStack.push({ dictionaryEntry, i: i + value, prevInterpreter });
+    ctx.advanceCurrentFrame(value);
   },
 });
 define({
@@ -490,18 +504,8 @@ function compileWord({
 }
 
 function executeColonDefinition({ ctx }: { ctx: Context }) {
-  const stackFrame = ctx.returnStack.pop();
-  if (!stackFrame) throw new Error("Return stack underflow");
-  const { dictionaryEntry, i, prevInterpreter } = stackFrame;
-  // TODO: Popping the stack frame to read it and then increment index is a
-  //       common enough occurence that I should probably implement "peakReturnStack"
-  //       and "incrementReturnStackIndex" methods to not risk accidental
-  //       state change (like forgetting to put the whole stack frame in order)
-  ctx.returnStack.push({
-    dictionaryEntry,
-    i: i + 1,
-    prevInterpreter,
-  });
+  const { dictionaryEntry, i } = ctx.peekReturnStack();
+  ctx.advanceCurrentFrame();
   const callable = dictionaryEntry!.compiledWordImpls![i]!;
   if (typeof callable !== "function")
     throw new Error("Attempted to execute a non-function definition");
