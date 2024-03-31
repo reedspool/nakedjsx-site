@@ -57,6 +57,10 @@ function define({ name, impl, immediateImpl }: Omit<Dictionary, "prev">) {
   //       a context object. Seems wasteful to copy "core" functions like those
   //       defined in JavaScript below across many dictionaries.
   const prev = latest;
+  // @ts-ignore debug info
+  if (impl) impl.__debug__originalWord = name;
+  // @ts-ignore debug info
+  if (immediateImpl) immediateImpl.__debug__originalWord = name;
   latest = { prev, name, impl, immediateImpl };
 }
 
