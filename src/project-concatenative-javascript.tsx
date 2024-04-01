@@ -6,7 +6,7 @@ type Dictionary = {
   name: string;
   prev: Dictionary | null;
   impl?: ({ ctx }: { ctx: Context }) => void | false;
-  compiledWordImpls?: (Dictionary["impl"] | unknown)[];
+  compiled?: (Dictionary["impl"] | unknown)[];
   isImmediate?: boolean;
 };
 let latest: Dictionary | null = null;
@@ -149,10 +149,8 @@ define({
       // Move cursor past the single blank space between
       ctx.inputStreamPointer++;
       const text = consume({ until: "'", including: true, ctx });
-      latest!.compiledWordImpls!.push(
-        findDictionaryEntry({ word: "lit" })!.impl,
-      );
-      latest!.compiledWordImpls!.push(text);
+      latest!.compiled!.push(findDictionaryEntry({ word: "lit" })!.impl);
+      latest!.compiled!.push(text);
     } else {
       // Move cursor past the single blank space between
       ctx.inputStreamPointer++;
@@ -251,7 +249,7 @@ define({
       },
     });
     dictionaryEntry = latest;
-    dictionaryEntry!.compiledWordImpls = [];
+    dictionaryEntry!.compiled = [];
     ctx.interpreter = "compileWord";
   },
 });
@@ -267,7 +265,7 @@ define({
 
     // @ts-ignore debug info
     if (impl) impl.__debug__originalWord = "exit";
-    latest!.compiledWordImpls!.push(impl);
+    latest!.compiled!.push(impl);
 
     // TODO: If this is always the case, then `:` should throw an error if
     //       run from outside queryWord mode (i.e. can't define a word inside
@@ -291,10 +289,10 @@ define({
     //       words, it compiles in a function which compiles them.
     //       This seems right a la https://forth-standard.org/standard/core/POSTPONE
     if (dictionaryEntry.isImmediate) {
-      latest!.compiledWordImpls!.push(dictionaryEntry.impl);
+      latest!.compiled!.push(dictionaryEntry.impl);
     } else {
-      latest!.compiledWordImpls!.push(() => {
-        latest!.compiledWordImpls!.push(dictionaryEntry.impl);
+      latest!.compiled!.push(() => {
+        latest!.compiled!.push(dictionaryEntry.impl);
       });
     }
   },
@@ -311,7 +309,7 @@ define({
 define({
   name: ",",
   impl: ({ ctx }) => {
-    latest?.compiledWordImpls!.push(ctx.pop());
+    latest?.compiled!.push(ctx.pop());
   },
 });
 
@@ -333,7 +331,7 @@ define({
   impl: ({ ctx }) => {
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
-    const compiled = dictionaryEntry?.compiledWordImpls![i];
+    const compiled = dictionaryEntry?.compiled![i];
 
     if (!compiled || typeof compiled !== "function")
       throw new Error("tick must be followed by a word");
@@ -349,7 +347,7 @@ define({
   impl: ({ ctx }) => {
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
-    const literal = dictionaryEntry?.compiledWordImpls![i];
+    const literal = dictionaryEntry?.compiled![i];
 
     ctx.push(literal);
 
@@ -361,13 +359,12 @@ define({
   name: "here",
   impl: ({ ctx }) => {
     const dictionaryEntry = latest;
-    const i = dictionaryEntry?.compiledWordImpls?.length || 0;
+    const i = dictionaryEntry?.compiled?.length || 0;
     ctx.push({
       dictionaryEntry,
       i,
-      getter: () => dictionaryEntry!.compiledWordImpls![i],
-      setter: (_value: unknown) =>
-        (dictionaryEntry!.compiledWordImpls![i] = _value),
+      getter: () => dictionaryEntry!.compiled![i],
+      setter: (_value: unknown) => (dictionaryEntry!.compiled![i] = _value),
     });
   },
 });
@@ -409,7 +406,7 @@ define({
   impl: ({ ctx }) => {
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
-    const value = dictionaryEntry.compiledWordImpls![i];
+    const value = dictionaryEntry.compiled![i];
 
     if (typeof value !== "number" || Number.isNaN(value)) {
       throw new Error("`branch` must be followed by a number");
@@ -425,7 +422,7 @@ define({
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
     const condition = ctx.pop();
-    const value = dictionaryEntry.compiledWordImpls![i];
+    const value = dictionaryEntry.compiled![i];
 
     if (typeof condition !== "number" || Number.isNaN(condition)) {
       throw new Error(
@@ -450,7 +447,7 @@ define({
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
     const condition = ctx.pop();
-    const value = dictionaryEntry.compiledWordImpls![i];
+    const value = dictionaryEntry.compiled![i];
 
     if (typeof value !== "number" || Number.isNaN(value)) {
       throw new Error("`0branch` must be followed by a number");
@@ -622,16 +619,14 @@ function compileWord({
         throw new Error("immediate word requires impl");
       dictionaryEntry.impl({ ctx });
     } else {
-      latest!.compiledWordImpls!.push(dictionaryEntry.impl);
+      latest!.compiled!.push(dictionaryEntry.impl);
     }
   } else {
     const primitiveMaybe = wordAsPrimitive({ word });
 
     if (primitiveMaybe.isPrimitive) {
-      latest!.compiledWordImpls!.push(
-        findDictionaryEntry({ word: "lit" })!.impl,
-      );
-      latest!.compiledWordImpls!.push(primitiveMaybe.value);
+      latest!.compiled!.push(findDictionaryEntry({ word: "lit" })!.impl);
+      latest!.compiled!.push(primitiveMaybe.value);
     } else {
       throw new Error(`Couldn't comprehend word '${word}'`);
     }
@@ -641,7 +636,7 @@ function compileWord({
 function executeColonDefinition({ ctx }: { ctx: Context }) {
   const { dictionaryEntry, i } = ctx.peekReturnStack();
   ctx.advanceCurrentFrame();
-  const callable = dictionaryEntry!.compiledWordImpls![i]!;
+  const callable = dictionaryEntry!.compiled![i]!;
   if (typeof callable !== "function")
     throw new Error("Attempted to execute a non-function definition");
   callable({ ctx });
