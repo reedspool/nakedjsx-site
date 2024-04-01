@@ -270,6 +270,31 @@ define({
 });
 
 define({
+  name: "postpone",
+  immediateImpl: ({ ctx }) => {
+    const word = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
+    const dictionaryEntry = findDictionaryEntry({ word });
+    if (!dictionaryEntry) {
+      throw new Error(`Couldn't find dictionary entry to POSTPONE ('${word}')`);
+    }
+    // TODO: This replicates a lot of the logic structure from compileWord,
+    //       except it compiles the "compile time" semantics, i.e. it never
+    //       executes immediate words, just compiles them, and for non-immediate
+    //       words, it compiles in a function which compiles them.
+    //       This seems right a la https://forth-standard.org/standard/core/POSTPONE
+    if (dictionaryEntry.immediateImpl) {
+      latest!.compiledWordImpls!.push(dictionaryEntry.immediateImpl);
+    } else if (dictionaryEntry.isImmediate) {
+      latest!.compiledWordImpls!.push(dictionaryEntry.impl);
+    } else {
+      latest!.compiledWordImpls!.push(() => {
+        latest!.compiledWordImpls!.push(dictionaryEntry.impl);
+      });
+    }
+  },
+});
+
+define({
   name: "immediate",
   immediateImpl: () => {
     latest!.isImmediate = true;
@@ -671,8 +696,9 @@ query({
   ctx: {
     ...newCtx(),
     inputStream: `
-  : if immediate    tick falsyBranch , here 0 , ;
+  : if    immediate postpone falsyBranch here 0 , ;
   : endif immediate here over -stackFrame swap ! ;
+  : else  immediate postpone branch here 0 , swap postpone endif ;
  `,
   },
 });
