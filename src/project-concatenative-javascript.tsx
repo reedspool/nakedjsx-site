@@ -714,9 +714,13 @@ query({
   ctx: {
     ...newCtx(),
     inputStream: `
-  : if    immediate postpone falsyBranch here 0 , ;
-  : endif immediate here over -stackFrame swap ! ;
-  : else  immediate postpone branch here 0 , swap postpone endif ;
+  : ahead           here 0 , ;
+  : <back           here -stackFrame , ;
+  : if              postpone falsyBranch ahead ;                immediate
+  : endif           here over -stackFrame swap ! ;              immediate
+  : else            postpone branch ahead swap postpone endif ; immediate
+  : begin           here ;                                      immediate
+  : until           postpone falsyBranch <back ;                immediate
  `,
   },
 });
