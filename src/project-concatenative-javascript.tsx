@@ -528,6 +528,15 @@ define({
   name: "debugger",
   impl: ({ ctx }) => {
     console.log("Interpreter paused with context:", ctx);
+    console.log(
+      `Here is the input stream, with \`<--!-->\` marking the input stream pointer`,
+    );
+    console.log(
+      `${ctx.inputStream.slice(
+        0,
+        ctx.inputStreamPointer,
+      )}<--!-->${ctx.inputStream.slice(ctx.inputStreamPointer)}`,
+    );
     debugger;
   },
 });
@@ -536,6 +545,15 @@ define({
   name: "'debugger",
   immediateImpl: ({ ctx }) => {
     console.log("Interpreter immediately paused with context:", ctx);
+    console.log(
+      `Here is the input stream, with \`<--!-->\` marking the input stream pointer`,
+    );
+    console.log(
+      `${ctx.inputStream.slice(
+        0,
+        ctx.inputStreamPointer,
+      )}<--!-->${ctx.inputStream.slice(ctx.inputStreamPointer)}`,
+    );
     debugger;
   },
 });
