@@ -6,7 +6,6 @@ type Dictionary = {
   name: string;
   prev: Dictionary | null;
   impl?: ({ ctx }: { ctx: Context }) => void | false;
-  immediateImpl?: Dictionary["impl"];
   compiledWordImpls?: (Dictionary["impl"] | unknown)[];
   isImmediate?: boolean;
 };
@@ -65,7 +64,7 @@ const newCtx: () => Context = () => {
   };
 };
 
-function define({ name, impl, immediateImpl }: Omit<Dictionary, "prev">) {
+function define({ name, impl, isImmediate = false }: Omit<Dictionary, "prev">) {
   // TODO: Right now, there's only one global dictionary which is shared
   //       across all contexts. Considering how this might be isolated to
   //       a context object. Seems wasteful to copy "core" functions like those
@@ -73,9 +72,7 @@ function define({ name, impl, immediateImpl }: Omit<Dictionary, "prev">) {
   const prev = latest;
   // @ts-ignore debug info
   if (impl) impl.__debug__originalWord = name;
-  // @ts-ignore debug info
-  if (immediateImpl) immediateImpl.__debug__originalWord = name;
-  latest = { prev, name, impl, immediateImpl };
+  latest = { prev, name, impl, isImmediate };
 }
 
 define({
@@ -141,18 +138,27 @@ define({
 });
 define({
   name: "'",
+  isImmediate: true,
   impl: ({ ctx }) => {
-    // Move cursor past the single blank space between
-    ctx.inputStreamPointer++;
-    const text = consume({ until: "'", including: true, ctx });
-    ctx.push(text);
-  },
-  immediateImpl: ({ ctx }) => {
-    // Move cursor past the single blank space between
-    ctx.inputStreamPointer++;
-    const text = consume({ until: "'", including: true, ctx });
-    latest!.compiledWordImpls!.push(findDictionaryEntry({ word: "lit" })!.impl);
-    latest!.compiledWordImpls!.push(text);
+    // TODO: Switching on the state of the interpreter feels dirty, coupling the
+    //       implementation of this word to the implementation of the compiler,
+    //       which is at higher level of abstraction. However, that's exactly
+    //       how Jonesforth does it (though in Forth itself).
+    //       I'd still like to find a better way.
+    if (ctx.interpreter === "compileWord") {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const text = consume({ until: "'", including: true, ctx });
+      latest!.compiledWordImpls!.push(
+        findDictionaryEntry({ word: "lit" })!.impl,
+      );
+      latest!.compiledWordImpls!.push(text);
+    } else {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const text = consume({ until: "'", including: true, ctx });
+      ctx.push(text);
+    }
   },
 });
 
@@ -252,7 +258,8 @@ define({
 
 define({
   name: ";",
-  immediateImpl: ({ ctx }) => {
+  isImmediate: true,
+  impl: ({ ctx }) => {
     const impl: Dictionary["impl"] = ({ ctx }) => {
       const { prevInterpreter } = ctx.returnStack.pop()!;
       ctx.interpreter = prevInterpreter;
@@ -271,7 +278,8 @@ define({
 
 define({
   name: "postpone",
-  immediateImpl: ({ ctx }) => {
+  isImmediate: true,
+  impl: ({ ctx }) => {
     const word = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
     const dictionaryEntry = findDictionaryEntry({ word });
     if (!dictionaryEntry) {
@@ -282,9 +290,7 @@ define({
     //       executes immediate words, just compiles them, and for non-immediate
     //       words, it compiles in a function which compiles them.
     //       This seems right a la https://forth-standard.org/standard/core/POSTPONE
-    if (dictionaryEntry.immediateImpl) {
-      latest!.compiledWordImpls!.push(dictionaryEntry.immediateImpl);
-    } else if (dictionaryEntry.isImmediate) {
+    if (dictionaryEntry.isImmediate) {
       latest!.compiledWordImpls!.push(dictionaryEntry.impl);
     } else {
       latest!.compiledWordImpls!.push(() => {
@@ -296,9 +302,7 @@ define({
 
 define({
   name: "immediate",
-  immediateImpl: () => {
-    latest!.isImmediate = true;
-  },
+  isImmediate: true,
   impl: () => {
     latest!.isImmediate = true;
   },
@@ -543,7 +547,8 @@ define({
 
 define({
   name: "'debugger",
-  immediateImpl: ({ ctx }) => {
+  isImmediate: true,
+  impl: ({ ctx }) => {
     console.log("Interpreter immediately paused with context:", ctx);
     console.log(
       `Here is the input stream, with \`<--!-->\` marking the input stream pointer`,
@@ -612,15 +617,9 @@ function compileWord({
   const dictionaryEntry = findDictionaryEntry({ word });
 
   if (dictionaryEntry) {
-    if (dictionaryEntry.immediateImpl) {
-      dictionaryEntry.immediateImpl({ ctx });
-    } else if (dictionaryEntry.isImmediate) {
+    if (dictionaryEntry.isImmediate) {
       if (typeof dictionaryEntry.impl !== "function")
         throw new Error("immediate word requires impl");
-      if (typeof dictionaryEntry.immediateImpl === "function")
-        throw new Error(
-          "I got confused because a word had the immediate flag set and it had an immediateImpl",
-        );
       dictionaryEntry.impl({ ctx });
     } else {
       latest!.compiledWordImpls!.push(dictionaryEntry.impl);
