@@ -12,47 +12,179 @@ If you see ❌ or 🚧, then that test has failed.
 
 Here are some tests which don't make much sense in the table below. First test: <span c="' Success' me >text">🚧</span>. Leading and extra whitespace don't change anything: <span c="    ' Success'    me    >text   ">🚧</span>. Look in the console to see if <span c="' Log test: ✅' log">this logs a checkmark</span>.
 
+export const tests = [
+  { 
+    Title: () => <>Emoji</>,
+    code: "' ✅' me >text"
+  },
+  { 
+    Title: () => <> <code>swap</code> </>,
+    code: "' ✅' ' ❌' swap me >text"
+  },
+  { 
+    Title: () => <> <code>dup</code> </>,
+    code: "' ✅' dup me >text me >text"
+  },
+  { 
+    Title: () => <> <code>drop</code> </>,
+    code: "' ✅' ' ❌' drop me >text"
+  },
+  { 
+    Title: () => <> <code>over</code> </>,
+    code: "' ✅' ' ❌' over me >text"
+  },
+  { 
+    Title: () => <> <code>rot</code> </>,
+    code: "' ✅' ' ❌' ' ❌' rot me >text"
+  },
+  { 
+    Title: () => <> <code>-rot</code> </>,
+    code: "' ❌' ' ✅' ' ❌' -rot me >text"
+  },
+  { 
+    Title: () => <> <code>&amp;&amp;</code> </>,
+    code: "true ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>||</code> </>,
+    code: "false ' ✅' \|\| me >text"
+  },
+  { 
+    Title: () => <> <code>:</code> and <code>;</code> </>,
+    code: ": single ' ✅' ; single me >text"
+  },
+  { 
+    Title: () => <> Multi-word <code>:</code> </>,
+    code: ": multi 4 ' ❌' ' ❌' ' ✅' ; multi me >text"
+  },
+  { 
+    Title: () => <> Multi-level <code>:</code> </>,
+    code: ": levels 1 2 3 multi ; levels me >text"
+  },
+  { 
+    Title: () => <> <code>immediate</code>, <code>,</code>, <code>tick</code>, <code>lit</code> </>,
+    code: ": check immediate tick lit , ' ✅' , ; : pushCheck ' ❌' check ; pushCheck me >text"
+  },
+  { 
+    Title: () => <> <code>typeof</code> </>,
+    code: "' test' ' string' typeof ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>now</code> </>,
+    code: "now ' number' typeof ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>@</code> and <code>!</code> </>,
+    code: "variable foo 5 ' ✅' foo ! foo @ me >text"
+  },
+  { 
+    Title: () => <> numeric <code>==</code> </>,
+    code: "5 5 == dup ' boolean' typeof && ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> numeric <code>===</code> </>,
+    code: "5 5 === dup ' boolean' typeof && ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>+</code> and <code>-</code> </>,
+    code: "5 4 3 + - -2 == ' ✅' && me >text"
+  },
+  { 
+    Title: () => <>Floats <code>+</code> like JS</>,
+    code: "0.1 0.2 + dup 0.3 > swap 0.31 < && ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>\*</code> and <code>/</code> </>,
+    code: "10 1.5 * 5 / 3 == ' ✅' && me >text"
+  },
+  { 
+    Title: () => <>Floats <code>*</code> like JS</>,
+    code: "0.1 0.2 * dup 0.02 > swap 0.021 < && ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>&gt;</code> and <code>&lt;</code> </>,
+    code: "4 5 < 5 4 > && ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>&gt;=</code> and <code>&lt;=</code> </>,
+    code: "4 5 <= 4 4 <= && 5 4 >= 5 5 >= && && ' ✅' && me >text"
+  },
+  { 
+    Title: () => <> <code>sleep</code> </>,
+    code: "now 750 sleep now swap - 749 > ' ✅' && me >text "
+  },
+  { 
+    Title: () => <> After <code>sleep</code> </>,
+    code: "' ✅' me >text"
+  },
+  { 
+    Title: () => <> <code>:</code> and <code>sleep</code> </>,
+    code: ": sleepier now 750 sleep now swap - 749 > ' ✅' && ; sleepier me >text"
+  },
+  { 
+    Title: () => <> <code>branch</code></>,
+    code: ": 3, immediate 3 , ; : branchy ' ✅' branch 3, ' ❌1' ' ❌2' drop ; branchy me >text"
+  },
+  { 
+    Title: () => <> <code>0 0branch</code></>,
+    code: ": branchy ' ✅' 0 0branch 3, ' ❌1' ' ❌2' drop ; branchy me >text"
+  },
+  { 
+    Title: () => <> <code>1 0branch</code></>,
+    code: ": branchy ' ❌1' 1 0branch 3, ' ✅' ' ❌2' drop ; branchy me >text"
+  },
+  { 
+    Title: () => <>Falsy <code> falsyBranch</code></>,
+    code: ": branchy ' ✅' ' ' falsyBranch 3, ' ❌1' ; branchy me >text"
+  },
+  { 
+    Title: () => <>Truthy <code> falsyBranch</code></>,
+    code: ": branchy ' ❌1' true falsyBranch 3, ' ✅' ; branchy me >text"
+  },
+  { 
+    Title: () => <> <code>true if</code> </>,
+    code: ": iffy ' ❌' true if ' ✅' endif ; iffy me >text"
+  },
+  { 
+    Title: () => <> <code>false if</code> </>,
+    code: ": iffy ' ✅' false if ' ❌' endif ; iffy me >text"
+  },
+  { 
+    Title: () => <> <code>true if/else</code> </>,
+    code: ": iffy true if ' ✅' else ' ❌' endif ; iffy me >text"
+  },
+  { 
+    Title: () => <> <code>false if/else</code> </>,
+    code: ": iffy false if ' ❌' else ' ✅' endif ; iffy me >text"
+  },
+  { 
+    Title: () => <> <code>begin/until</code> </>,
+    code: ": countDown begin 1 - dup 1 < until ; 5 countDown 0 === ' ✅' &&  me >text"
+  },
+  { 
+    Title: () => <>Click event</>,
+    code: "[ ' ✅' event target> >text ] ' click' me .addEventListener"
+  },
+]
+
+export const Test = ({ Title, code }) =>
+  <>
+    <tr> 
+      <td><Title /></td> 
+      <td> <span c={code}>🚧</span> </td> 
+      <td><button class="cpnt-button" _="on click toggle .hidden on next <tr /> then if my innerText is 'Show' put 'Hide' into me else put 'Show' into me">Show</button></td>
+    </tr>
+    <tr class="hidden">
+      <td class="px-md py-sm bg-gray-300 text-gray-700" colspan={2}><code class="text-xs">{code}</code></td>
+    </tr>
+  </>
+
+<button class="cpnt-button mb-4" _="on click trigger click on <button /> in next <table /> ">Toggle all code</button>
+
 <table>
-    <thead> <tr> <th>Word(s)/feature</th> <th>✅ / ❌ / 🚧</th> </tr> </thead>
+    <thead> <tr> <th>Word(s)/feature</th> <th>✅ / ❌ / 🚧</th> <th>Code</th></tr> </thead>
     <tbody>
-        <tr> <td>Emoji</td> <td> <span c="' ✅' me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>swap</code> </td> <td> <span c="' ✅' ' ❌' swap me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>dup</code> </td> <td> <span c="' ✅' dup me >text me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>drop</code> </td> <td> <span c="' ✅' ' ❌' drop me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>over</code> </td> <td> <span c="' ✅' ' ❌' over me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>rot</code> </td> <td> <span c="' ✅' ' ❌' ' ❌' rot me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>-rot</code> </td> <td> <span c="' ❌' ' ✅' ' ❌' -rot me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>&amp;&amp;</code> </td> <td> <span c="true ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>||</code> </td> <td> <span c="false ' ✅' \|\| me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>:</code> and <code>;</code> </td> <td> <span c=": single ' ✅' ; single me >text">🚧</span> </td> </tr> 
-        <tr> <td> Multi-word <code>:</code> </td> <td> <span c=": multi 4 ' ❌' ' ❌' ' ✅' ; multi me >text">🚧</span> </td> </tr> 
-        <tr> <td> Multi-level <code>:</code> </td> <td> <span c=": levels 1 2 3 multi ; levels me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>immediate</code>, <code>,</code>, <code>tick</code>, <code>lit</code> </td> <td> <span c=": check immediate tick lit , ' ✅' , ; : pushCheck ' ❌' check ; pushCheck me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>typeof</code> </td> <td> <span c="' test' ' string' typeof ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>now</code> </td> <td> <span c="now ' number' typeof ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>@</code> and <code>!</code> </td> <td> <span c="variable foo 5 ' ✅' foo ! foo @ me >text">🚧</span> </td> </tr> 
-        <tr> <td> numeric <code>==</code> </td> <td> <span c="5 5 == dup ' boolean' typeof && ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> numeric <code>===</code> </td> <td> <span c="5 5 === dup ' boolean' typeof && ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>+</code> and <code>-</code> </td> <td> <span c="5 4 3 + - -2 == ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td>Floats <code>+</code> like JS</td> <td> <span c="0.1 0.2 + dup 0.3 > swap 0.31 < && ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>\*</code> and <code>/</code> </td> <td> <span c="10 1.5 * 5 / 3 == ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td>Floats <code>*</code> like JS</td> <td> <span c="0.1 0.2 * dup 0.02 > swap 0.021 < && ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>&gt;</code> and <code>&lt;</code> </td> <td> <span c="4 5 < 5 4 > && ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>&gt;=</code> and <code>&lt;=</code> </td> <td> <span c="4 5 <= 4 4 <= && 5 4 >= 5 5 >= && && ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>sleep</code> </td> <td> <span c="now 750 sleep now swap - 749 > ' ✅' && me >text ">🚧</span> </td> </tr> 
-        <tr> <td> After <code>sleep</code> </td> <td> <span c="' ✅' me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>:</code> and <code>sleep</code> </td> <td> <span c=": sleepier now 750 sleep now swap - 749 > ' ✅' && ; sleepier me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>branch</code></td> <td> <span c=": 3, immediate 3 , ; : branchy ' ✅' branch 3, ' ❌1' ' ❌2' drop ; branchy me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>0 0branch</code></td> <td> <span c=": branchy ' ✅' 0 0branch 3, ' ❌1' ' ❌2' drop ; branchy me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>1 0branch</code></td> <td> <span c=": branchy ' ❌1' 1 0branch 3, ' ✅' ' ❌2' drop ; branchy me >text">🚧</span> </td> </tr>
-        <tr> <td>Falsy <code> falsyBranch</code></td> <td> <span c=": branchy ' ✅' ' ' falsyBranch 3, ' ❌1' ; branchy me >text">🚧</span> </td> </tr>
-        <tr> <td>Truthy <code> falsyBranch</code></td> <td> <span c=": branchy ' ❌1' true falsyBranch 3, ' ✅' ; branchy me >text">🚧</span> </td> </tr>
-        <tr> <td> <code>true if</code> </td> <td> <span c=": iffy ' ❌' true if ' ✅' endif ; iffy me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>false if</code> </td> <td> <span c=": iffy ' ✅' false if ' ❌' endif ; iffy me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>true if/else</code> </td> <td> <span c=": iffy true if ' ✅' else ' ❌' endif ; iffy me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>false if/else</code> </td> <td> <span c=": iffy false if ' ❌' else ' ✅' endif ; iffy me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>begin/until</code> </td> <td> <span c=": countDown begin 1 - dup 1 < until ; 5 countDown 0 === ' ✅' &&  me >text">🚧</span> </td> </tr> 
-        <tr> <td>Click event</td> <td> <span c="[ ' ✅' event target> >text ] ' click' me .addEventListener">🚧</span> </td> </tr> 
+    {tests.map(({ Title, code }) => <Test Title={Title} code={code} />)}
     </tbody>
 </table>
 
