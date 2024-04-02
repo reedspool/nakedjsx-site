@@ -2,10 +2,18 @@
 // Github
 // https://github.com/reedspool/reeds-website/blob/main/posts/project-concatenative-javascript.mdx
 // Live reeds.website/project-concatenative-javascript
+/**
+ * In Forth, the dictionary is a linear structure (because everything's linear
+ * in computer memory). But in JavaScript we have the benefit and the challenge
+ * of references to data in unknowable places. That is, we can't refer directly
+ * to memory, but instead we get named slots. Translating the wisdom and
+ * pragmatism of Forth to the Wild West of JavaScript is the fun and curse of
+ * this endeavor.
+ */
 type Dictionary = {
   name: string;
-  prev: Dictionary | null;
-  impl?: ({ ctx }: { ctx: Context }) => void | false;
+  previous: Dictionary | null;
+  impl?: ({ ctx }: { ctx: Context }) => void;
   compiled?: (Dictionary["impl"] | unknown)[];
   isImmediate?: boolean;
 };
@@ -64,77 +72,64 @@ const newCtx: () => Context = () => {
   };
 };
 
-function define({ name, impl, isImmediate = false }: Omit<Dictionary, "prev">) {
+function define({
+  name,
+  impl,
+  isImmediate = false,
+}: Omit<Dictionary, "previous">) {
   // TODO: Right now, there's only one global dictionary which is shared
   //       across all contexts. Considering how this might be isolated to
   //       a context object. Seems wasteful to copy "core" functions like those
   //       defined in JavaScript below across many dictionaries.
-  const prev = latest;
+  //       Maybe each dictionary could have its own dictionary which it searches
+  //       first? Then I'd have to distinguish between which dictionary to apply
+  //       a new word definition - doesn't seem to bad though.
   // @ts-ignore debug info
   if (impl) impl.__debug__originalWord = name;
-  latest = { prev, name, impl, isImmediate };
+  latest = { previous: latest, name, impl, isImmediate };
 }
 
 define({
   name: "swap",
   impl: ({ ctx }) => {
-    const a = ctx.pop();
-    const b = ctx.pop();
-    ctx.push(a);
-    ctx.push(b);
+    const [a, b] = [ctx.pop(), ctx.pop()];
+    ctx.push(a, b);
   },
 });
 define({
   name: "over",
   impl: ({ ctx }) => {
-    const a = ctx.pop();
-    const b = ctx.pop();
-    ctx.push(b);
-    ctx.push(a);
-    ctx.push(b);
+    const [a, b] = [ctx.pop(), ctx.pop()];
+    ctx.push(b, a, b);
   },
 });
 
 define({
   name: "rot",
   impl: ({ ctx }) => {
-    const a = ctx.pop();
-    const b = ctx.pop();
-    const c = ctx.pop();
-    ctx.push(b);
-    ctx.push(a);
-    ctx.push(c);
+    const [a, b, c] = [ctx.pop(), ctx.pop(), ctx.pop()];
+    ctx.push(b, a, c);
   },
 });
 
 define({
   name: "-rot",
   impl: ({ ctx }) => {
-    const a = ctx.pop();
-    const b = ctx.pop();
-    const c = ctx.pop();
-    ctx.push(a);
-    ctx.push(c);
-    ctx.push(b);
+    const [a, b, c] = [ctx.pop(), ctx.pop(), ctx.pop()];
+    ctx.push(a, c, b);
   },
 });
 define({
   name: "dup",
-  impl: ({ ctx }) => {
-    ctx.push(ctx.peek());
-  },
+  impl: ({ ctx }) => ctx.push(ctx.peek()),
 });
 define({
   name: "drop",
-  impl: ({ ctx }) => {
-    ctx.pop();
-  },
+  impl: ({ ctx }) => ctx.pop(),
 });
 define({
   name: "me",
-  impl: ({ ctx }) => {
-    ctx.push(ctx.me);
-  },
+  impl: ({ ctx }) => ctx.push(ctx.me),
 });
 define({
   name: "'",
@@ -162,27 +157,8 @@ define({
 
 define({
   name: ">text",
-  impl: ({ ctx }) => {
-    (ctx.pop() as HTMLElement).innerText = ctx.pop()!.toString();
-  },
-});
-
-define({
-  name: "&&",
-  impl: ({ ctx }) => {
-    const b = ctx.pop();
-    const a = ctx.pop();
-    ctx.push(a && b);
-  },
-});
-
-define({
-  name: "||",
-  impl: ({ ctx }) => {
-    const b = ctx.pop();
-    const a = ctx.pop();
-    ctx.push(a || b);
-  },
+  impl: ({ ctx }) =>
+    ((ctx.pop() as HTMLElement).innerText = ctx.pop()!.toString()),
 });
 
 define({
@@ -195,8 +171,7 @@ define({
 define({
   name: "typeof",
   impl: ({ ctx }) => {
-    const b = ctx.pop();
-    const a = ctx.pop();
+    const [b, a] = [ctx.pop(), ctx.pop()];
     ctx.push(typeof a === b);
   },
 });
@@ -213,13 +188,14 @@ function defineBinaryExactlyAsInJS({ name }: { name: Dictionary["name"] }) {
   define({
     name,
     impl: ({ ctx }) => {
-      const b = ctx.pop();
-      const a = ctx.pop();
+      const [b, a] = [ctx.pop(), ctx.pop()];
       ctx.push(binary(a, b));
     },
   });
 }
 
+defineBinaryExactlyAsInJS({ name: "&&" });
+defineBinaryExactlyAsInJS({ name: "||" });
 defineBinaryExactlyAsInJS({ name: "==" });
 defineBinaryExactlyAsInJS({ name: "===" });
 defineBinaryExactlyAsInJS({ name: "+" });
@@ -301,16 +277,12 @@ define({
 define({
   name: "immediate",
   isImmediate: true,
-  impl: () => {
-    latest!.isImmediate = true;
-  },
+  impl: () => (latest!.isImmediate = true),
 });
 
 define({
   name: ",",
-  impl: ({ ctx }) => {
-    latest?.compiled!.push(ctx.pop());
-  },
+  impl: ({ ctx }) => latest?.compiled!.push(ctx.pop()),
 });
 
 // TODO: Standard Forth has a useful and particular meaning for `'`, aka `tick`,
@@ -360,6 +332,9 @@ define({
   impl: ({ ctx }) => {
     const dictionaryEntry = latest;
     const i = dictionaryEntry?.compiled?.length || 0;
+    // This shape merges the "return stack frame" and the "variable" types to
+    // refer to a location within a dictionary entry's "compiled" data. In Forth,
+    // this is much simpler since can point anywhere in linear memory!
     ctx.push({
       dictionaryEntry,
       i,
@@ -372,13 +347,13 @@ define({
 define({
   name: "-stackFrame",
   impl: ({ ctx }) => {
-    const b = ctx.pop();
-    const a = ctx.pop();
+    const [b, a] = [ctx.pop(), ctx.pop()];
 
     // TODO: All this mess is just to assert that the parameters are the correct
-    //       kind of objects for Typescript. Maybe this is what typeguard functions
-    //       are for? Still, it's a sign that the idea of typescript with the mix
-    //       of structured data and unknown data on the parameter stack is tenuous
+    //       kind of objects so Typescript doesn't complain when I access the
+    //       properties below. Maybe this is what typeguard functions are for?
+    //       Even so, it's a sign that the idea of typescript with the mix of
+    //       structured data and unknown data on the parameter stack is tenuous
     if (
       !a ||
       typeof a !== "object" ||
@@ -393,6 +368,9 @@ define({
     ) {
       throw new Error("`-stackFrame` requires two stackFrame parameters");
     }
+
+    // Maybe there is a meaning for subtracting locations within different
+    // dictionary entries, but I haven't thought of it
     if (a.dictionaryEntry !== b.dictionaryEntry) {
       throw new Error(
         "`-stackFrame` across different dictionary entries not supported",
@@ -433,11 +411,8 @@ define({
       throw new Error("`0branch` must be followed by a number");
     }
 
-    if (condition === 0) {
-      ctx.advanceCurrentFrame(value);
-    } else {
-      ctx.advanceCurrentFrame();
-    }
+    // Must at least advance beyond the next location where the distance sits
+    ctx.advanceCurrentFrame(condition === 0 ? value : 1);
   },
 });
 
@@ -450,14 +425,11 @@ define({
     const value = dictionaryEntry.compiled![i];
 
     if (typeof value !== "number" || Number.isNaN(value)) {
-      throw new Error("`0branch` must be followed by a number");
+      throw new Error("`falsyBranch` must be followed by a number");
     }
 
-    if (!condition) {
-      ctx.advanceCurrentFrame(value);
-    } else {
-      ctx.advanceCurrentFrame();
-    }
+    // Must at least advance beyond the next location where the distance sits
+    ctx.advanceCurrentFrame(!condition ? value : 1);
   },
 });
 
@@ -515,13 +487,13 @@ define({
 define({
   name: "sleep",
   impl: ({ ctx }) => {
-    const a = ctx.pop();
+    const millis = ctx.pop() as number;
+    // Pause execution and restart it after the number of milliseconds.
+    ctx.paused = true;
     setTimeout(() => {
       ctx.paused = false;
       query({ ctx });
-    }, a as number);
-
-    ctx.paused = true;
+    }, millis);
   },
 });
 
@@ -565,7 +537,7 @@ function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
 
   while (entry) {
     if (entry.name == word) return entry;
-    entry = entry.prev;
+    entry = entry.previous;
   }
 
   return undefined;
@@ -687,7 +659,7 @@ function execute({ ctx }: { ctx: Context }) {
 
     const word = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
 
-    // Input only had whitespace
+    // Input only had whitespace, will halt on the next call to `execute`.
     if (!word.match(/\S/)) return;
 
     if (interpreter === "queryWord") return queryWord({ word, ctx });
