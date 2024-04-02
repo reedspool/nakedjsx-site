@@ -34,7 +34,9 @@ Here are some tests which don't make much sense in the table below. First test: 
         <tr> <td> numeric <code>==</code> </td> <td> <span c="5 5 == dup ' boolean' typeof && ' ✅' && me >text">🚧</span> </td> </tr> 
         <tr> <td> numeric <code>===</code> </td> <td> <span c="5 5 === dup ' boolean' typeof && ' ✅' && me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>+</code> and <code>-</code> </td> <td> <span c="5 4 3 + - -2 == ' ✅' && me >text">🚧</span> </td> </tr> 
-        <tr> <td> <code>*</code> and <code>/</code> </td> <td> <span c="10 1.5 * 5 / 3 == ' ✅' && me >text">🚧</span> </td> </tr> 
+        <tr> <td>Floats <code>+</code> like JS</td> <td> <span c="0.1 0.2 + dup 0.3 > swap 0.31 < && ' ✅' && me >text">🚧</span> </td> </tr> 
+        <tr> <td> <code>\*</code> and <code>/</code> </td> <td> <span c="10 1.5 * 5 / 3 == ' ✅' && me >text">🚧</span> </td> </tr> 
+        <tr> <td>Floats <code>*</code> like JS</td> <td> <span c="0.1 0.2 * dup 0.02 > swap 0.021 < && ' ✅' && me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>&gt;</code> and <code>&lt;</code> </td> <td> <span c="4 5 < 5 4 > && ' ✅' && me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>&gt;=</code> and <code>&lt;=</code> </td> <td> <span c="4 5 <= 4 4 <= && 5 4 >= 5 5 >= && && ' ✅' && me >text">🚧</span> </td> </tr> 
         <tr> <td> <code>sleep</code> </td> <td> <span c="now 750 sleep now swap - 749 > ' ✅' && me >text ">🚧</span> </td> </tr> 
