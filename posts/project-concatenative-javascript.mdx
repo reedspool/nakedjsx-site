@@ -10,7 +10,7 @@ The TypeScript source code for the language [lives here](https://github.com/reed
 
 If you see ❌ or 🚧, then that test has failed.
 
-Here are some tests which don't make much sense in the table below. First test: <span c="' Success' me >text">🚧</span>. Leading and extra whitespace don't change anything: <span c="    ' Success'    me    >text   ">🚧</span>. Look in the console to see if <span c="' Log test: ✅' log">this logs a checkmark</span>.
+This paragraph contains some tests which don't make much sense in the table below. First test: <span c="' Success' me >text">🚧</span>. Leading and extra whitespace don't change anything: <span c="    ' Success'    me    >text   ">🚧</span>. Look in the console to see if <span c="' Log test: ✅' log">this logs a checkmark</span>.
 
 export const tests = [
   { 
@@ -228,7 +228,7 @@ export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
       <td><button class="cpnt-button" c="on click me text> ' Show' === if ' Hide' else ' Show' endif me >text " _="on click toggle .hidden on next <tr />">Show</button></td>
     </tr>
     <tr class="hidden">
-      <td class="px-md py-sm bg-gray-300 text-gray-700" colspan={2}><code class="text-xs">{code}</code></td>
+      <td class="px-md py-sm bg-gray-300 text-gray-700" colspan={3}><code class="text-xs">{code}</code></td>
     </tr>
   </>
 

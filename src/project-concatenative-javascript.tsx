@@ -990,5 +990,14 @@ document.querySelectorAll("[c]").forEach((el) => {
     console.error(`Error in script:\n\n'${inputStream}'`);
     console.error(error);
     console.error("Context after error", ctx);
+    console.error(
+      `Here is the input stream, with \`<--!-->\` marking the input stream pointer`,
+    );
+    console.error(
+      `${ctx.inputStream.slice(
+        0,
+        ctx.inputStreamPointer,
+      )}<--!-->${ctx.inputStream.slice(ctx.inputStreamPointer)}`,
+    );
   }
 });
