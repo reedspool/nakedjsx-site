@@ -225,7 +225,7 @@ export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
     <tr> 
       <td><Title /></td> 
       <td> <span c={code}><TestTarget /></span> </td> 
-      <td><button class="cpnt-button" c="on click me text> ' Show' === if ' Hide' else ' Show' endif me >text " _="on click toggle .hidden on next <tr />">Show</button></td>
+      <td><button class="cpnt-button" c="on click me text> ' Show' === if ' Hide' else ' Show' endif me >text ' tr' me next ' hidden' swap toggleClass">Show</button></td>
     </tr>
     <tr class="hidden">
       <td class="px-md py-sm bg-gray-300 text-gray-700" colspan={3}><code class="text-xs">{code}</code></td>
