@@ -162,8 +162,8 @@ export const tests = [
     code: ": countDown begin 1 - dup 1 < until ; 5 countDown 0 === ' ✅' &&  me >text"
   },
   { 
-    Title: () => <>Click event</>,
-    code: "[ ' ✅' event target> >text ] ' click' me .addEventListener"
+    Title: () => <>Click event (click on the 🚧)</>,
+    code: "on click ' ✅' me >text ;"
   },
 ]
 

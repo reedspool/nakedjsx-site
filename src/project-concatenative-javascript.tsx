@@ -26,6 +26,7 @@ type Context = {
     i: number;
     prevInterpreter: Context["interpreter"];
   }[];
+  compilationTarget: Dictionary | null;
   inputStream: string;
   paused: boolean;
   halted: boolean;
@@ -47,6 +48,7 @@ const newCtx: () => Context = () => {
     halted: false,
     inputStreamPointer: 0,
     interpreter: "queryWord",
+    compilationTarget: null,
     pop() {
       if (this.parameterStack.length < 1) throw new Error("Stack underflow");
       return this.parameterStack.pop();
@@ -144,8 +146,10 @@ define({
       // Move cursor past the single blank space between
       ctx.inputStreamPointer++;
       const text = consume({ until: "'", including: true, ctx });
-      latest!.compiled!.push(findDictionaryEntry({ word: "lit" })!.impl);
-      latest!.compiled!.push(text);
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "lit" })!.impl,
+      );
+      ctx.compilationTarget!.compiled!.push(text);
     } else {
       // Move cursor past the single blank space between
       ctx.inputStreamPointer++;
@@ -153,12 +157,6 @@ define({
       ctx.push(text);
     }
   },
-});
-
-define({
-  name: ">text",
-  impl: ({ ctx }) =>
-    ((ctx.pop() as HTMLElement).innerText = ctx.pop()!.toString()),
 });
 
 define({
@@ -210,7 +208,7 @@ defineBinaryExactlyAsInJS({ name: "<=" });
 define({
   name: ":",
   impl: ({ ctx }) => {
-    let dictionaryEntry: typeof latest;
+    let dictionaryEntry: Dictionary | null;
 
     const name = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
     define({
@@ -224,9 +222,16 @@ define({
         ctx.interpreter = "executeColonDefinition";
       },
     });
+    // `define` will set `latest` to the new word, and that's the word we need
+    // to execute later.
     dictionaryEntry = latest;
     dictionaryEntry!.compiled = [];
     ctx.interpreter = "compileWord";
+
+    // In most Forth's, compilation occurs directly into `latest`. But here
+    // we enable compililation into entries which don't end up in the main
+    // dictionary. See the definiton of "on" in the web section for an example.
+    ctx.compilationTarget = dictionaryEntry;
   },
 });
 
@@ -241,12 +246,13 @@ define({
 
     // @ts-ignore debug info
     if (impl) impl.__debug__originalWord = "exit";
-    latest!.compiled!.push(impl);
+    ctx.compilationTarget!.compiled!.push(impl);
 
     // TODO: If this is always the case, then `:` should throw an error if
     //       run from outside queryWord mode (i.e. can't define a word inside
     //       another word definition), right? Need to look at Jonesforth
     ctx.interpreter = "queryWord";
+    ctx.compilationTarget = null;
   },
 });
 
@@ -265,11 +271,12 @@ define({
     //       words, it compiles in a function which compiles them.
     //       This seems right a la https://forth-standard.org/standard/core/POSTPONE
     if (dictionaryEntry.isImmediate) {
-      latest!.compiled!.push(dictionaryEntry.impl);
+      ctx.compilationTarget!.compiled!.push(dictionaryEntry.impl);
     } else {
-      latest!.compiled!.push(() => {
-        latest!.compiled!.push(dictionaryEntry.impl);
-      });
+      const impl: Dictionary["impl"] = ({ ctx }) => {
+        ctx.compilationTarget!.compiled!.push(dictionaryEntry.impl);
+      };
+      ctx.compilationTarget!.compiled!.push(impl);
     }
   },
 });
@@ -277,12 +284,19 @@ define({
 define({
   name: "immediate",
   isImmediate: true,
-  impl: () => (latest!.isImmediate = true),
+  impl: ({ ctx }) => {
+    // When `immediate` occurs within a definition, it can occur in a word which
+    // will not end up in the dictionary (i.e. not overwrite `latest`),
+    // e.g. `: x immediate ... ;` but if it occurs outside the definition e.g.
+    // `: x ... ; immediate` that will only work to adjust `latest`
+    const target = ctx.compilationTarget ?? latest;
+    target!.isImmediate = true;
+  },
 });
 
 define({
   name: ",",
-  impl: ({ ctx }) => latest?.compiled!.push(ctx.pop()),
+  impl: ({ ctx }) => ctx.compilationTarget?.compiled!.push(ctx.pop()),
 });
 
 // TODO: Standard Forth has a useful and particular meaning for `'`, aka `tick`,
@@ -330,7 +344,7 @@ define({
 define({
   name: "here",
   impl: ({ ctx }) => {
-    const dictionaryEntry = latest;
+    const dictionaryEntry = ctx.compilationTarget;
     const i = dictionaryEntry?.compiled?.length || 0;
     // This shape merges the "return stack frame" and the "variable" types to
     // refer to a location within a dictionary entry's "compiled" data. In Forth,
@@ -591,14 +605,16 @@ function compileWord({
         throw new Error("immediate word requires impl");
       dictionaryEntry.impl({ ctx });
     } else {
-      latest!.compiled!.push(dictionaryEntry.impl);
+      ctx.compilationTarget!.compiled!.push(dictionaryEntry.impl);
     }
   } else {
     const primitiveMaybe = wordAsPrimitive({ word });
 
     if (primitiveMaybe.isPrimitive) {
-      latest!.compiled!.push(findDictionaryEntry({ word: "lit" })!.impl);
-      latest!.compiled!.push(primitiveMaybe.value);
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "lit" })!.impl,
+      );
+      ctx.compilationTarget!.compiled!.push(primitiveMaybe.value);
     } else {
       throw new Error(`Couldn't comprehend word '${word}'`);
     }
@@ -690,7 +706,67 @@ query({
  `,
   },
 });
-document.querySelectorAll("[c]").forEach((el: Element) => {
+
+/**
+ * Web/browser specific things
+ */
+// Put the text (second in the parameter stack) into the innerText of the element
+// (first in the parameter stack)
+define({
+  name: ">text",
+  impl: ({ ctx }) => {
+    const [element, content] = [ctx.pop(), ctx.pop()];
+    (element as HTMLElement).innerText = content!.toString();
+  },
+});
+
+// Add an event listener, like Hyperscript does. Works by defining an anonymous
+// dictionary entry.
+// Usage: `<a c="on click ' It worked!' me >text ;">`
+define({
+  name: "on",
+  impl: ({ ctx }) => {
+    const event = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
+    // By not using `define` we don't adjust the dictionary pointer `latest`.
+    // This is a divergence from Forth implementations I've seen, and I'm calling
+    // it an "anonymous dictionary entry".
+    const dictionaryEntry: Dictionary = {
+      name: `anonymous-on-${event}-handler`,
+      previous: null,
+      compiled: [],
+    };
+
+    (ctx.me as Element).addEventListener(event, ({ target }) => {
+      // When the event occurs, we will run an independent interpreter (new ctx)
+      // with this anonymous dictionary entry already on the return stack. This
+      // is almost exactly as if this were a colon definition named `x` and then
+      // ran a program where `x` was the only word in the input stream.
+      query({
+        ctx: {
+          ...newCtx(),
+          me: target,
+          returnStack: [
+            {
+              dictionaryEntry,
+              i: 0,
+              prevInterpreter: "queryWord", // Unused, I believe
+            },
+          ],
+          interpreter: "executeColonDefinition",
+        },
+      });
+    });
+
+    ctx.interpreter = "compileWord";
+    // Compile all words into this anonymous entry until `;`
+    ctx.compilationTarget = dictionaryEntry;
+  },
+});
+
+// For any HTML element on the page with a `c` attribute, execute the value of
+// that attribute. This intentionally emulates Hyperscript's `_` or `data-script`
+// attributes.
+document.querySelectorAll("[c]").forEach((el) => {
   const inputStream = el.getAttribute("c")!;
   const ctx = { ...newCtx(), me: el, inputStream };
   try {
