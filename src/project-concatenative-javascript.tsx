@@ -720,6 +720,15 @@ define({
   },
 });
 
+// Get the element's text
+define({
+  name: "text>",
+  impl: ({ ctx }) => {
+    const element = ctx.pop();
+    ctx.push((element as HTMLElement).innerText);
+  },
+});
+
 // Add an event listener, like Hyperscript does. Works by defining an anonymous
 // dictionary entry.
 // Usage: `<a c="on click ' It worked!' me >text ;">`

@@ -162,6 +162,10 @@ export const tests = [
     code: ": countDown begin 1 - dup 1 < until ; 5 countDown 0 === ' ✅' &&  me >text"
   },
   { 
+    Title: () => <> <code>text{">"}</code> </>,
+    code: "me text> ' 🚧' === ' ✅' && me >text"
+  },
+  { 
     Title: () => <>Click event (click on the 🚧)</>,
     code: "on click ' ✅' me >text ;"
   },
@@ -172,7 +176,7 @@ export const Test = ({ Title, code }) =>
     <tr> 
       <td><Title /></td> 
       <td> <span c={code}>🚧</span> </td> 
-      <td><button class="cpnt-button" _="on click toggle .hidden on next <tr /> then if my innerText is 'Show' put 'Hide' into me else put 'Show' into me">Show</button></td>
+      <td><button class="cpnt-button" c="on click me text> ' Show' === if ' Hide' else ' Show' endif me >text ;" _="on click toggle .hidden on next <tr />">Show</button></td>
     </tr>
     <tr class="hidden">
       <td class="px-md py-sm bg-gray-300 text-gray-700" colspan={2}><code class="text-xs">{code}</code></td>
