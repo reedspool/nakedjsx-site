@@ -188,6 +188,19 @@ export const tests = [
     code: ": selecty me select' span:nth-child(2)' first ; selecty ' ✅' swap >text",
     TestTarget : () => <><span>{/* not this one */}</span><span>🚧</span></> 
   },
+
+  { 
+    Title: () => <> <code>next</code> </>,
+    code: "me select' span' first ' span' swap next ' ✅' swap >text",
+    TestTarget : () => <><span>{/* not this one */}</span><span>🚧</span></> 
+  },
+
+  { 
+    Title: () => <> <code>previous</code> </>,
+    code: "me select' span:nth-child(2)' first ' span' swap previous ' ✅' swap >text",
+    TestTarget : () => <><span>🚧</span><span>{/* not this one */}</span></> 
+  },
+
   { 
     Title: () => <><code>on click</code></>,
     code: "on click ' ✅' me >text ;",

@@ -841,6 +841,118 @@ define({
   },
 });
 
+// Stolen with love from Hyperscript https://hyperscript.org and converted to TS
+var scanForwardQuery = function (
+  start: Node,
+  root: Element | Document,
+  match: string,
+  wrap?: boolean,
+): Element | undefined {
+  var results = root.querySelectorAll(match);
+  for (var i = 0; i < results.length; i++) {
+    var elt = results[i];
+    if (!elt) return;
+    if (
+      elt.compareDocumentPosition(start) === Node.DOCUMENT_POSITION_PRECEDING
+    ) {
+      return elt;
+    }
+  }
+  if (wrap) {
+    return results[0];
+  }
+
+  return;
+};
+
+var scanBackwardsQuery = function (
+  start: Node,
+  root: Element | Document,
+  match: string,
+  wrap?: boolean,
+): Element | undefined {
+  var results = root.querySelectorAll(match);
+  for (var i = results.length - 1; i >= 0; i--) {
+    var elt = results[i];
+    if (!elt) return;
+    if (
+      elt.compareDocumentPosition(start) === Node.DOCUMENT_POSITION_FOLLOWING
+    ) {
+      return elt;
+    }
+  }
+  if (wrap) {
+    return results[results.length - 1];
+  }
+
+  return;
+};
+
+var scanForwardArray = function (
+  start: unknown,
+  array: Array<Element>,
+  match: Parameters<typeof HTMLElement.prototype.matches>[0],
+  wrap?: Boolean,
+): Element | undefined {
+  var matches: Array<Element> = [];
+  array.forEach(function (elt) {
+    if (elt.matches(match) || elt === start) {
+      matches.push(elt);
+    }
+  });
+  for (var i = 0; i < matches.length - 1; i++) {
+    var elt = matches[i];
+    if (elt === start) {
+      return matches[i + 1];
+    }
+  }
+  if (wrap) {
+    var first = matches[0];
+    if (first && first.matches(match)) {
+      return first;
+    }
+  }
+
+  return;
+};
+
+var scanBackwardsArray = function (
+  start: unknown,
+  array: Array<Element>,
+  match: Parameters<typeof HTMLElement.prototype.matches>[0],
+  wrap?: Boolean,
+): Element | undefined {
+  return scanForwardArray(start, Array.from(array).reverse(), match, wrap);
+};
+
+define({
+  name: "next",
+  impl: ({ ctx }) => {
+    const [element, selector] = [ctx.pop(), ctx.pop()];
+
+    const result = scanForwardQuery(
+      element as Element,
+      document,
+      selector!.toString(),
+    );
+    ctx.push(result);
+  },
+});
+
+define({
+  name: "previous",
+  impl: ({ ctx }) => {
+    const [element, selector] = [ctx.pop(), ctx.pop()];
+
+    const result = scanBackwardsQuery(
+      element as Element,
+      document,
+      selector!.toString(),
+    );
+    ctx.push(result);
+  },
+});
+
 // For any HTML element on the page with a `c` attribute, execute the value of
 // that attribute. This intentionally emulates Hyperscript's `_` or `data-script`
 // attributes.
