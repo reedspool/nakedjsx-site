@@ -754,6 +754,29 @@ define({
   },
 });
 
+// Add a class to an element
+define({
+  name: "addClass",
+  impl: ({ ctx }) => {
+    const [element, clazz] = [ctx.pop(), ctx.pop()];
+    (element as HTMLElement).classList.add(clazz!.toString());
+  },
+});
+define({
+  name: "removeClass",
+  impl: ({ ctx }) => {
+    const [element, clazz] = [ctx.pop(), ctx.pop()];
+    (element as HTMLElement).classList.remove(clazz!.toString());
+  },
+});
+define({
+  name: "toggleClass",
+  impl: ({ ctx }) => {
+    const [element, clazz] = [ctx.pop(), ctx.pop()];
+    (element as HTMLElement).classList.toggle(clazz!.toString());
+  },
+});
+
 // Use querySelectorAll to push a NodeList onto the stack
 // Note: Use `first` to unpack the first element if you only want one
 // Usage: `' span' me select`

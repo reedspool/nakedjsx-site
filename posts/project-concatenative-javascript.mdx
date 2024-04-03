@@ -202,6 +202,18 @@ export const tests = [
   },
 
   { 
+    Title: () => <> <code>addClass</code> & <code>removeClass</code> </>,
+    code: "' hidden' me select' span' first addClass ' hidden' me select' span:nth-child(2)' first removeClass",
+    TestTarget : () => <><span>🚧</span><span class="hidden">✅</span></> 
+  },
+
+  { 
+    Title: () => <> <code>toggleClass</code> </>,
+    code: "' hidden' me select' span' first toggleClass ' hidden' me select' span:nth-child(2)' first toggleClass",
+    TestTarget : () => <><span>🚧</span><span class="hidden">✅</span></> 
+  },
+
+  { 
     Title: () => <><code>on click</code></>,
     code: "on click ' ✅' me >text ;",
     TestTarget : () => <><span _="init wait a tick then send click to closest <[c] />">🚧</span></> 
