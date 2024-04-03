@@ -236,17 +236,20 @@ define({
 });
 
 define({
+  name: "exit",
+  impl: ({ ctx }) => {
+    const { prevInterpreter } = ctx.returnStack.pop()!;
+    ctx.interpreter = prevInterpreter;
+  },
+});
+
+define({
   name: ";",
   isImmediate: true,
   impl: ({ ctx }) => {
-    const impl: Dictionary["impl"] = ({ ctx }) => {
-      const { prevInterpreter } = ctx.returnStack.pop()!;
-      ctx.interpreter = prevInterpreter;
-    };
-
-    // @ts-ignore debug info
-    if (impl) impl.__debug__originalWord = "exit";
-    ctx.compilationTarget!.compiled!.push(impl);
+    ctx.compilationTarget!.compiled!.push(
+      findDictionaryEntry({ word: "exit" })!.impl,
+    );
 
     // TODO: If this is always the case, then `:` should throw an error if
     //       run from outside queryWord mode (i.e. can't define a word inside
@@ -624,6 +627,11 @@ function compileWord({
 function executeColonDefinition({ ctx }: { ctx: Context }) {
   const { dictionaryEntry, i } = ctx.peekReturnStack();
   ctx.advanceCurrentFrame();
+  // If someone leaves off a `;`, e.g. `on click 1`, just exit normally
+  if (i === dictionaryEntry!.compiled!.length) {
+    findDictionaryEntry({ word: "exit" })!.impl!({ ctx });
+    return;
+  }
   const callable = dictionaryEntry!.compiled![i]!;
   if (typeof callable !== "function")
     throw new Error("Attempted to execute a non-function definition");
