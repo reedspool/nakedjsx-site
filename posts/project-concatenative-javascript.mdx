@@ -166,17 +166,41 @@ export const tests = [
     code: "me text> ' 🚧' === ' ✅' && me >text"
   },
   { 
-    Title: () => <>Click event (click on the 🚧)</>,
-    code: "on click ' ✅' me >text ;"
+    Title: () => <> <code>select</code> </>,
+    code: "' span:nth-child(2)' me select first ' ✅' swap >text",
+    TestTarget : () => <><span>{/* not this one */}</span><span>🚧</span></> 
+  },
+
+  { 
+    Title: () => <> <code>select'</code> </>,
+    code: " me select' span:nth-child(2)' first ' ✅' swap >text",
+    TestTarget : () => <><span>{/* not this one */}</span><span>🚧</span></> 
+  },
+
+  { 
+    Title: () => <> <code>select</code> in <code>:</code></>,
+    code: ": selecty ' span:nth-child(2)' me select first ; selecty ' ✅' swap >text",
+    TestTarget : () => <><span>{/* not this one */}</span><span>🚧</span></> 
+  },
+
+  { 
+    Title: () => <> <code>select'</code> in <code>:</code> </>,
+    code: ": selecty me select' span:nth-child(2)' first ; selecty ' ✅' swap >text",
+    TestTarget : () => <><span>{/* not this one */}</span><span>🚧</span></> 
+  },
+  { 
+    Title: () => <><code>on click</code></>,
+    code: "on click ' ✅' me >text ;",
+    TestTarget : () => <><span _="init wait a tick then send click to closest <[c] />">🚧</span></> 
   },
 ]
 
-export const Test = ({ Title, code }) =>
+export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
   <>
     <tr> 
       <td><Title /></td> 
-      <td> <span c={code}>🚧</span> </td> 
-      <td><button class="cpnt-button" c="on click me text> ' Show' === if ' Hide' else ' Show' endif me >text ;" _="on click toggle .hidden on next <tr />">Show</button></td>
+      <td> <span c={code}><TestTarget /></span> </td> 
+      <td><button class="cpnt-button" c="on click me text> ' Show' === if ' Hide' else ' Show' endif me >text " _="on click toggle .hidden on next <tr />">Show</button></td>
     </tr>
     <tr class="hidden">
       <td class="px-md py-sm bg-gray-300 text-gray-700" colspan={2}><code class="text-xs">{code}</code></td>
@@ -188,7 +212,7 @@ export const Test = ({ Title, code }) =>
 <table>
     <thead> <tr> <th>Word(s)/feature</th> <th>✅ / ❌ / 🚧</th> <th>Code</th></tr> </thead>
     <tbody>
-    {tests.map(({ Title, code }) => <Test Title={Title} code={code} />)}
+    {tests.map((props) => <Test {...props} />)}
     </tbody>
 </table>
 

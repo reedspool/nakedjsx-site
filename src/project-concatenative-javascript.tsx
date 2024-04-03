@@ -716,6 +716,17 @@ query({
 });
 
 /**
+ * JavaScript stuff
+ */
+define({
+  name: "first",
+  impl: ({ ctx }) => {
+    const array = ctx.pop()! as Array<unknown>;
+    ctx.push(array[0]);
+  },
+});
+
+/**
  * Web/browser specific things
  */
 // Put the text (second in the parameter stack) into the innerText of the element
@@ -724,6 +735,12 @@ define({
   name: ">text",
   impl: ({ ctx }) => {
     const [element, content] = [ctx.pop(), ctx.pop()];
+    // TODO: I put this here because I ran into this error where
+    //       `select` returns a NodeList, not a single element.
+    //       Considering a toggle DEBUG_MODE which does extensive
+    //       checks like this everywhere, which can be turned off for speed.
+    if (!(element instanceof HTMLElement))
+      throw new Error("Require an Element to set innerText");
     (element as HTMLElement).innerText = content!.toString();
   },
 });
@@ -734,6 +751,50 @@ define({
   impl: ({ ctx }) => {
     const element = ctx.pop();
     ctx.push((element as HTMLElement).innerText);
+  },
+});
+
+// Use querySelectorAll to push a NodeList onto the stack
+// Note: Use `first` to unpack the first element if you only want one
+// Usage: `' span' me select`
+define({
+  name: "select",
+  impl: ({ ctx }) => {
+    const [element, selector] = [ctx.pop(), ctx.pop()];
+    ctx.push((element as Element).querySelectorAll(selector!.toString()));
+  },
+});
+
+// Like `select`, but slightly more convenient syntax
+// Usage `me select' span'`
+define({
+  name: "select'",
+  isImmediate: true,
+  impl: ({ ctx }) => {
+    // TODO: See note in definition of "'" about the state of the interpreter
+    if (ctx.interpreter === "compileWord") {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const selector = consume({ until: "'", including: true, ctx });
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "lit" })!.impl,
+      );
+      ctx.compilationTarget!.compiled!.push(selector);
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "swap" })!.impl,
+      );
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "select" })!.impl,
+      );
+    } else {
+      const element = ctx.pop();
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const selector = consume({ until: "'", including: true, ctx });
+      ctx.push(selector);
+      ctx.push(element);
+      findDictionaryEntry({ word: "select" })!.impl!({ ctx });
+    }
   },
 });
 
