@@ -162,6 +162,10 @@ export const tests = [
     code: ": countDown begin 1 - dup 1 < until ; 5 countDown 0 === ' ✅' &&  me >text"
   },
   { 
+    Title: () => <> Endless loop </>,
+    code: ": flicker begin 750 sleep dup me >text 250 sleep over me >text again ;  ' ✅' ' 🚧' flicker "
+  },
+  { 
     Title: () => <> <code>text{">"}</code> </>,
     code: "me text> ' 🚧' === ' ✅' && me >text"
   },
@@ -236,9 +240,7 @@ export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
 
 <table>
     <thead> <tr> <th>Word(s)/feature</th> <th>✅ / ❌ / 🚧</th> <th>Code</th></tr> </thead>
-    <tbody>
-    {tests.map((props) => <Test {...props} />)}
-    </tbody>
+    <tbody>{tests.map(Test)}</tbody>
 </table>
 
 ## Logbook

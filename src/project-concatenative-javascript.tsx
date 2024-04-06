@@ -711,6 +711,8 @@ query({
   : else            postpone branch ahead swap postpone endif ; immediate
   : begin           here ;                                      immediate
   : until           postpone falsyBranch <back ;                immediate
+  : again           postpone branch <back ;                     immediate
+  : repeat          postpone again postpone endif ;             immediate
  `,
   },
 });
