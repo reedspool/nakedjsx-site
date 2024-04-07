@@ -978,6 +978,31 @@ define({
   },
 });
 
+// Find the closest parent element which matches the selector
+define({
+  name: "closest",
+  impl: ({ ctx }) => {
+    const [selector, element] = [ctx.pop() as string, ctx.pop() as Element];
+    const result = element.parentElement!.closest(selector);
+    ctx.push(result);
+  },
+});
+
+// Emit the named event
+// Usage: `me ' click' emit`
+define({
+  name: "emit",
+  impl: ({ ctx }) => {
+    const [event, element] = [ctx.pop() as string, ctx.pop() as Element];
+    element.dispatchEvent(
+      new CustomEvent(event, {
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  },
+});
+
 // For any HTML element on the page with a `c` attribute, execute the value of
 // that attribute. This intentionally emulates Hyperscript's `_` or `data-script`
 // attributes.
@@ -989,7 +1014,7 @@ document.querySelectorAll("[c]").forEach((el) => {
       ctx,
     });
   } catch (error) {
-    console.error(`Error in script:\n\n'${inputStream}'`);
+    console.error(`Error in script:\n\n"${inputStream}"`);
     console.error(error);
     console.error("Context after error", ctx);
     console.error(

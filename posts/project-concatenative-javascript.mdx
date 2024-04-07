@@ -218,9 +218,9 @@ export const tests = [
   },
 
   { 
-    Title: () => <><code>on click</code></>,
+    Title: () => <><code>on click</code>, <code>closest</code>, & <code>emit</code></>,
     code: "on click ' ✅' me >text ;",
-    TestTarget : () => <><span _="init wait a tick then send click to closest <[c] />">🚧</span></> 
+    TestTarget : () => <><span c="me ' [c]' closest ' click' emit">🚧</span></> 
   },
 ]
 
