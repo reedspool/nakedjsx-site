@@ -1,0 +1,29 @@
+# Project: Racing Simulation
+
+## Logbook
+
+### Sat Apr 20 11:51:40 GMT-0700 (Pacific Daylight Time) 2024
+
+I wanted to make a racing game in the style of Blaseball. I'm not sure exactly where the idea came from. 
+
+A few of the elements of Blaseball which I want to emulate are its foundation as a weird simulation, its casual chaos, its participation model, and its web-first nature. I reserve the right to add to this list as I learn more about Blaseball.
+
+Blaseball's core game loop is a simulation for a league. The teams in the league face off against each other in a "splort." The splort of blaseball looks at first glance much like the sport of baseball. Deeper inspection reveals the weirdnesses and incongruencies. I love this as a narrative hook - it looks so familiar on first glance but something's a little off.
+
+If you dug deeper into Blaseball, you might feel like I did, that all the small incongruencies add up to a monumentally chaotic whole. Blaseball's chaos kept it surprising. Seasoned viewers who thought they'd seen it all might randomly see new brand events occur. And these new events might change the game fundamentally. You never thought a player could spontaneously combust? Well, now you know. Continuous chaos kept Blaseball fresh - even if no new events had happened in a week, you never knew when one might occur. The game creators leaned into this by leaving hints for events which had never yet happened in descriptions and rules around the website.
+
+Players participate in Blaseball mostly by watching. Perhaps "players" is a confusing word. In most computer games, the players are either AI-driven agents or humans with physical controls. But everyone actively playing the splort of Blaseball is a simulated agent. The humans fall into two categories - those who create the game and those who observe it. So to talk about the humans who observe the game, maybe "audience" is more suitable. 
+
+So the audience watches the game (glame?) and participates indirectly. In Blaseball's history there were many active ways to participate indirectly. The audience voted on polls set up by the creators, they bought tokens which supposedly affected the statistical calculations of the simulations, and they bet on the outcomes of the match-ups.
+
+The audience also passively participated indirectly. Passive doesn't sound right as a description of the massive energy of the participation I mean to describe. The plethora of fan art and discussion was anything but passive. Still, all the stories, songs, wiki pages, and tweets made no active contribution to the statistics of the simulation. The creators did, however, keep an eye on those commmunity contributions and made changes to the game to reflect the community's engagement.
+
+Blaseball was web-first and open. It was a website. Loading that website immediately showed you ongoing rounds of the league play, with dynamic updates second-by-second, play-by-play. When I opened the Blaseball homepage, I felt transported to another world which was familiar but slightly off in an intriguing way. I don't know I would have felt that immediacy if I'd installed an app to enter the world. It also felt like I could share the true weirdness of Blaseball with everyone by sharing the link to the homepage.
+
+I was working on another project called [RCVerse](https://github.com/reedspool/rcverse) when I had the idea for this game. I realized a lot of the lessons I'd learned creating RCVerse would apply to this project. RCVerse's model was a central game server that sent live updates to all connected browsers. That's exactly how I understood Blaseball to work and so exactly how I wanted my project to work.
+
+I imagined a webpage with a top-down view of a track, much like the Mario Kart mini map ([example 1](https://images.gamebanana.com/img/ss/mods/63ff2be6993a6.jpg) [example 2](https://64.media.tumblr.com/2f1d9704f96adb2cc7b2e538e1f513fb/tumblr_pvlw49Ql801rrftcdo1_640.png) [example 3](https://raw.githubusercontent.com/alejandro61299/Minimaps_Personal_Research/master/docs/web_images/world.png)). While searching for these examples, I found [this page of Alejandro Gamarra Niño's student research on minimaps](https://alejandro61299.github.io/Minimaps_Personal_Research/) which was a great overview. I realized that the "whole world" mini-map (in Alejandro's categorization) like Mario Kart would not be dramatic. If all the players were relatively close together then you wouldn't see the detail of jockeying, and if everyone were spread apart, that might be a boring race. Perhaps a "player-focused" minimap view would reveal more of the drama. Maybe the audience could choose which simulated player to follow?
+
+<Future>I read [this chapter on AI in racing games](https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter38_An_Architecture_Overview_for_AI_in_Racing_Games.pdf) from of [GameAIPro](https://www.gameaipro.com/). There were also some other interesting chapters in that book.</Future>
+
+RCer Elias sent me [this video on Blaseball from a product manager's perspective](https://www.youtube.com/watch?v=BbZ-3rc2vQ0&t=86s), how the narrative and the simulation collide with the audience and the creators. Really informative. 
