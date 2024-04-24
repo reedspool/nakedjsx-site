@@ -720,6 +720,7 @@ query({
 /**
  * JavaScript stuff
  */
+// Get the first item in an array
 define({
   name: "first",
   impl: ({ ctx }) => {
@@ -728,6 +729,15 @@ define({
   },
 });
 
+// Index into an array
+define({
+  name: "nth",
+  impl: ({ ctx }) => {
+    const n = ctx.pop() as number;
+    const array = ctx.pop()! as Array<unknown>;
+    ctx.push(array[n]);
+  },
+});
 /**
  * Web/browser specific things
  */
