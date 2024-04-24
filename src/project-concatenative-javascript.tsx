@@ -1016,25 +1016,35 @@ define({
 // For any HTML element on the page with a `c` attribute, execute the value of
 // that attribute. This intentionally emulates Hyperscript's `_` or `data-script`
 // attributes.
-document.querySelectorAll("[c]").forEach((el) => {
-  const inputStream = el.getAttribute("c")!;
-  const ctx = { ...newCtx(), me: el, inputStream };
-  try {
-    query({
-      ctx,
-    });
-  } catch (error) {
-    console.error(`Error in script:\n\n"${inputStream}"`);
-    console.error(error);
-    console.error("Context after error", ctx);
-    console.error(
-      `Here is the input stream, with \`<--!-->\` marking the input stream pointer`,
-    );
-    console.error(
-      `${ctx.inputStream.slice(
-        0,
-        ctx.inputStreamPointer,
-      )}<--!-->${ctx.inputStream.slice(ctx.inputStreamPointer)}`,
-    );
-  }
-});
+function runAttributes() {
+  document.querySelectorAll("[c]").forEach((el) => {
+    const inputStream = el.getAttribute("c")!;
+    const ctx = { ...newCtx(), me: el, inputStream };
+    try {
+      query({
+        ctx,
+      });
+    } catch (error) {
+      console.error(`Error in script:\n\n"${inputStream}"`);
+      console.error(error);
+      console.error("Context after error", ctx);
+      console.error(
+        `Here is the input stream, with \`<--!-->\` marking the input stream pointer`,
+      );
+      console.error(
+        `${ctx.inputStream.slice(
+          0,
+          ctx.inputStreamPointer,
+        )}<--!-->${ctx.inputStream.slice(ctx.inputStreamPointer)}`,
+      );
+    }
+  });
+}
+
+window.addEventListener("DOMContentLoaded", runAttributes);
+window.catscript = {
+  runAttributes,
+  query,
+  newCtx,
+  define,
+};

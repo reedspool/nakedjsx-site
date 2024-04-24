@@ -342,3 +342,11 @@ In Forth, the return stack and parameter stack hold arbitrary data of any type. 
 ### Fri Mar 29 02:39:42 PM EDT 2024
 
 I started reading [Jonesforth](https://github.com/nornagon/jonesforth.) Implemented `lit` and compiled numeric primitives using it as Jonesforth does. I also renamed my internal dictionary variable to `latest`. Jonesforth is already an invaluable resource and I feel like I've only just begun to study it.
+
+### Wed Apr 24 10:29:00 AM PDT 2024
+
+I've made a lot more progress I never described. I got control structures working and an idea for how to work with click handlers and much more.
+
+I wanted to play with the library for a creative coding exercise, but I realized I know how to quickly include it on another page. It would be easy to include on another page on my website, but maybe not on the web-at-large? Or maybe I could just include the compiled JavaScript straight from my website? I tried this on a codepen. I noted a couple issues. First, the classic jQuery `ready` problem. I added an event listener for `DOMContentLoaded` to fix that. Then, because I was using a `type="module"` script tag, I didn't expose anything on the global object. That made it really hard to detect if it was loaded at all in codepen. So I added some of the utilities to the global scope. Then I pushed to deploy and test again on codepen.
+
+After I pushed, it still didn't work. I checked how I was using codepen, and I was using it wrong! I never properly included my script in the first place. When I properly included it, it worked! I didn't know if it previously would have worked without my improvements, but I liked the improvements either way, so I didn't revert and check.
