@@ -62,6 +62,7 @@ async function compilePageFromMdx({
   mdxSrc,
   output,
   layout,
+  page = "CommonPage",
 }: (typeof dataForPages)[number]) {
   if (!mdxSrc) throw new Error(`No MDX to compile for ${output}`);
   const tmpDir = resolve(dirname("./tmp/" + mdxSrc));
@@ -98,6 +99,7 @@ import type { MDXProps } from "staticPageBuildingStuff";
 import * as Stuff from "staticPageBuildingStuff";
 const {
   CommonPage,
+  EmptyPage,
   Future,
   Link,
   HashTarget,
@@ -116,11 +118,11 @@ await mkdir("./build", { recursive: true });
 await writeFile(
   "${output}",
   (
-    <CommonPage>
+    <${page}>
       <Stuff.${layout}>
         <ReTypedMDXFile components={{ Link, HashTarget, GitHubLink, Future, FancyScriptTag }} />
       </Stuff.${layout}>
-    </CommonPage>
+    </${page}>
   ).toString(),
 );
 `;
@@ -180,6 +182,7 @@ async function compilePageFromJsxOrTsx({
   output,
   layout,
   title,
+  page = "CommonPage",
 }: (typeof dataForPages)[number]) {
   if (!pageJsxOrTsxSrc)
     throw new Error(`No Page JSX or TSX to compile for ${output}`);
@@ -203,6 +206,7 @@ async function compilePageFromJsxOrTsx({
 import * as Stuff from "staticPageBuildingStuff";
 const {
   CommonPage,
+  EmptyPage,
   Future,
   Link,
   HashTarget,
@@ -217,11 +221,11 @@ await mkdir("./build", { recursive: true });
 await writeFile(
   "${output}",
   (
-    <CommonPage ${title ? `title={"${title}"}` : ""}>
+    <${page} ${title ? `title={"${title}"}` : ""}>
       <Stuff.${layout}>
         <Body components={{ Link, HashTarget, GitHubLink, Future, FancyScriptTag }} />
       </Stuff.${layout}>
-    </CommonPage>
+    </${page}>
   ).toString(),
 );
 `;

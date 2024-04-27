@@ -36,8 +36,20 @@ export const CommonPage = ({
         <body>
           {children}
 
-          <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+          <script src="_hyperscript.js"></script>
         </body>
+      </html>
+    </>
+  );
+};
+
+export const EmptyPage = ({ children }: { children: JSX.Children }) => {
+  return (
+    <>
+      {`<!DOCTYPE html>`}
+      <html lang="en">
+        <head></head>
+        <body>{children}</body>
       </html>
     </>
   );

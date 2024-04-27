@@ -1,4 +1,9 @@
-export { EmptyLayout, BlogLayout, CommonPage } from "./components/CommonPage";
+export {
+  EmptyLayout,
+  BlogLayout,
+  CommonPage,
+  EmptyPage,
+} from "./components/CommonPage";
 export { GenericPageBody } from "./components/GenericPageBody";
 export { Link, HashTarget, GitHubLink } from "./components/Link";
 export { Future } from "./components/Future";
