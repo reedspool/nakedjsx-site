@@ -1,6 +1,6 @@
 # Project: Counting-Up Party Game 
 
-I had an idea for a game.
+<Link slug="counting-game">Printable cards here!</Link>
 
 ## Inspiration
 
@@ -17,6 +17,8 @@ I need a name for this game. Just going to brainstorm ideas here:
 3. The Counting
 4. Count Together
 5. Count Up
+6. Order Up
+7. Order In
 
 ## Log Book
 
@@ -25,8 +27,6 @@ I need a name for this game. Just going to brainstorm ideas here:
 By the time I'd started this page, I'd already played the game at 3 different parties and gotten really positive feedback.
 
 I recorded all of the communication method details I had on my most recent version of the cards into a JavaScript data structure [in a new page file on my site here](https://github.com/reedspool/reeds-website/blob/main/pages/counting-up-party-game.tsx#L1)
-
-<Future>I began to make a generated printable page on my website so I could upgrade from hand-drawn-and-cut cards to stylistic, printed cards. My friend said he would help me laminate, and I wanted a visual I could be proud of before I did that. Laminating it somehow felt significant in that way.</Future>
 
 
 ### Tue Jan  2 10:33:04 AM PST 2024
@@ -45,4 +45,18 @@ And here's where Playwright comes in. Playwright is a headless controller for a 
 For this project, I could imagine that being very useful for making some constraint-based assertions on the shapes of cards.
 </Future>
 
-<Future>I thought  of another communication method: "everyone yells their number all at once on the count of three. You cannot say your number again. You can say other people's numbers"</Future>
+### Sat Apr 27 12:06:37 PM PDT 2024
+
+I had an idea of how to solve "the one problem" which brought me back to this game. What's "the one problem?" The original rules of this game had the numbers always counting up from the lowest to the highest. Unfortunately, if you got the number 1 in your hand, you knew immediately you could play that, because it was guaranteed to be the lowest. That meant whoever had the `1` had a better strategy (immediately play the card) than the fun strategy (follow the communication method). This game was supposed to be fun first, so one person not having fun was an immediate failure for me in the role of the game designer. Worse, if someone played 1 immediately and someone else had 2, they could play their 2 immediately next! And 3, and so on!
+
+So, I had an idea for how to fix this, but it complicated the game a bit. I felt like I'd have to try iterate more versions of the game to work out the kinks of the new, additional complication. And to make more incremental progress, I thought I'd have to make more cards. I wanted to automate some bit of the process of making the cards for a couple reasons. One, I wanted to start to work towards a cleaner version of the cards. Second, I wanted to make many versions of the deck with slight variations to test out different gameplay ideas. And I didn't want to keep using the hand-made version of the game anymore anyways because the first version I made on index cards was getting a little worse for wear. 
+
+I began to make a generated printable page on my website so I could upgrade from hand-drawn-and-cut cards to stylistic, printed cards. My friend said he would help me laminate, and I wanted a visual I could be proud of before I did that. Laminating it somehow felt significant enought to warrant prior effort, though this was probably one of those useless mental blocks.
+
+I made <Link slug="counting-game">a page for the cards</Link> and got to work.
+
+I had to research how to make a printable page. I had done this before to make an easy resume builder, but it had been a while.
+
+I learned about a new tool! In Chrome DevTools (not sure about other browsers), under the three-dot menu in the top right -> More tools -> Rendering -> Emulate CSS type select "print" to help simulate 
+
+I found [this interesting project (github)](https://github.com/mcdemarco/cardpen) and [online](https://cardpen.mcdemarco.net/) where some people worked on a generic, reusable tool for making the kinds of cards I wanted to make in HTML.

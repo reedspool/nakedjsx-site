@@ -34,6 +34,12 @@ const dataForPages = [
     layout: "EmptyLayout",
   },
   {
+    pageJsxOrTsxSrc: "pages/counting-up-party-game.tsx",
+    output: "build/counting-game.html",
+    layout: "EmptyLayout",
+    page: "EmptyPage",
+  },
+  {
     clientSrc: "src/log-game-client.jsx",
     output: "build/log-game-client.js",
   },
