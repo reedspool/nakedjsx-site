@@ -60,3 +60,15 @@ I had to research how to make a printable page. I had done this before to make a
 I learned about a new tool! In Chrome DevTools (not sure about other browsers), under the three-dot menu in the top right -> More tools -> Rendering -> Emulate CSS type select "print" to help simulate 
 
 I found [this interesting project (github)](https://github.com/mcdemarco/cardpen) and [online](https://cardpen.mcdemarco.net/) where some people worked on a generic, reusable tool for making the kinds of cards I wanted to make in HTML.
+
+### Sun Apr 28 07:46:54 PM PDT 2024
+
+I went to the library for a test print. Some interesting results. First, the measurement of poker cards I found online 2.5in width by 3.5in height was over by 1/32in width and 1/16in height. I was surprised to find the border radius I found, 1/8in worked perfectly via CSS.
+
+I felt silly when I realized I hadn't printed any of the cards with English on them.
+
+<Future>I made card backs with the number and communication symbols big on the back. It took some programming to make the pages interspersed, 9 cards then 9 backs on the next page to line up with Chrome's printing dialog.</Future>
+
+### Mon Apr 29 01:37:36 PM PDT 2024
+
+I went back to the library for more printing, this time with my laptop. I found energy there to focus on coding. I refactored all my cards to use a single component since they'd been converging to a similar structure. I also added some runtime checks to assert that all my ducks were in a row, for example that I had a symbol for each tag I used.

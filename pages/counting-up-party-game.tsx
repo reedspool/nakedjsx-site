@@ -13,27 +13,27 @@ const communicationMethods: Array<{
   lowerNumberHotTip?: string;
 }> = [
   {
-    main: "Only say words which rhyme with your number.",
+    main: "Words which rhyme with your number.",
     tag: ["beginner"],
   },
   {
-    main: "Only say historical events.",
+    main: "Historical events.",
     tag: ["silly"],
   },
   {
-    main: "Only flex your arm.",
+    main: "Flex your arm.",
     tag: ["confusing"],
   },
   {
-    main: "Make the shape of your number with your arms and body",
+    main: "Make the shape of your number with your arms and body.",
     tag: ["beginner", "movement", "silly"],
   },
   {
-    main: "Only say names of famous people.",
+    main: "Names of famous people.",
     tag: ["confusing"],
   },
   {
-    main: "Only laugh.",
+    main: "Laugh.",
     higherNumberHotTip: "Louder if your number is higher.",
     lowerNumberHotTip: "Softer if your number is lower.",
     tag: ["beginner"],
@@ -70,35 +70,35 @@ const communicationMethods: Array<{
     tag: ["beginner", "confusing", "silly"],
   },
   {
-    main: "Only say foods.",
+    main: "Foods.",
     tag: ["beginner"],
   },
   {
-    main: "Only say furniture.",
+    main: "Furniture.",
     tag: ["silly", "confusing"],
   },
   {
-    main: "Only say movie titles.",
+    main: "Movie titles.",
     tag: ["beginner"],
   },
   {
-    main: "Only say song lyrics.",
+    main: "Song lyrics.",
     tag: ["beginner"],
   },
   {
-    main: "Only blink and use the direction of your eyes.",
+    main: "Blink and use the direction of your eyes.",
     tag: ["confusing", "silly"],
   },
   {
-    main: "Say 100 minus your number.",
+    main: "100 minus your number.",
     tag: ["beginner"],
   },
   {
-    main: "Only say units of measurement.",
+    main: "Units of measurement.",
     tag: ["silly", "confusing"],
   },
   {
-    main: "Only say vehicles.",
+    main: "Vehicles.",
     tag: ["silly", "confusing"],
   },
   {
@@ -112,18 +112,18 @@ const communicationMethods: Array<{
     tag: ["movement", "silly", "beginner"],
   },
   {
-    main: "Only say your number all together, on the count of three.",
+    main: "Say your number all together, on the count of three.",
   },
   {
-    main: "Only say sexual acts/positions",
+    main: "Sexual acts/positions",
     tag: ["mature", "confusing"],
   },
   {
-    main: "Only say names of drugs and alcoholic drinks",
+    main: "Names of drugs and alcoholic drinks",
     tag: ["mature", "confusing"],
   },
   {
-    main: "Only sing or hum a tone",
+    main: "Sing or hum a tone",
     tag: ["silly", "beginner"],
   },
 ];
@@ -131,16 +131,44 @@ const communicationMethods: Array<{
 type CommunicationMethods = typeof communicationMethods;
 type CommunicationMethod = CommunicationMethods[0];
 
+const tagPriority: Array<Tag> = [
+  "mature",
+  "beginner",
+  "confusing",
+  "silly",
+  "movement",
+];
+const tagSort = (a: Tag, b: Tag) => {
+  return tagPriority.indexOf(a) - tagPriority.indexOf(b);
+};
+
 const symbolsToMaterialSymbolsContent: { [key in string | Tag]: string } = {
   communication: "record_voice_over",
   saboteur: "dangerous",
   mature: "no_adult_content",
   confusing: "psychology_alt",
   movement: "run_circle",
-  silly: "offline_bolt",
+  silly: "person_play",
   beginner: "account_child",
   information: "help",
+  number: "numbers",
 } as const;
+const symbols = Object.keys(symbolsToMaterialSymbolsContent);
+
+Object.values(communicationMethods).forEach(({ tag }) => {
+  // TODO rename tag to tags
+  tag?.forEach((tag) => {
+    // tagPriority must include all used tags
+    // TODO Can this be done with Typescript? Couldn't figure out how
+    if (tagPriority.indexOf(tag) == -1)
+      throw new Error(`tagPriority missing '${tag}'`);
+
+    // symbols must include all used tags (can include whatever else)
+    // TODO Can this be done with TypeScript? Couldn't figure out how
+    if (symbols.indexOf(tag) == -1) throw new Error(`symbols missing '${tag}'`);
+  });
+});
+
 export const MaterialSymbol = ({
   which,
   classList = "",
@@ -174,6 +202,7 @@ export const Body = () => (
           "wght" 400,
           "GRAD" 0,
           "opsz" 24;
+        font-size: inherit;
       }
       body {
         --fancy-font-family: "Special Elite", system-ui;
@@ -193,15 +222,15 @@ export const Body = () => (
       }
       .container {
         /* https://en.wikipedia.org/wiki/Bicycle_Playing_Cards */
-        --poker-card-height: 3.5in;
-        --poker-card-width: 2.5in;
+        --poker-card-height: calc(3.5in - (1in / 16));
+        --poker-card-width: calc(2.5in - (1in / 32));
         /* https://themagiccafe.com/forums/viewtopic.php?topic=382099 */
         --poker-card-corner-radius: 0.125in;
         --card-height: var(--poker-card-height);
         --card-width: var(--poker-card-width);
         /* empirical, want the inner corner to appear at the center of the curve */
-        --card-padding-y: 0.1in;
-        --card-padding-x: 0.07in;
+        --card-padding-y: 0.15in;
+        --card-padding-x: 0.12in;
         --card-corner-radius: var(--poker-card-corner-radius);
         --margin: 0.05in;
         display: flex;
@@ -232,6 +261,11 @@ export const Body = () => (
         background-color: darkgray;
         padding: var(--card-padding-y) var(--card-padding-x);
       }
+
+      .card__container:nth-of-type(9n) {
+        break-after: page;
+      }
+
       .card {
         box-sizing: border-box;
         font-family: var(--fancy-font-family);
@@ -245,17 +279,13 @@ export const Body = () => (
         justify-content: space-between;
         align-items: center;
       }
-      .card:nth-child(9n) {
-        break-after: page;
-      }
-
-      .card__number {
+      .card.card-number {
         font-family: var(--fancy-font-family);
-        font-size: 56pt;
+        font-size: 72pt;
       }
 
       .card-header {
-        font-size: 20pt;
+        font-size: 24pt;
         width: 100%;
         display: flex;
         flex-direction: row;
@@ -267,18 +297,32 @@ export const Body = () => (
       }
       .card-header-tags {
         color: darkgray;
+        font-size: 16pt;
       }
-      .card__number[data-number="6"] .card__number-body,
-      .card__number[data-number="9"] .card__number-body {
+      .card.card-number[data-number="6"] .card-header,
+      .card.card-number[data-number="9"] .card-header {
         text-decoration: underline;
       }
-      .card__number-body {
+
+      .card-communication .card__body {
+        padding-inline: calc(1in / 8);
       }
-      .card__key-card-body {
+
+      .card.card-number .card__body {
+        color: darkgray;
+      }
+
+      .card-key .card__body {
         font-size: 12pt;
       }
-      .card__key-card-body .material-symbols-outlined {
+      .card-key .card__body .material-symbols-outlined {
         vertical-align: text-bottom;
+      }
+      .card-rules .card__body {
+        font-size: 12pt;
+      }
+      .card-rules .card__body p {
+        margin: 0;
       }
       .page-break {
         height: 0px;
@@ -291,6 +335,8 @@ export const Body = () => (
     ))}
     <SaboteurCard />
     <KeyCard />
+    {/* <RulesCard1 /> */}
+    {/* <RulesCard2 /> */}
     {communicationMethods.map(CommunicationMethodCard)}
     {/* Blanks, N to fill out the current page + an entire page which one can
       skip when they hit the print button */}
@@ -298,7 +344,7 @@ export const Body = () => (
       9 -
         ((NUM_OF_NUM_CARDS +
           communicationMethods.length +
-          2) /* 1 saboteur, 1 key card */ %
+          2) /* 1 saboteur, 1 key card, rules card(s) */ %
           9) +
         9,
     ).map(() => (
@@ -309,36 +355,21 @@ export const Body = () => (
 const CardContainer = ({ children }: { children: JSX.Children }) => (
   <div class="card__container">{children}</div>
 );
-
-const tagPriority: Array<Tag> = [
-  "mature",
-  "beginner",
-  "confusing",
-  "silly",
-  "movement",
-];
-const tagSort = (a: Tag, b: Tag) => {
-  return tagPriority.indexOf(a) - tagPriority.indexOf(b);
-};
-
-const CommunicationMethodCard = ({ main, tag = [] }: CommunicationMethod) => {
-  const HeaderContent = () => (
-    <>
-      <MaterialSymbol which="communication" />
-      <span class="card-header-tags">
-        {tag.sort(tagSort).map((tag) => (
-          <MaterialSymbol which={tag} />
-        ))}
-      </span>
-    </>
-  );
+const Empty = () => <></>;
+const StandardCard = ({
+  HeaderContent = Empty,
+  BodyContent = Empty,
+  classList = "",
+}) => {
   return (
     <CardContainer>
-      <div class="card">
+      <div class={`card ${classList}`}>
         <div class="card-header">
           <HeaderContent />
         </div>
-        <div class="">{main}</div>
+        <div class="card__body">
+          <BodyContent />
+        </div>
         <div class="card-header card-header--bottom">
           <HeaderContent />
         </div>
@@ -346,45 +377,69 @@ const CommunicationMethodCard = ({ main, tag = [] }: CommunicationMethod) => {
     </CardContainer>
   );
 };
-const NumberCard = ({ num }: { num: number }) => (
-  <CardContainer>
-    <div class="card card__number" data-number={num}>
-      <div class="card-header">{num}</div>
-      <div class="card__number-body">{num}</div>
-      <div class="card-header card-header--bottom">{num}</div>
-    </div>
-  </CardContainer>
-);
 
-const SaboteurCard = () => (
-  <CardContainer>
-    <div class="card">
-      <div class="card-header">
-        <MaterialSymbol which="saboteur" />
-      </div>
-      <div class="">
-        You are the saboteur. Mess with them. Don't get caught.
-      </div>
-      <div class="card-header card-header--bottom">
-        <MaterialSymbol which="saboteur" />
-      </div>
-    </div>
-  </CardContainer>
-);
+const CommunicationMethodCard = ({ main, tag = [] }: CommunicationMethod) => {
+  return (
+    <StandardCard
+      classList="card-communication"
+      HeaderContent={() => (
+        <>
+          <MaterialSymbol which="communication" />
+          <span class="card-header-tags">
+            {tag.sort(tagSort).map((tag) => (
+              <MaterialSymbol which={tag} />
+            ))}
+          </span>
+        </>
+      )}
+      BodyContent={() => main}
+    />
+  );
+};
+const NumberCard = ({ num }: { num: number }) => {
+  return (
+    <StandardCard
+      classList="card-number"
+      HeaderContent={() => (
+        <>
+          <span>{num}</span>
+          <span>{num}</span>
+        </>
+      )}
+      BodyContent={() => "#"}
+    />
+  );
+};
+
+const SaboteurCard = () => {
+  return (
+    <StandardCard
+      classList="card-communication"
+      HeaderContent={() => (
+        <>
+          <MaterialSymbol which="saboteur" />
+          <MaterialSymbol which="saboteur" />
+        </>
+      )}
+      BodyContent={() =>
+        "You are the saboteur. Mess with them. Don't get caught."
+      }
+    />
+  );
+};
 
 const KeyCard = () => {
-  const HeaderContent = () => (
-    <>
-      <MaterialSymbol which="information" />
-    </>
-  );
   return (
-    <CardContainer>
-      <div class="card ">
-        <div class="card-header">
-          <HeaderContent />
-        </div>
-        <div class="card__key-card-body">
+    <StandardCard
+      classList="card-key"
+      HeaderContent={() => (
+        <>
+          <MaterialSymbol which="information" />
+          <MaterialSymbol which="information" />
+        </>
+      )}
+      BodyContent={() => (
+        <>
           <div style="text-decoration: underline;">Key</div>
           <div>
             <MaterialSymbol which="communication" /> Communication card
@@ -404,11 +459,60 @@ const KeyCard = () => {
           <div>
             <MaterialSymbol which="movement" /> Requires movement
           </div>
-        </div>
-        <div class="card-header card-header--bottom">
-          <HeaderContent />
-        </div>
-      </div>
-    </CardContainer>
+        </>
+      )}
+    />
+  );
+};
+const RulesCard1 = () => {
+  return (
+    <StandardCard
+      classList="card-rules"
+      HeaderContent={() => (
+        <>
+          <MaterialSymbol which="information" />
+          <MaterialSymbol which="information" />
+        </>
+      )}
+      BodyContent={() => (
+        <>
+          <div style="text-decoration: underline;">Rules 1/3</div>
+          <p>Each player draws a number card.</p>
+          <p>One player draws a Communication Card. They are The Guesser.</p>
+        </>
+      )}
+    />
+  );
+};
+
+const RulesCard2 = () => {
+  return (
+    <StandardCard
+      classList="card-rules"
+      HeaderContent={() => (
+        <>
+          <MaterialSymbol which="information" />
+          <MaterialSymbol which="information" />
+        </>
+      )}
+      BodyContent={() => (
+        <>
+          <div style="text-decoration: underline;">Rules 2/3</div>
+          <p>The Guesser holds their number card up.</p>
+          <p>
+            The goal is for The Guesser to correctly place each player's number
+            in their hand in order.
+          </p>
+          <p>
+            Each player attempts to convey which number they're holding
+            following the rules of the chosen Communication Card.
+          </p>
+          <p>
+            Each player attempts to convey which number they're holding
+            following the rules of the chosen Communication Card.
+          </p>
+        </>
+      )}
+    />
   );
 };
