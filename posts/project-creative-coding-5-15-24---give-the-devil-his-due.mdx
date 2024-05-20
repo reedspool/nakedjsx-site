@@ -1,0 +1,193 @@
+# Project: Creative Coding 5/15/24 - Give The Devil His Due
+
+## Logbook
+
+### Wed May 15 10:27:58 GMT-0700 (Pacific Daylight Time) 2024
+
+The Creative Coding prompt was: 
+
+> He will give the devil his due. — from King Henry IV
+
+Someone [looked up the meaning of that phrase](https://www.myenglishpages.com/idiom/give-the-devil-his-due-meaning-and-examples/).
+
+> one has to acknowledge the positive qualities of a person who is unpleasant or disliked.
+
+I was grateful because I would have come up with a completely different idea of the meaning, something about an evil library.
+
+I had recently watched [AI-driven Dynamic Dialog through Fuzzy Pattern Matching](https://www.youtube.com/watch?v=tAbBID3N64A). That describes how Valve makes actors talk to each other based on the current situation of the world. I wanted to make a simulation where a handful of autonomous actors trade procedurally generated dialogue. The actors could act out any situation, so I thought I could sufficiently abide by the creative prompt.
+
+I started out with some hand-crafted actors with weird names. The thought developed into a scene where people are trading bad jokes to pass the time.
+
+<details>
+<summary>Code</summary>
+<FancyScriptTag type="application/javascript" async>{ `{
+  // With thanks from https://manofmany.com/entertainment/best-dad-jokes
+  const jokes = [
+    "Did you hear about the circus fire? It was in tents.",
+    "Can February March? No, but April May!",
+    "It’s inappropriate to make a ‘dad joke’ if you’re not a dad. It’s a faux pa.",
+    "Wanna hear a joke about paper? Never mind—it’s tearable.",
+    "How do lawyers say goodbye? We’ll be suing ya!",
+    "What’s the best way to watch a fly fishing tournament? Live stream.",
+    "Spring is here! I got so excited I wet my plants.",
+    "I could tell a joke about pizza, but it’s a little cheesy.",
+    "Don’t trust atoms. They make up everything!",
+    "When does a joke become a dad joke? When it becomes apparent.",
+    "What’s an astronaut’s favourite part of a computer? The space bar.",
+    "I don’t play soccer because I enjoy the sport. I’m just doing it for kicks!",
+    "Why are elevator jokes so classic and good? They work on many levels.",
+    "Why do bees have sticky hair? Because they use a honeycomb.",
+    "What do you call a fake noodle? An impasta.",
+    "Which state has the most streets? Rhode Island.",
+    "What did the coffee report to the police? A mugging.",
+    "Why did the scarecrow win an award? Because he was outstanding in his field.",
+    "I made a pencil with two erasers. It was pointless.",
+    "I’m reading a book about anti-gravity. It’s impossible to put down!",
+    "Did you hear about the guy who invented the knock-knock joke? He won the ‘no-bell’ prize.",
+    "I’ve got a great joke about construction, but I’m still working on it.",
+    "I used to hate facial hair…but then it grew on me.",
+    "I decided to sell my vacuum cleaner—it was just gathering dust!",
+    "I had a neck brace fitted years ago and I’ve never looked back since.",
+    "You know, people say they pick their nose, but I feel like I was just born with mine.",
+    "What’s brown and sticky? A stick.",
+    "Why can’t you hear a psychiatrist using the bathroom? Because the ‘P’ is silent.",
+    "What do you call an elephant that doesn’t matter? An irrelephant.",
+    "What do you get from a pampered cow? Spoiled milk.",
+    "I like telling Dad jokes. Sometimes he laughs!",
+    "Did I tell you the time I fell in love during a backflip? I was heels over head!",
+    "If a child refuses to sleep during nap time, are they guilty of resisting a rest?",
+    "I ordered a chicken and an egg online. I’ll let you know.",
+    "It takes guts to be an organ donor.",
+    "If you see a crime at an Apple Store, does that make you an iWitness?",
+    "I’m so good at sleeping, I can do it with my eyes closed!",
+    "Kid says, “Dad, did you get a haircut?” “No, I got them all cut!”",
+    "My wife is really mad at the fact that I have no sense of direction. So I packed up my stuff and right!",
+    "How do you get a squirrel to like you? Act like a nut."
+  ]
+
+  // From https://stackoverflow.com/a/12646864
+  function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+      }
+  }
+  function shuffleCopy(array) {
+    const copy = [...array];
+    shuffle(copy);
+    return copy;
+  }
+  let grabBagOfJokes = shuffleCopy(jokes)
+  const wait = (millis) => new Promise((resolve) => setTimeout(resolve, millis))
+  document.addEventListener("DOMContentLoaded", async () => {
+    const output = document.querySelector('[data-target=results-1]');
+    
+    const world = {
+      actor1: {
+        name: "Bread Carpenter",
+        occupation: "baker",
+        stamina: 5,
+        role: "joker",
+      },
+      actor2: {
+        name: "Scarlet Frankenfurter",
+        occupation: "line cook",
+        stamina: 2,
+        role: "annoyed",
+      },
+      actor3: {
+        name: "Chuck Grandler",
+        occupation: "trust fund kid",
+        stamina: 1,
+        role: "encouraging",
+      }
+    }
+    
+    function addProceduralNote(content) {
+      const div = document.createElement("div")
+      div.innerHTML = \u0060<em>\${content}</em>\u0060
+      output.appendChild(div)
+    }
+
+    function addDialogue(name, line) {
+      const div = document.createElement("div")
+      div.innerHTML = \u0060\${name}: \${line}\u0060
+      output.appendChild(div)
+    }
+    
+    addProceduralNote(\u0060Three humans in a most riveting situation: the waiting room of the Motor Vehicle Registrar\u0060)
+    addProceduralNote(\u0060\${world.actor1.name} is a \${world.actor1.occupation}\u0060)
+    addProceduralNote(\u0060\${world.actor2.name} is a \${world.actor2.occupation}\u0060)
+    addProceduralNote(\u0060\${world.actor3.name} is a \${world.actor3.occupation}\u0060)
+    addProceduralNote(\u0060The three have sat here for hours\u0060)
+    
+    const actors = [world.actor1, world.actor2, world.actor3]
+    
+    function query(trigger) {
+      const universe = {
+        world,
+        trigger
+      }
+      
+      universe.joker = actors.find((actor) => actor.role === "joker")
+
+      const passing = [
+        { 
+          predicate: [
+            ({ trigger }) => trigger.event === "Awkward silence",
+            ({ joker }) => Boolean(joker),
+            ({ joker }) => joker.stamina > 0,
+          ],
+          outcome: ({ joker,  }) => {
+            if (grabBagOfJokes.length === 0) grabBagOfJokes = shuffleCopy(jokes)
+            addDialogue(joker.name, grabBagOfJokes.pop())
+            joker.stamina--;
+          },
+        },
+        { 
+          predicate: [
+            ({ trigger }) => trigger.event === "Awkward silence",
+            ({ joker }) => Boolean(joker),
+            ({ joker }) => joker.stamina === 0,
+          ],
+          outcome: ({ joker,  }) => {
+            if (grabBagOfJokes.length === 0) grabBagOfJokes = shuffleCopy(jokes)
+            addDialogue(joker.name, "That's all I got")
+            const actorsWhoArentJoker = actors.filter(({ role }) => role !== "joker")
+            shuffle(actorsWhoArentJoker)
+            actorsWhoArentJoker[0].role = "joker";
+            actorsWhoArentJoker[1].role = "annoyed";
+            joker.role = "encouraging";
+          },
+        },
+      ].filter(({ predicate }) => {
+        for (p of predicate) {
+          if (! p(universe)) return false;
+        }
+        return true;
+      })
+      
+      passing.sort((a, b) => a.predicate.length - b.predicate.length)
+      
+      console.log("passing for", trigger, universe, passing)
+      
+      if (passing.length < 1) return;
+      
+      passing[0].outcome(universe)
+    }
+    
+    while (true) {
+      await wait(7500)
+      addProceduralNote(\u0060An awkward silence grips the room\u0060)
+      query({ event: "Awkward silence" })
+    }
+  })
+} `}</FancyScriptTag>
+</details>
+
+<h3>Results</h3>
+<output data-target="results-1"></output>
+
+### Mon May 20 02:50:00 PM PDT 2024
+
+I got to a place where each character would tell some jokes, and eventually they'd all be too exhausted. I wanted them to regain stamina and start telling jokes again. When I tried to add regaining stamina, I realized I wasn't sure where it would go. My best thought was to make a separate temporal system, a normal real-time game loop where each character would regain some small chunk of their stamina over time. That didn't fit into the current model at all, where I was focused on an event-based model. But it made sense that to see a real-time scene play out, we'd want both a real-time engine, and an event engine. The real-time engine might spit out events regularly, and the event engine would respond, sometimes spitting out more events in its response, or scheduling new event listeners for future real-time triggers. Seemed like a great pairing, and closer to what I had in my other project. So instead of attempting to build this event-based dialogue generator in isolation, I realized it would be another component of the system I'd built elsewhere.
