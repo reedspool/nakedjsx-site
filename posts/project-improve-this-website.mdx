@@ -336,3 +336,39 @@ So I used the dumb gold standard tool to skirt around the friction of my own too
 <Future>I noticed an issue where if I had an opening tag in one of my MDX files but no closing tag, and then more literal tags beneath that, then the error which MDX gave me could be about the wrong closing tag. E.g., it would say "no closing tag for `span`" when all my spans were properly closed, because there was a missing closing tag for a `div` earlier in the document, not a `span`! I wanted to fix this.</Future>
 
 I was unsure why Tailwind CSS changes seemed to be cached in local development. Perhaps it had to do with the recent change to `http-server` from `npx serve`? I checked `npx http-server --help` and found the `-c-1` option to disable caching and I gave that a try. It worked!
+
+### Mon Mar  4 07:12:07 AM PST 2024
+
+I like that my package.json scripts are split up into fine-grained tasks. Yes, most of the time I do the same tasks over and over again, but when I lay everything out separately like this I feel more flexible and ready to experiment.
+
+But, again, I do the same things over and over. Every time I want to do normal dev work on my website, I want a few specific processes running. One is to serve the website. One is to compile the website HTML and JavaScript again when any source file changes, and one is to compile the CSS when any source file changes.
+
+I like having each of these running in a separate Emacs VTerm buffer. Most of the time I don't look at them, but if something goes wrong, I can flip to them as easily as any other Emacs navigation. 
+
+So I wrote some ELisp to create those buffers for me. I didn't exhaustively ensure I included all the relavent functions here. I use [Doom Emacs](https://github.com/doomemacs/doomemacs) so a lot of this functionality was already available in my environment.
+
+
+```lisp
+(defun my/send-and-rename-vterm (command)
+  "Send a command to vterm and rename the buffer with that command"
+  (interactive "sCommand: ")
+  (vterm-send-string command)
+  (vterm-send-return)
+  (if (projectile-project-name)
+      (rename-buffer (format "vterm (%s): %s" (projectile-project-name) command))
+    (rename-buffer (format "vterm: %s" command))))
+
+(defun my/open-vterm-with-command (command)
+  "Send a command to vterm and rename the buffer with that command"
+  (interactive "sCommand: ")
+  (call-interactively #'+vterm/here)
+  (funcall-interactively #'my/send-and-rename-vterm command)
+  )
+
+(progn
+(funcall-interactively #'my/open-vterm-with-command "npm run static:dev:css")
+;; I consistently have to restart this later, otherwise it doesn't compile changes to MDX files (?)
+(funcall-interactively #'my/open-vterm-with-command "npm run static:dev:compile")
+(funcall-interactively #'my/open-vterm-with-command "npm run static:dev:serve")
+)
+```
