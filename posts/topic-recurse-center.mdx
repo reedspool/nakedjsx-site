@@ -283,3 +283,17 @@ version="1.1" height="315" width="342"
   <use xlink:href="#heart" stroke="none" stroke-width="0" fill="red" transform="rotate(225,150,121)" />
 </svg>
 
+
+### Tue Feb 20 09:35:52 AM PST 2024
+
+I often posted reminder notes in Recurse Center's Zulip chat, and they often had a bunch of repeated information. All that information was also present in RC's closed-source calendar app. So, I had the idea to lower the burden to writing those reminders by grabbing all of that information from the calendar and formatting it for a Zulip post. I figured I could write some JavaScript to do this.
+
+I ended up having a lot of fun with this and bouncing ideas and improvements off some other RCers, esp Hannah
+
+My most recent version was this
+
+```js
+javascript:if (!location.href.match(/^https:\/\/www.recurse.com\/calendar\/\d+/)) {  alert(    "Click on an event on www.recurse.com/calendar, then run this script again",  );} else {  const getPaneDetailValueElmtByLabel = (label) => {    const elmtLabels = document.querySelectorAll(".pane-detail__label");    return [].filter.call(elmtLabels, (elmt) =>      elmt.innerText.match(label),    )?.[0]?.nextElementSibling;  };  const elmtSidebar = document.querySelector(".full-page-app__pane--sidebar");  const elmtTitle = elmtSidebar.querySelector("h3");  const title = elmtTitle.innerText;  const elmtZoomLink =    getPaneDetailValueElmtByLabel("Zoom room")?.querySelector("a");  const zoomUrl =    elmtZoomLink && `www.recurse.com${elmtZoomLink.getAttribute("href")}`;  const zoomName = elmtZoomLink?.innerText;  const calendarUrl = location.href;  const eventDescription = getPaneDetailValueElmtByLabel("Description")?.innerText;  const elmtEventTime = getPaneDetailValueElmtByLabel("Date & time");  const eventDateRaw = elmtEventTime.children[0].children[0].innerText;  const eventTimeRaw =    elmtEventTime.children[0].children[1].innerText.split(" ");  const eventTime = new Date(    eventDateRaw.split(", ")[1].slice(0, -2) +      " " +      (new Date).getFullYear() +       " " +      eventTimeRaw[0].slice(0, -2) +      " " +      eventTimeRaw[0].substr(-2, 2) +      " " +      eventTimeRaw[3],  );  const minUntilStart = Math.floor((eventTime - new Date()) / 60000);  let timePhrase = `starts in ${minUntilStart} minutes at <time:${eventTime.toISOString()}>`;  if (minUntilStart <= 1 && minUntilStart >= -1) {    timePhrase = `is meeting now!`;  } else if (minUntilStart < -1) {    timePhrase = `started ${minUntilStart} minutes ago (but you%27re not late!)`;  }  const message = `${title} ${timePhrase} - ${    elmtZoomLink ? `[${zoomName} Zoom room](${zoomUrl})` : "No Zoom room"  } - [Calendar event](${calendarUrl}) ${    eventDescription &&    `\n\n\`\`\`spoiler Event description\n${eventDescription}\n\`\`\``  }`;  console.log(message);}
+```
+
+<Future>I made a little widget to format code for a bookmarklet so that it was easy to read this code and edit it and then single-linify it.</Future>

@@ -67,8 +67,18 @@ I went to the library for a test print. Some interesting results. First, the mea
 
 I felt silly when I realized I hadn't printed any of the cards with English on them.
 
-<Future>I made card backs with the number and communication symbols big on the back. It took some programming to make the pages interspersed, 9 cards then 9 backs on the next page to line up with Chrome's printing dialog.</Future>
-
 ### Mon Apr 29 01:37:36 PM PDT 2024
 
 I went back to the library for more printing, this time with my laptop. I found energy there to focus on coding. I refactored all my cards to use a single component since they'd been converging to a similar structure. I also added some runtime checks to assert that all my ducks were in a row, for example that I had a symbol for each tag I used.
+
+I made card backs with the number and communication symbols big on the back. It took some programming to make the pages interspersed, 9 cards then 9 backs on the next page to line up with Chrome's printing dialog.
+
+I differentiated the card backs based on the type of card. This proved to be a bit of a coding challenge because I needed to interleave the pages. I.e. Page 1 was 9 card fronts, and Page 2 was 9 card backs, and they should all line up exactly.
+
+### Mon May 20 12:22:33 PM PDT 2024
+
+<Future>I found an error where two cards had the wrong back. This suggested that I had the backs reversed. I should reverse the horizontal ordering of the card backs so that they match up when the two pages are placed back to back.</Future>
+
+<Future>I learned it was difficult to match up the backs and fronts of papers when printing double sided on inkjet printers to within a centemeter accuracy. At least that was true of the commercial printers I used for free at the local library (thank you library!). This resulted in the backs of cards looking unrefined, imprecise. I thought of a way to make it a little less of an eye-soar. I changed the borders on the backs of the cards to all-white, so that a slightly-off border wouldn't show through.</Future>
+
+<Future>I learned from people holding them in their hands that the two kinds of cards looking so similar added a small amount of friction all over the place. Someone pointed out the wisdom of the Cards Against Humanity decks: the different types of cards were totally inverted, immediately comprehensible as different. I tried to differentiate my card types by inverting the color schemes.</Future>
