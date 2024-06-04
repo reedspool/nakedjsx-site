@@ -1,0 +1,117 @@
+# Project: Playing with JavaScript's keyword
+
+## Logbook
+
+### Mon Jun 03 15:37:49 GMT-0700 (Pacific Daylight Time) 2024
+
+I had a silly idea about JavaScript's `new` keyword. You can return whatever you want from a JavaScript constructor. Could you return something different from a constructor when called normally versus with a `new` keyword? Yes! I found the wild `new.target` magic property. I say "wild" and "magic" because nothing else in JavaScript works like this. So anyways, what could we do with this magic property?
+
+I had this question: "could I make a function which can generate any number any integer with only a mix of `new` and parentheses?" That is, if I only mixed the word `new` and the open and closing paren characters (`(` and `)`), could I generate an arbitrary expression which evaluates to an arbitrary integer (whole number)?
+
+So I'd need a recursive constructor. That was simple enough.
+
+<FancyScriptTag>
+{`
+{
+  function Recurse() {
+    return Recurse;
+  }
+  
+  console.log(
+    \u0060Is Recurse recursive?\u0060,
+    new Recurse() === Recurse ? "Yes!" : "No")
+}
+`}
+</FancyScriptTag>
+
+And I'd need to differentiate between using the `new` keyword to call as a constructor or just parentheses to call as a normal function:
+
+<FancyScriptTag>
+{`
+{
+  function Differentiate() {
+    if (new.target) {
+      return { value: "A" }
+    } else {
+      return { value: "B" }
+    }
+  }
+  
+  console.log(
+    \u0060Differentiate detects \\u0060new\\u0060?\u0060,
+    (new Differentiate).value === "A" ? "Yes!" : "No")
+
+  console.log(
+    \u0060Differentiate detects normal call?\u0060,
+    (Differentiate()).value === "B" ? "Yes!" : "No")
+}
+`}
+</FancyScriptTag>
+
+I also needed a function which was callable but when used in an expression would evaluate to a number. I found I could achieve this by editing the prototype's `valueOf`. I also learned with the help of [this stack overflow answer](https://stackoverflow.com/a/21807662) that modifying the prototype of a function was possible but slow. Well, I wasn't here to win any speed benchmarks.
+
+<FancyScriptTag>
+{`
+{
+  const Prototype = { valueOf: function () { return this.value; } }
+  function Hidden(value) {
+    const callable = function () {
+      this.value = value
+    }
+    Object.setPrototypeOf(callable, Prototype)
+    callable.value = value;
+    return callable;
+  }
+  
+  console.log(
+    \u0060Does Hidden return a callable?\u0060,
+    typeof (new Hidden()) === "function" ? "Yes!" : "No")
+
+  console.log(
+    \u0060Does Hidden return a number?\u0060,
+    (new Hidden(321)) + 222 === 543 ? "Yes!" : "No")
+}
+`}
+</FancyScriptTag>
+
+With that I felt I had all the tools I needed. I had only to mash them together in various arrangements until the perfect result arose.
+
+<FancyScriptTag>
+{`
+{
+  const Prototype = { valueOf: function () { return this.value; } }
+  function newnew() {
+    const newnewnew = function () { 
+      const newnewnewnew = arguments.callee
+
+      Object.setPrototypeOf(newnewnewnew, Prototype)
+      newnewnewnew.value = new.target ? arguments.callee * 2 : arguments.callee + 1;
+      return newnewnewnew
+    }
+    newnewnew.value = new.target ? 0 : 1;
+    Object.setPrototypeOf(newnewnew, Prototype)
+    return newnewnew
+  }
+  
+  console.log(
+    \u0060newnew's can make 0\u0060,
+    +(new newnew()) === 0 ? "Yes!" : "No")
+  console.log(
+    \u0060newnew's can make 1\u0060,
+    +(newnew()) === 1 ? "Yes!" : "No")
+  console.log(
+    \u0060newnew's can make 2\u0060,
+    +new (newnew()) === 2 ? "Yes!" : "No")
+  console.log(
+    \u0060newnew's can make 3\u0060,
+    +new (newnew())()() === 3 ? "Yes!" : "No")
+  console.log(
+    \u0060newnew's can make 18\u0060,
+    +(new new new new (newnew())()()())()() === 18 ? "Yes!" : "No")
+}
+`}
+</FancyScriptTag>
+
+Now, obviously, this is ridiculous. And I'm not even using the parameter to the function. What's the need for that? 
+
+Also, this is not any integer, since I have no way to make negative numbers. Maybe the parameter could negate the input?
