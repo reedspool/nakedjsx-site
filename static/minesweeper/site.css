@@ -1,0 +1,166 @@
+:root {
+    --beat: 0.2em;
+}
+
+html,
+body {
+}
+
+button {
+    cursor: pointer;
+}
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.grid legend {
+    display: none;
+}
+
+.grid fieldset {
+    padding: 0;
+    border: none;
+}
+
+.grid__row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.grid__cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 5ch;
+    aspect-ratio: 1; /* Maybe aspect-ratio isn't working on eink browser? */
+    height: 5ch;
+    background-color: #a8a8a8;
+    border: 1px solid #9a9a9a;
+}
+
+.grid__cell button {
+    border: none;
+    height: 100%;
+    width: 100%;
+    display: inline-block;
+    box-shadow:
+        rgba(0, 0, 0, 0.09) 0px 2px 1px,
+        rgba(0, 0, 0, 0.09) 0px 4px 2px,
+        rgba(0, 0, 0, 0.09) 0px 8px 4px,
+        rgba(0, 0, 0, 0.09) 0px 16px 8px,
+        rgba(0, 0, 0, 0.09) 0px 32px 16px;
+}
+
+.grid__cell--mine {
+    /* background-color: lightgray; */
+}
+
+.grid__cell.grid__cell--hidden:hover,
+.grid__cell.grid__cell--hidden button:hover {
+    background-color: #b8b8b8;
+}
+
+.toast {
+    position: fixed;
+    top: calc(var(--beat) * 4);
+}
+
+/* HTML: <div class="loader"></div> */
+/* From https://css-loaders.com/dots/ #26 */
+.loader {
+    width: 4px;
+    color: #000;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    box-shadow:
+        19px -19px 0 0px,
+        38px -19px 0 0px,
+        57px -19px 0 0px,
+        19px 0 0 5px,
+        38px 0 0 5px,
+        57px 0 0 5px,
+        19px 19px 0 0px,
+        38px 19px 0 0px,
+        57px 19px 0 0px;
+    transform: translateX(-38px);
+    animation: loader 2s infinite linear;
+}
+@keyframes loader {
+    12.5% {
+        box-shadow:
+            19px -19px 0 0px,
+            38px -19px 0 0px,
+            57px -19px 0 5px,
+            19px 0 0 5px,
+            38px 0 0 0px,
+            57px 0 0 5px,
+            19px 19px 0 0px,
+            38px 19px 0 0px,
+            57px 19px 0 0px;
+    }
+    25% {
+        box-shadow:
+            19px -19px 0 5px,
+            38px -19px 0 0px,
+            57px -19px 0 5px,
+            19px 0 0 0px,
+            38px 0 0 0px,
+            57px 0 0 0px,
+            19px 19px 0 0px,
+            38px 19px 0 5px,
+            57px 19px 0 0px;
+    }
+    50% {
+        box-shadow:
+            19px -19px 0 5px,
+            38px -19px 0 5px,
+            57px -19px 0 0px,
+            19px 0 0 0px,
+            38px 0 0 0px,
+            57px 0 0 0px,
+            19px 19px 0 0px,
+            38px 19px 0 0px,
+            57px 19px 0 5px;
+    }
+    62.5% {
+        box-shadow:
+            19px -19px 0 0px,
+            38px -19px 0 0px,
+            57px -19px 0 0px,
+            19px 0 0 5px,
+            38px 0 0 0px,
+            57px 0 0 0px,
+            19px 19px 0 0px,
+            38px 19px 0 5px,
+            57px 19px 0 5px;
+    }
+    75% {
+        box-shadow:
+            19px -19px 0 0px,
+            38px -19px 0 5px,
+            57px -19px 0 0px,
+            19px 0 0 0px,
+            38px 0 0 0px,
+            57px 0 0 5px,
+            19px 19px 0 0px,
+            38px 19px 0 0px,
+            57px 19px 0 5px;
+    }
+    87.5% {
+        box-shadow:
+            19px -19px 0 0px,
+            38px -19px 0 5px,
+            57px -19px 0 0px,
+            19px 0 0 0px,
+            38px 0 0 5px,
+            57px 0 0 0px,
+            19px 19px 0 5px,
+            38px 19px 0 0px,
+            57px 19px 0 0px;
+    }
+}
