@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm run static:build:clean && npm run static:build:static && npm run static:build:jsxString && npm run static:build:jsxBrowser && npm run static:build:buildCompiler && npm run static:build:compile && npm run static:build:css",
     "static:build:css": "postcss css/style.css --output build/build.css --verbose",
-    "static:build:jsxString": "esbuild ./jsx/MyJSXStringImplementation.tsx --outfile=tmp/jsx/MyJSXStringImplementation.js",
+    "static:build:jsxString": "esbuild './jsx/MyJSXStringImplementation.tsx' --outfile=tmp/jsx/MyJSXStringImplementation.js",
     "static:build:jsxBrowser": "esbuild ./jsx/MyJSXBrowserImplementation.tsx --outfile=tmp/jsx/MyJSXBrowserImplementation.js",
     "static:build:static": "mkdir -p build && cp -r static/* build/",
     "static:build:buildCompiler": "esbuild scripts/compile.tsx --outfile=tmp/scripts/compile.mjs --format=esm",

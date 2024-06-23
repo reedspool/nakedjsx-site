@@ -107,6 +107,7 @@ const {
   CommonPage,
   EmptyPage,
   Future,
+  Comment,
   Link,
   HashTarget,
   GitHubLink,
@@ -126,7 +127,7 @@ await writeFile(
   (
     <${page}>
       <Stuff.${layout}>
-        <ReTypedMDXFile components={{ Link, HashTarget, GitHubLink, Future, FancyScriptTag }} />
+        <ReTypedMDXFile components={{ Link, HashTarget, GitHubLink, Future, Comment, FancyScriptTag }} />
       </Stuff.${layout}>
     </${page}>
   ).toString(),
@@ -214,6 +215,7 @@ const {
   CommonPage,
   EmptyPage,
   Future,
+  Comment,
   Link,
   HashTarget,
   GitHubLink,
@@ -229,7 +231,7 @@ await writeFile(
   (
     <${page} ${title ? `title={"${title}"}` : ""}>
       <Stuff.${layout}>
-        <Body components={{ Link, HashTarget, GitHubLink, Future, FancyScriptTag }} />
+        <Body components={{ Link, HashTarget, GitHubLink, Future, Comment, FancyScriptTag }} />
       </Stuff.${layout}>
     </${page}>
   ).toString(),

@@ -1,0 +1,135 @@
+# [DRAFT] Article: HTML Considered Simple
+
+The World Wide Web is vast and incomprehensible. But its mechanisms are well within reach for even a teenager in 2004. That's when I wrote my first HTML file and loaded it on IE5, the defacto browser of the day.
+
+There's a diagram I want to use in this article. It's a diagram you've probably seen before, or imagined based on your understanding of the Web and of computers, or maybe someone described it to you.
+
+On the left, there's a person. The person is an abstract concept. It's you. It's me. It's a "user", or a "player," or your "audience." This person has person-like faculties. They can interpret text and other media via their senses, their eyes and ears. Most people use both, some only use one, and an even smaller group use neither. There are billions of people. And this diagram will represent all of them with a single head, face, or just an eye or an ear.
+
+On the right side of this diagram, there is a computer. It's also abstract. There are billions of computers in the world of all sorts of types. Many of those computers are virtual, abstractions in and of themselves. But in this diagram, they are one.
+
+Between the person on the left and the computer on the right, there are two arrows. One arrow goes from the person to the computer, the second arrow from the computer to the person.
+
+The computer-to-person arrow depicts media presented to us, the collective person. The person-to-computer arrow represents actions or intents, human desires to interact with the computer.
+
+The arrows are also abstract, a more classical abstraction. Most of us have drawn lines with triangles since youth, and we know that they represent a relationship. 
+
+I want to present many instances of this diagram in this article. The first one I've described has been around, I believe, since at least the 60s, though I can't find a concrete source that far back. Iterations of this diagram appear everywhere, and I'll draw a few more of them here. I believe it at leasts dates to the birth of the field of "Human Computer Interaction," and I have an inkling that it goes much farther back.
+
+This is a simple diagram when placed in the deluge of systems diagrams. Just two objects connected by two arrows. This is a small system. But so much complexity lies within.
+
+<Comment>Presenting of the diagram mapping to the browser to server interaction</Comment>
+
+Another iteration of this diagram has a depiction of a browser window on the left and an even more abstract computer on the right, called a server. Both sides of this diagram are computer programs, but the one on the left includes those person-ly senses, desires, and actions. In fact, a classical name for a browser is a "user agent," that is, a program which acts on behalf of a person. And to act responsibly for that person, it should also show relevant information and possible actions to that person. So person, user agent, and browser are all synonyms in this abstraction. No human taps electrical switches to literally emit zeroes and ones along an Internet connected wire, or sensitively interprets the highs and lows on that same wire on the receiving end. A browser does that for them.
+
+The arrows in between a browser and a server often represent HTTP. The browser-to-server arrow is an HTTP Request, which is a formal text document sent over an increasingly complex but hidden "information super highway". The HTTP Response comes back on the other arrow over a very similar, with a very similar format. 
+
+The differences between these two arrows is more interesting than their similarities. The browser-to-server arrow exists for the same reason as the person-to-computer arrow in our original Ur-diagram, to encode human intent in a computer-comprehensible manner. And same for the opposite, server-to-browser arrow. It sends information over the network with the express purpose of presenting media to a human.
+
+<Comment>Maybe I should talk about the differences of these arrows above, and maybe give them better names than the confusing x-to-y and y-to-x format. Seems hard to grok at first glance. Maybe Request and Response.</Comment>
+
+In the origins of the Web, the Response contained only one type of information, HTML. HTML and HTTP together used the existing and future Internet platform to create The World Wide Web. CSS came later to make HTML documents prettier, and JavaScript came after that to make HTML documents have more interactions. Both served over HTTP, both linked to and useless without an associated HTML document.
+
+In the origins of the Web, the Request contained only the address of a document and a "verb" that a  person wanted to perform with that document. Most often, the person just wanted to "get" it. And these origins still drive 99.9999% (a completely made up number) of the Web today.
+
+But still, a person is on the left. Person's intent is in an arrow from left to right. A computer on the right. And an arrow back from the right to the left, representing media for a person to consume.
+
+<Comment>Aside, on computer games, human factors and speed and excitement.</Comment>
+
+In 1990, the year of the birth of the web, another budding industry was hitting its stride. SimCity, The Secret of Monkey Island, and Super Mario Bros. 3 are just a few of the incredible games which came out that year.
+
+Consider our favorite diagram in light of the constraints of a video game like Super Mario Bros. 3. The Mario series is praised for two things: How it feels to control (request) and how it communicates for a player (response). Super Mario Bros. 3 is exciting to play. Your eyes will alight (define?) at the colors and fast moving sprites. Your hands will twitch on the directional buttons and Mario will Respond to you! In mid-air, you can use your real-time abilities and redirect the plumber, and the game will dutifully respond.
+
+The shortest amount of time that a human can detect a visual stimuli and react to it is around 100 milliseconds, a tenth of a second. That's about the amount of time it takes you to complete the motion of snapping your fingers. It's fast. It's exciting. For a video game to feel good, and evoke feelings of "control," the game has to be giving you enough information (response) for you to react in just 1/10 of a second.
+
+<Comment>If I'm not going to give other examples of times, maybe this is extraneous information? But maybe later I'll get back to times</Comment>
+
+The Web must have felt magical, because in a fraction of a second, a university student could click a link (request) and get back (response) an article written by a peer across the globe and read it. Then they could go back to their dorm jump on some goombas with the same feeling of efficacy.
+
+But the Web outgrew this magic. The story of the Web might be its constant outgrowing of its tight loops, and us floundering with ways to tighten it again.
+
+<Comment> Introducing Ajax, mapping it to more attractive, use cases. </Comment>
+
+In the early 2000s, a new web strategy appeared for making sparkly web pages. This tightened the loop. Now a request and response could happen behind the scenes without a human even noticing!
+
+<Future>I got a link to Jesse James Garrett's article on the way back machine and read it.</Future>
+
+Back to video games for a moment, around this time (2004) was the release of the game World of Warcraft. In WoW, a person could engage in a realtime battle with hundreds of other players worldwide.
+
+<Comment>I keep using this word realtime. I should quantify that. Maybe that's what I'm trying to get at with the 10th of a second reflex number. Realtime means getting information continuously in order to take actions at around that fraction of a second mark. </Comment>
+
+In my head, I imagine a Chief of Technology at a bank reviewing his company's web portal. Click a link (request), and wait at minimum 1 second for the page to reload (response). Read the page and search for the next link. Click (req), compute, load (res), consume, process, click (req), compute, load (res). Not thrilling. Go home, hop on a server and heal, stomp, survive, flounce a massive army of competition. The difference was stark. For a dreamer who understood how little difference there was between the loop of WoW and the loop of a website, the slack in that loop must have felt overwhelming in its frustrations.
+
+With Ajax, suddenly you could have that realtime loop on your webpage, and it felt delightful. Hope was within view. Unfortunately, you had to learn JavaScript to use it.
+
+For JavaScript, Ajax was the killer app. Now you could amass information on your page, reload in real time, and show it.
+
+There were two other relevant forces happening which I want to include in this story. The browser wars and virtualization. These three things together, Ajax, browser wars, and virtual lists, I believe, and not one of them without the other two, are why we have the current status quo, which is what the htmx people call "SPAs" (Single Page Applications). 
+
+When I say browser wars, I mean that there was a concerted effort since the beginning of the open market place for browsers to unify their interface for application developers. And JavaScript was already employed to do that, with the hugely popular jQuery application.
+
+And then virtual lists being even more complicated is what I think of when I think of the rise of React. I haven't looked into the history of React to confirm this, but that's what I remember. The Virtual DOM achieved this.
+
+And React unified all three of these "concerns." It had a unified interface over the confusion of the web. It could wipe away the blemishes of browser slowness for massive lists of pages (is this real? I need to research) and it gave a single place for ajax requests to work their magic, via the Elm architecture.
+
+Okay so my point is that this "SPA" thing added a new node to our beautiful diagram. In the middle there was now another thing, and that thing was JavaScript application code. On the left was the person, and the person applied their intent (req) to JavaScript. JavaScript would then send an Ajax request to the server (req), and then the server would respond, and then JavaScript would have to respond.
+
+This is similar to how a multiplayer video game works, like WoW. 
+
+But there's no need for it! For 90% of use cases today, browsers are perfectly capable of handling this with just a thin sliver of application agnostic JavaScript.
+
+htmx removes that middle node, (well, it really adds just a tiny glob to the browser, enhancing the existing HTML format)
+
+This makes the loop so much more easy to maintain, that it gives power back for programmers to make even more enhancements. (this is a weak argument)
+
+With this hypermedia driven approach, you don't need complex JavaScript. Instead, you add complexity to the server side.
+
+But now that you have a hypermedia driven application, what if you again want to add a feature that is complex, that is outside the boundaries of the current means of the browser-to-server loop, and your only solution is to use JavaScript? Well, you can keep that section of your application narrow. Keep it a small box in that big world of your browser. The HTML tree structure can support nested exeriences like this.
+
+And what about my service workers? They also put another, much more literal third node in the middle. Well, ya, I'm not too sold on them. But they do enable some certain stuff that isn't feasible any other way, but in a very progressive-enhancement sort of way.
+
+<Comment>Gosh this is turning into a very long article. But this is just a first draft. I'm going to edit it. It's going to be very different in the end. Hold the path, see what comes out of my typing, and then shape it later.</Comment>
+
+## Logbook
+
+That's it, that's the whole article. Below are my notes I wrote to myself as I drafted, edited, published, updated this article.
+
+### Sat Jun 22 13:36:51 GMT-0700 (Pacific Daylight Time) 2024
+
+I recently read the book by the htmx people, [Hypermedia Systems](https://hypermedia.systems). It presented a clear picture in my mind of the use of hypermedia for application development, its strengths and weaknesses. 
+
+I also had an idea about Service Workers at the same time. I had trouble describing my idea to people. When I did feel I described it well enough to communicate my point, people seemed disinterested. But their dismissal (of the idea, not me, no shade) didn't relieve me from my ruminations. So, I had to build the thing and see for myself. And if my construction compelled me to continue, then I could present an interactive artifact instead of explaining an abstract concept. 
+
+The book gave me a clear direction for my explorations. It's a common thread in the book that HDAs (Hypermedia Driven Applications, their term) aren't a great fit for every case. The one case they repeat is an example of a bad fit is a spreadsheet like Google Sheets. I agreed that this was at the edge of the great use cases for HDAs, but I disagreed that it was outside those boundaries. In fact, I thought it was a great application to show just how far the superpowers could go. So, that's exactly what I built.
+
+I started with Minesweeper which is not exactly a spreadsheet, but it has a lot of commonalities. It's played on a grid, similar to the tabular interface of a spreadsheet. And an interaction in one grid cell may cascade into changes for a lot of cells. In Minesweeper, when the player clicks on a cell with no nearby mines, any connected cells with no nearby mines are also revealed, and so on, sometimes resulting in a whole ocean of blank spaces revealed at once. This matches the common case of a spreadsheet where a change to a single cell might cascade into changes in any cell which is calculated from that cell, and any cell calculated from those cells, and so on.
+
+Minesweeper was easy. Next, I took on help from Peter to achieve a spreadsheet. And we did it in less than 6 hours.
+
+<Future>I asked Peter if and how he'd like to be attributed in this article</Future>
+
+Mind you, it wasn't a good or efficient spreadsheet at that time. The spreadsheet, and Minesweeper, sent the entire state of the game board or spreadsheet table to the server with each button press, and the server responded with all the HTML for the new state of the board/table. A lot of data went back and forth in those first versions.
+
+<Future>After one final editing pass, I took the Draft label off this article and sent it to some friends for one final sanity check.</Future>
+
+But the proof of concept was there, for me at least. People still struggled to understand what I felt was so compelling about the experiments. I learned it was wishful thinking that all I had to do was build a cruddy example and everyone would just click. 
+
+Perhaps this sounds to a reader like I think I'm some crazy mad scientist genius, misunderstood. Ick, please no. Through these explorations, and my failure to express my ideas succinctly, I've learned how complicated the landscape is. To me, it feels a bit more straight forward, but that's probably due to my immersion and exploration of the HDA approach for, wow, at least 5 years now. I've caught the bug, along with the rising number of people interested in htmx and other HDA/"HTML over the wire" solutions.
+
+And it was that complexity which drew me to express things differently. Even with htmx's meteoric rise in popularity, I felt that to bring someone on board through a conversation still took a lot of friction. 
+
+Part of the issue with expressing these ideas is several, splintered audiences. For someone beginning in web development, there's way more well-crafted resources for learning "the old way" rather than htmx's "new way." These are ironic labels of course. Htmx's approach is a twist on something much older than JavaScript itself. But if you look up "how to make a application with React," you'll see vastly more search results than the same with htmx, let alone with just HTML. The other audiences are people with experience in the status quo.
+
+HTML has always seemed simple. Just write a text file in Notepad, and you've got a web presence! But that simplicity elides and abstracts a massive interconnected, distributed computing landscape: the World Wide Web!
+
+As I began writing this article, I realized that the story wasn't just about explaining the loop in the diagram itself. The story was emerging about how the loop was always being tightened and loosened, complexified and simplified, a tussle, a push and pull. 
+
+What does a smaller loop mean? A smaller loop means a less complex loop. It also means a faster loop. And those are better for humans. Less complexity is better for human creators and maintainers. Less lag is better for consumers, for users, for players, for all of us.
+
+What does a larger loop mean? It means the opposite. More complexity, more confusion, more time, more friction, more frustration.
+
+Why does the loop get bigger, longer, and more complex? Because the loop has a purpose, and we don't have a better, simpler, faster way to achieve that purpose, so we add more stuff.
+
+Why, if we know ways to make that loop tighter, do we not simply make it tighter? Well, applications are complicated, and they require resources and human comprehension and collaboration to work in that complexity. Those are really difficult things that I don't want to understate.
+
+After many hours, I finally got down all the many disparate points I was trying to make. I didn't feel very good about the structure of my argument, or even the purpose. What was useful about this, other than explaining to myself and maybe to five other intereated parties why I was doing this Service Worker dance? I decided to leave it for now, come back and read it and see if any part of it still stuck for me later.
