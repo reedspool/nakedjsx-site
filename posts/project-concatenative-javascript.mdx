@@ -1,6 +1,6 @@
 <script src="./project-concatenative-javascript.js" type="module"></script>
 
-# Project: Concatenative JavaScript
+# Project: CatScript - Concatenative JavaScript
 
 After I explored Forth, I wondered if I could apply some of what I learned to my comfort zone of JavaScript in a browser environment. 
 
@@ -233,6 +233,16 @@ export const tests = [
     Title: () => <> <code>( comments )</code> </>,
     code: " : checky ( comment in definition ) ' ✅' ; checky ( this is a comment, it can contain anything ✅ except a closing paren ) me >text"
   },
+
+  {
+    Title: () => <> <code>match/ .../</code> </>,
+    code: "' te123st' match/ e\\\\d+/ first ' e123' === ' ✅' && me >text"
+  },
+
+  {
+    Title: () => <> <code>match/ .../</code> within <code>:</code></>,
+    code: ": matchy match/ e\\\\d+/ first ; ' te123st' matchy ' e123' === ' ✅' && me >text"
+  },
 ]
 
 export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
@@ -360,4 +370,16 @@ After I pushed, it still didn't work. I checked how I was using codepen, and I w
 
 Saw the [Cognate Language](https://cognate-lang.github.io/), and I enjoyed a lot of its key insights. One insight was using words starting with uppercase letters as commands and all lowercase words as comments. Another was the prescript notation. I had thought it would be fun to make a toggle to a line-oriented, prescript variant, so one could go back and forth when one deemed appropriate. Confusing, but fun.
 
-Added comments.
+Added comments. 
+
+I started translating the exact code for `execute` from JavaScript into my language. A big part of what interested me about Forth was the exposed internals of the interpreter, and right now my interpreter was wrapped up in JavaScript. I wanted to move as much as possible into my language, so that I could mess with those internals from the inside as well as the outside. 
+
+### Wed Jun 26 09:11:13 AM PDT 2024
+
+On the way to implementing the interpreter internals inside the language, I implemented regular expression matching. I didn't yet make any way to create a JS RegExp object on the stack, because I couldn't think of a way to test it given the other current faculties of the language. I needed to make a way to call arbitrary functions on objects on my stacks, so I could call the equivalent of `"abcd".match(/bc/)`. Currently, I had no way to do that.
+
+<Future>I explored how to make arbitrary JS function calls on objects in my language. I wondered if this was related to the issue of evaluating arbitrary JavaScript. I also wondered if it was related to calling the `new` operator in JavaScript on arbitrary objects.</Future>
+
+I continued translating code from JS to my language, now onto the direct manipulation of the textual input stream (the string of actual code being interpreted)
+
+I got tired of saying "my language" in here. I was surprised I'd never written down the current project name. I guess I didn't want to commit. Maybe I was previously scared that I'd want to keep this clean. Elias M helped me come up with the name "CatScript". I checked the name against Wikipedia's list of programming languages and found no matches. I did find [references](https://www.johann-oberdorfer.eu/blog/2023/05/19/23-05-19-catscript-questions-answered/) to CATScript, which was (is) apparently a variant of Visual Basic for Applications for use in a CAD program called CATIA. But I thought hopefully there was minimal crossover. CatScript merges "concatenative" languages, a category of languages of which Forth is traditionally a member, and JavaScript. And it's cute. Why not? So from now on I'll call this CatScript.

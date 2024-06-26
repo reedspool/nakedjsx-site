@@ -746,6 +746,48 @@ define({
     ctx.push(array[n]);
   },
 });
+
+define({
+  name: "match",
+  impl: ({ ctx }) => {
+    const [str, regex] = [ctx.pop(), ctx.pop()];
+    ctx.push((str as string).match(regex as RegExp));
+  },
+});
+
+// Match a regular expression
+define({
+  name: "match/",
+  isImmediate: true,
+  impl: ({ ctx }) => {
+    // TODO: See note in definition of "'" about the state of the interpreter
+    if (ctx.interpreter === "compileWord") {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      // TODO: Handle escaped forward slashes (\/)
+      const regexp = consume({ until: "/", including: true, ctx });
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "lit" })!.impl,
+      );
+      ctx.compilationTarget!.compiled!.push(new RegExp(regexp));
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "swap" })!.impl,
+      );
+      ctx.compilationTarget!.compiled!.push(
+        findDictionaryEntry({ word: "match" })!.impl,
+      );
+    } else {
+      const str = ctx.pop();
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const regexp = consume({ until: "/", including: true, ctx });
+      ctx.push(new RegExp(regexp));
+      ctx.push(str);
+      findDictionaryEntry({ word: "match" })!.impl!({ ctx });
+    }
+  },
+});
+
 /**
  * Web/browser specific things
  */
