@@ -228,6 +228,11 @@ export const tests = [
     code: "on click ' ✅' me >text ;",
     TestTarget : () => <><span c="me ' [c]' closest ' click' emit">🚧</span></> 
   },
+
+  {
+    Title: () => <> <code>( comments )</code> </>,
+    code: " : checky ( comment in definition ) ' ✅' ; checky ( this is a comment, it can contain anything ✅ except a closing paren ) me >text"
+  },
 ]
 
 export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
@@ -350,3 +355,9 @@ I've made a lot more progress I never described. I got control structures workin
 I wanted to play with the library for a creative coding exercise, but I realized I know how to quickly include it on another page. It would be easy to include on another page on my website, but maybe not on the web-at-large? Or maybe I could just include the compiled JavaScript straight from my website? I tried this on a codepen. I noted a couple issues. First, the classic jQuery `ready` problem. I added an event listener for `DOMContentLoaded` to fix that. Then, because I was using a `type="module"` script tag, I didn't expose anything on the global object. That made it really hard to detect if it was loaded at all in codepen. So I added some of the utilities to the global scope. Then I pushed to deploy and test again on codepen.
 
 After I pushed, it still didn't work. I checked how I was using codepen, and I was using it wrong! I never properly included my script in the first place. When I properly included it, it worked! I didn't know if it previously would have worked without my improvements, but I liked the improvements either way, so I didn't revert and check.
+
+### Tue Jun 25 08:10:05 PM PDT 2024
+
+Saw the [Cognate Language](https://cognate-lang.github.io/), and I enjoyed a lot of its key insights. One insight was using words starting with uppercase letters as commands and all lowercase words as comments. Another was the prescript notation. I had thought it would be fun to make a toggle to a line-oriented, prescript variant, so one could go back and forth when one deemed appropriate. Confusing, but fun.
+
+Added comments.

@@ -549,6 +549,14 @@ define({
   },
 });
 
+define({
+  name: "(",
+  isImmediate: true,
+  impl: ({ ctx }) => {
+    consume({ until: ")", including: true, ctx });
+  },
+});
+
 function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
   let entry = latest;
 
