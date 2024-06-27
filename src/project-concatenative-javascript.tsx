@@ -26,6 +26,7 @@ type Context = {
     i: number;
     prevInterpreter: Context["interpreter"];
   }[];
+  controlStack: unknown[];
   compilationTarget: Dictionary | null;
   inputStream: string;
   paused: boolean;
@@ -43,6 +44,7 @@ const newCtx: () => Context = () => {
     me: null,
     parameterStack: [],
     returnStack: [],
+    controlStack: [],
     inputStream: "",
     paused: false,
     halted: false,
@@ -568,22 +570,55 @@ define({
 
 define({
   name: ".",
+  isImmediate: true,
   impl({ ctx }) {
-    const prop = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
-    const obj = ctx.pop() as any;
+    // TODO: See note in definition of "'" about the state of the interpreter
+    if (ctx.interpreter === "compileWord") {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const prop = consume({ until: /\s/, including: true, ctx });
 
-    ctx.push(obj[prop]);
+      const impl: Dictionary["impl"] = ({ ctx }) => {
+        const obj = ctx.pop() as any;
+        ctx.push(obj[prop]);
+      };
+      ctx.compilationTarget!.compiled!.push(impl);
+    } else {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const prop = consume({ until: /\s/, including: true, ctx });
+      const obj = ctx.pop() as any;
+
+      ctx.push(obj[prop]);
+    }
   },
 });
 
 define({
   name: ".!",
+  isImmediate: true,
   impl({ ctx }) {
-    const prop = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
-    const obj = ctx.pop() as any;
-    const value = ctx.pop() as any;
+    // TODO: See note in definition of "'" about the state of the interpreter
+    if (ctx.interpreter === "compileWord") {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const prop = consume({ until: /\s/, including: true, ctx });
 
-    ctx.push((obj[prop] = value));
+      const impl: Dictionary["impl"] = ({ ctx }) => {
+        const obj = ctx.pop() as any;
+        const value = ctx.pop() as any;
+        obj[prop] = value;
+      };
+      ctx.compilationTarget!.compiled!.push(impl);
+    } else {
+      // Move cursor past the single blank space between
+      ctx.inputStreamPointer++;
+      const prop = consume({ until: /\s/, including: true, ctx });
+      const obj = ctx.pop() as any;
+
+      const value = ctx.pop() as any;
+      obj[prop] = value;
+    }
   },
 });
 
@@ -781,6 +816,118 @@ define({
     const n = ctx.pop() as number;
     const array = ctx.pop()! as Array<unknown>;
     ctx.push(array[n]);
+  },
+});
+
+// Clone an array
+define({
+  name: "clone",
+  impl: ({ ctx }) => {
+    const array = ctx.pop()! as Array<unknown>;
+    const clone = [...array];
+    ctx.push(clone);
+  },
+});
+
+define({
+  name: ">control",
+  impl: ({ ctx }) => {
+    ctx.controlStack.push(ctx.pop());
+  },
+});
+
+// Loop over an array, pushing interstitial values to the return stack
+define({
+  name: "foreach",
+  isImmediate: true,
+  impl: ({ ctx }) => {
+    ctx.compilationTarget!.compiled!.push(
+      findDictionaryEntry({ word: "clone" })!.impl,
+    );
+    ctx.compilationTarget!.compiled!.push(
+      findDictionaryEntry({ word: ">control" })!.impl,
+    );
+    ctx.compilationTarget!.compiled!.push(
+      findDictionaryEntry({ word: "lit" })!.impl,
+    );
+    ctx.compilationTarget!.compiled!.push(0);
+    ctx.compilationTarget!.compiled!.push(
+      findDictionaryEntry({ word: ">control" })!.impl,
+    );
+
+    const impl: Dictionary["impl"] = ({ ctx }) => {
+      const index = ctx.controlStack.pop() as number;
+      const array = ctx.controlStack.pop() as Array<unknown>;
+      ctx.controlStack.push(array);
+      ctx.controlStack.push(index);
+      ctx.controlStack.push(array[index]);
+
+      // Initial setup for the first iteration is complete, so jump to the
+      // beginning of the loop body, which is just beyond the "every loop" stuff.
+      ctx.advanceCurrentFrame(1);
+    };
+    ctx.compilationTarget!.compiled!.push(impl);
+
+    // TODO Jump beyond the "before every loop" chunk
+
+    // Push to the param stack the location where we need to jump back before
+    // every loop
+    findDictionaryEntry({ word: "here" })!.impl!({ ctx });
+
+    // Aforementioned "every loop" stuff
+    const impl2: Dictionary["impl"] = ({ ctx }) => {
+      ctx.controlStack.pop();
+      const lastIndex = ctx.controlStack.pop() as number;
+      const index = lastIndex + 1;
+      const array = ctx.controlStack.pop() as Array<unknown>;
+      ctx.controlStack.push(array);
+      ctx.controlStack.push(index);
+      ctx.controlStack.push(array[index]);
+    };
+    ctx.compilationTarget!.compiled!.push(impl2);
+  },
+});
+
+define({
+  name: "I",
+  impl: ({ ctx }) => {
+    const i = ctx.controlStack.pop();
+    ctx.controlStack.push(i);
+    ctx.push(i);
+  },
+});
+
+define({
+  name: "endforeach",
+  isImmediate: true,
+  impl: ({ ctx }) => {
+    findDictionaryEntry({ word: "here" })!.impl!({ ctx });
+    findDictionaryEntry({ word: "-stackFrame" })!.impl!({ ctx });
+    const offset = ctx.pop() as number;
+
+    const impl: Dictionary["impl"] = ({ ctx }) => {
+      ctx.controlStack.pop();
+      const lastIndex = ctx.controlStack.pop() as number;
+      const index = lastIndex + 1;
+      const array = ctx.controlStack.pop() as Array<unknown>;
+
+      // First, test if there are any more items in the array
+      if (index >= array.length) {
+        // Then let the interpreter proceed. We already cleaned out the control
+        // stack, so there's no cleanup.
+        return;
+      }
+
+      // There's more to do, so we need to put everything back and jump back
+      ctx.controlStack.push(array);
+      ctx.controlStack.push(index);
+      ctx.controlStack.push(array[index]);
+
+      // Jump back
+      ctx.advanceCurrentFrame(offset);
+    };
+
+    ctx.compilationTarget!.compiled!.push(impl);
   },
 });
 
