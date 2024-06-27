@@ -408,13 +408,13 @@ define({
   impl: ({ ctx }) => {
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
-    const value = dictionaryEntry.compiled![i];
+    const offset = dictionaryEntry.compiled![i];
 
-    if (typeof value !== "number" || Number.isNaN(value)) {
+    if (typeof offset !== "number" || Number.isNaN(offset)) {
       throw new Error("`branch` must be followed by a number");
     }
 
-    ctx.advanceCurrentFrame(value);
+    ctx.advanceCurrentFrame(offset);
   },
 });
 
@@ -424,19 +424,20 @@ define({
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
     const condition = ctx.pop();
-    const value = dictionaryEntry.compiled![i];
+    const offset = dictionaryEntry.compiled![i];
 
     if (typeof condition !== "number" || Number.isNaN(condition)) {
       throw new Error(
         `\`0branch\` found a non-number on the stack (${condition}) which indicates an error. If you want to use arbitrary values, try falsyBranch instead.`,
       );
     }
-    if (typeof value !== "number" || Number.isNaN(value)) {
+    if (typeof offset !== "number" || Number.isNaN(offset)) {
       throw new Error("`0branch` must be followed by a number");
     }
 
-    // Must at least advance beyond the next location where the distance sits
-    ctx.advanceCurrentFrame(condition === 0 ? value : 1);
+    // If we're not jumping to an calculated offset, then just hop once over the
+    // following value where the offset sits
+    ctx.advanceCurrentFrame(condition === 0 ? offset : 1);
   },
 });
 
@@ -446,14 +447,15 @@ define({
     const { dictionaryEntry, i } = ctx.peekReturnStack();
 
     const condition = ctx.pop();
-    const value = dictionaryEntry.compiled![i];
+    const offset = dictionaryEntry.compiled![i];
 
-    if (typeof value !== "number" || Number.isNaN(value)) {
+    if (typeof offset !== "number" || Number.isNaN(offset)) {
       throw new Error("`falsyBranch` must be followed by a number");
     }
 
-    // Must at least advance beyond the next location where the distance sits
-    ctx.advanceCurrentFrame(!condition ? value : 1);
+    // If we're not jumping to an calculated offset, then just hop once over the
+    // following value where the offset sits
+    ctx.advanceCurrentFrame(!condition ? offset : 1);
   },
 });
 
