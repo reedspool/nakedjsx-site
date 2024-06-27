@@ -557,6 +557,23 @@ define({
   },
 });
 
+define({
+  name: ".",
+  impl({ ctx }) {
+    const prop = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
+    const obj = ctx.pop() as any;
+
+    ctx.push(obj[prop]);
+  },
+});
+
+define({
+  name: "C",
+  impl({ ctx }) {
+    ctx.push(ctx);
+  },
+});
+
 function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
   let entry = latest;
 

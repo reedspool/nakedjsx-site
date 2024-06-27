@@ -243,6 +243,11 @@ export const tests = [
     Title: () => <> <code>match/ .../</code> within <code>:</code></>,
     code: ": matchy match/ e\\\\d+/ first ; ' te123st' matchy ' e123' === ' ✅' && me >text"
   },
+
+  {
+    Title: () => <> <code>C</code> and <code>.</code> operator</>,
+    code: "5 C . parameterStack first === ' ✅' && me >text"
+  },
 ]
 
 export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
