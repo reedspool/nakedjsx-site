@@ -126,6 +126,13 @@ define({
   impl: ({ ctx }) => ctx.push(ctx.peek()),
 });
 define({
+  name: "2dup",
+  impl: ({ ctx }) => {
+    const [a, b] = [ctx.pop(), ctx.pop()];
+    ctx.push(b, a, b, a);
+  },
+});
+define({
   name: "drop",
   impl: ({ ctx }) => ctx.pop(),
 });
@@ -564,6 +571,17 @@ define({
     const obj = ctx.pop() as any;
 
     ctx.push(obj[prop]);
+  },
+});
+
+define({
+  name: ".!",
+  impl({ ctx }) {
+    const prop = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
+    const obj = ctx.pop() as any;
+    const value = ctx.pop() as any;
+
+    ctx.push((obj[prop] = value));
   },
 });
 

@@ -89,6 +89,10 @@ export const tests = [
     Title: () => <> <code>+</code> and <code>-</code> </>,
     code: "5 4 3 + - -2 == ' ✅' && me >text"
   },
+  {
+    Title: () => <> <code>2dup</code> </>,
+    code: "8 7 2dup + + + 30 === ' ✅' && me >text"
+  },
   { 
     Title: () => <>Floats <code>+</code> like JS</>,
     code: "0.1 0.2 + dup 0.3 > swap 0.31 < && ' ✅' && me >text"
@@ -247,6 +251,11 @@ export const tests = [
   {
     Title: () => <> <code>C</code> and <code>.</code> operator</>,
     code: "5 C . parameterStack first === ' ✅' && me >text"
+  },
+
+  {
+    Title: () => <> <code>.!</code></>,
+    code: "' ✅' me >text true C .! halted ' ❌' me >text"
   },
 ]
 
