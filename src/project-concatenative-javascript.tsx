@@ -13,7 +13,7 @@
 type Dictionary = {
   name: string;
   previous: Dictionary | null;
-  impl?: ({ ctx }: { ctx: Context }) => void;
+  impl: ({ ctx }: { ctx: Context }) => void;
   compiled?: (Dictionary["impl"] | unknown)[];
   isImmediate?: boolean;
 };
@@ -661,7 +661,7 @@ function queryWord({ word, ctx }: { word: Dictionary["name"]; ctx: Context }) {
   const dictionaryEntry = findDictionaryEntry({ word });
 
   if (dictionaryEntry) {
-    return dictionaryEntry!.impl!({ ctx });
+    return dictionaryEntry!.impl({ ctx });
   } else {
     const primitiveMaybe = wordAsPrimitive({ word });
 
@@ -684,8 +684,6 @@ function compileWord({
 
   if (dictionaryEntry) {
     if (dictionaryEntry.isImmediate) {
-      if (typeof dictionaryEntry.impl !== "function")
-        throw new Error("immediate word requires impl");
       dictionaryEntry.impl({ ctx });
     } else {
       ctx.compilationTarget!.compiled!.push(dictionaryEntry.impl);
@@ -709,7 +707,7 @@ function executeColonDefinition({ ctx }: { ctx: Context }) {
   ctx.advanceCurrentFrame();
   // If someone leaves off a `;`, e.g. `on click 1`, just exit normally
   if (i === dictionaryEntry!.compiled!.length) {
-    findDictionaryEntry({ word: "exit" })!.impl!({ ctx });
+    findDictionaryEntry({ word: "exit" })!.impl({ ctx });
     return;
   }
   const callable = dictionaryEntry!.compiled![i]!;
@@ -872,7 +870,7 @@ define({
 
     // Push to the param stack the location where we need to jump back before
     // every loop
-    findDictionaryEntry({ word: "here" })!.impl!({ ctx });
+    findDictionaryEntry({ word: "here" })!.impl({ ctx });
 
     // Aforementioned "every loop" stuff
     const impl2: Dictionary["impl"] = ({ ctx }) => {
@@ -901,8 +899,8 @@ define({
   name: "endforeach",
   isImmediate: true,
   impl: ({ ctx }) => {
-    findDictionaryEntry({ word: "here" })!.impl!({ ctx });
-    findDictionaryEntry({ word: "-stackFrame" })!.impl!({ ctx });
+    findDictionaryEntry({ word: "here" })!.impl({ ctx });
+    findDictionaryEntry({ word: "-stackFrame" })!.impl({ ctx });
     const offset = ctx.pop() as number;
 
     const impl: Dictionary["impl"] = ({ ctx }) => {
@@ -967,7 +965,7 @@ define({
       const regexp = consume({ until: "/", including: true, ctx });
       ctx.push(new RegExp(regexp));
       ctx.push(str);
-      findDictionaryEntry({ word: "match" })!.impl!({ ctx });
+      findDictionaryEntry({ word: "match" })!.impl({ ctx });
     }
   },
 });
@@ -1062,7 +1060,7 @@ define({
       const selector = consume({ until: "'", including: true, ctx });
       ctx.push(selector);
       ctx.push(element);
-      findDictionaryEntry({ word: "select" })!.impl!({ ctx });
+      findDictionaryEntry({ word: "select" })!.impl({ ctx });
     }
   },
 });
@@ -1081,6 +1079,9 @@ define({
       name: `anonymous-on-${event}-handler`,
       previous: null,
       compiled: [],
+      impl() {
+        throw new Error(`Uncallable dictionary entry ${this.name} called`);
+      },
     };
 
     (ctx.me as Element).addEventListener(event, ({ target }) => {
@@ -1276,6 +1277,7 @@ function runAttributes() {
 }
 
 window.addEventListener("DOMContentLoaded", runAttributes);
+//@ts-ignore catscript doesn't exist on window
 window.catscript = {
   runAttributes,
   query,
