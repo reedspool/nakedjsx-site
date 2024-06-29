@@ -5,6 +5,9 @@ const arrayFrom1ToN = (n: number) =>
     .fill(null)
     .map((_, index) => index + 1);
 const NUM_OF_NUM_CARDS = 21;
+const NUM_ROWS_PER_PAGE = 3;
+const NUM_COLS_PER_PAGE = 3;
+const NUM_CARDS_PER_PAGE = NUM_ROWS_PER_PAGE * NUM_COLS_PER_PAGE;
 type Tag = "beginner" | "confusing" | "silly" | "movement" | "mature";
 const communicationMethods: Array<{
   main: string;
@@ -194,8 +197,15 @@ const Empty = () => <></>;
 const StandardCard = ({
   HeaderContent = Empty,
   BodyContent = Empty,
+  FooterContent,
   classList = "",
+}: {
+  HeaderContent?: () => JSX.Element;
+  FooterContent?: () => JSX.Element;
+  BodyContent?: () => JSX.Element;
+  classList?: string;
 }) => {
+  if (!FooterContent) FooterContent = HeaderContent;
   return (
     <CardContainer classList={classList}>
       <div class={`card`}>
@@ -206,7 +216,7 @@ const StandardCard = ({
           <BodyContent />
         </div>
         <div class="card-header card-header--bottom">
-          <HeaderContent />
+          <FooterContent />
         </div>
       </div>
     </CardContainer>
@@ -231,14 +241,37 @@ const CommunicationMethodCard = ({ main, tag = [] }: CommunicationMethod) => {
     />
   );
 };
+const NumberCardOrderIndicator = ({ order }: { order: "greater" | "less" }) => (
+  <span class="card-number__order-indicator">
+    {order === "greater" ? "&gt;" : "&lt;"}
+  </span>
+);
 const NumberCard = ({ num }: { num: number }) => {
   return (
     <StandardCard
       classList="card-number"
       HeaderContent={() => (
         <>
-          <span>{num}</span>
-          <span>{num}</span>
+          <span>
+            {num}
+            <NumberCardOrderIndicator order="less" />
+          </span>
+          <span>
+            <NumberCardOrderIndicator order="less" />
+            {num}
+          </span>
+        </>
+      )}
+      FooterContent={() => (
+        <>
+          <span>
+            {num}
+            <NumberCardOrderIndicator order="greater" />
+          </span>
+          <span>
+            <NumberCardOrderIndicator order="greater" />
+            {num}
+          </span>
         </>
       )}
       BodyContent={() => "#"}
@@ -249,7 +282,7 @@ const NumberCard = ({ num }: { num: number }) => {
 const SaboteurCard = () => {
   return (
     <StandardCard
-      classList="card-communication"
+      classList="card-number card-number__saboteur"
       HeaderContent={() => (
         <>
           <MaterialSymbol which="saboteur" />
@@ -374,7 +407,7 @@ const InformationCardBack = () => {
 const CommunicationMethodCardBack = () => {
   return (
     <StandardCard
-      classList="card-back"
+      classList="card-back card-communication"
       HeaderContent={() => (
         <>
           <MaterialSymbol which="communication" />
@@ -391,13 +424,31 @@ const CommunicationMethodCardBack = () => {
 };
 
 const NumberCardBack = () => {
+  // NOTE The greater than and less than indicators are opposite the front
+  //      because when fanned out, the back will appear in reverse order
   return (
     <StandardCard
-      classList="card-back card-number-back"
+      classList="card-back card-number"
       HeaderContent={() => (
         <>
-          <span>#</span>
-          <span>#</span>
+          <span>
+            ?
+            <NumberCardOrderIndicator order="greater" />
+          </span>
+          <span>
+            <NumberCardOrderIndicator order="greater" />?
+          </span>
+        </>
+      )}
+      FooterContent={() => (
+        <>
+          <span>
+            ?
+            <NumberCardOrderIndicator order="less" />
+          </span>
+          <span>
+            <NumberCardOrderIndicator order="less" />?
+          </span>
         </>
       )}
       BodyContent={() => (
@@ -409,6 +460,8 @@ const NumberCardBack = () => {
   );
 };
 
+// As we add all the card fronts to a list, take counts of how many are in each
+// category, so that we can put that same number of card backs onto the page
 const CardFronts: Array<JSX.Element> = [];
 let lastCardFrontsLength = CardFronts.length;
 CardFronts.push(
@@ -417,11 +470,11 @@ CardFronts.push(
 CardFronts.push(<SaboteurCard />);
 const numNumCards = CardFronts.length - lastCardFrontsLength;
 lastCardFrontsLength = CardFronts.length;
+
 CardFronts.push(...communicationMethods.map(CommunicationMethodCard));
 const numCommunicationCards = CardFronts.length - lastCardFrontsLength;
 lastCardFrontsLength = CardFronts.length;
-/* Blanks, N to fill out the current page + an entire page which one can
-      skip when they hit the print button */
+
 CardFronts.push(<KeyCard />);
 /*CardFronts.push(   <RulesCard1 />, )*/
 /*CardFronts.push( <RulesCard2 />, ) */
@@ -430,10 +483,14 @@ lastCardFrontsLength = CardFronts.length;
 
 const numNonblankCards = CardFronts.length;
 
-// Add a number of blank cards to
-//   1. Fill up the rest of the last sheet of non-blank cards (9 - (N % 9))
-//   2. Fill up another sheet of all blank cards (+ 9)
-const numBlankCards = 9 - (numNonblankCards % 9) + 9;
+// Given N is the total number of non-blank cards, add a number of blank cards to
+//   1. Fill up the rest of the last sheet of non-blank cards
+//        (NUM_CARDS_PER_PAGE - (N % NUM_CARDS_PER_PAGE))
+//   2. Fill up another sheet of all blank cards (+ NUM_CARDS_PER_PAGE)
+const numBlankCards =
+  NUM_CARDS_PER_PAGE -
+  (numNonblankCards % NUM_CARDS_PER_PAGE) +
+  NUM_CARDS_PER_PAGE;
 CardFronts.push(
   ...Array(numBlankCards).fill(<CommunicationMethodCard main={""} />),
 );
@@ -450,18 +507,29 @@ if (CardBacks.length !== CardFronts.length)
     `# of card fronts (${CardFronts.length}) did not match # backs (${CardBacks.length})`,
   );
 
-// Now intersperse card backs. After every 9 card fronts, insert 9 card backs.
+// Now intersperse card backs. After every NUM_CARDS_PER_PAGE card fronts,
+// insert NUM_CARDS_PER_PAGE card backs.
 const CardFrontsAndBacks: Array<JSX.Element> = [];
-for (var i = 0; i < CardFronts.length; i += 9) {
-  for (var j = i; j < i + 9; j++) {
+for (var i = 0; i < CardFronts.length; i += NUM_CARDS_PER_PAGE) {
+  for (var j = i; j < i + NUM_CARDS_PER_PAGE; j++) {
     const card = CardFronts[j];
     if (!card) throw new Error("CardFronts underflowed");
     CardFrontsAndBacks.push(card);
   }
-  for (var j = i; j < i + 9; j++) {
-    const card = CardBacks[j];
-    if (!card) throw new Error("CardBacks underflowed");
-    CardFrontsAndBacks.push(card);
+
+  // Each row of card backs must be in reverse order from the card fronts so
+  // that they match up when back-to-back how a printer prints them. So go
+  // row by row
+  for (let j = i; j < i + NUM_CARDS_PER_PAGE; j += NUM_ROWS_PER_PAGE) {
+    // And then column by column, but in reverse order
+    // TODO I think a good way to test this logic would be to try a page of
+    //      number cards on both the front and the back and make sure they exactly match
+    //      up
+    for (let k = j + NUM_COLS_PER_PAGE - 1; k >= j; k--) {
+      const card = CardBacks[k];
+      if (!card) throw new Error("CardBacks underflowed");
+      CardFrontsAndBacks.push(card);
+    }
   }
 }
 
@@ -481,6 +549,9 @@ export const Body = () => (
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
     <style>{css`
+      /* * {
+        border: 1px solid red;
+      } */
       .material-symbols-outlined {
         font-variation-settings:
           "FILL" 0,
@@ -547,7 +618,7 @@ export const Body = () => (
         padding: var(--card-padding-y) var(--card-padding-x);
       }
 
-      .card__container:nth-of-type(9n) {
+      .card__container:nth-of-type(${NUM_CARDS_PER_PAGE}n) {
         break-after: page;
       }
 
@@ -563,14 +634,30 @@ export const Body = () => (
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
+
+        border-radius: calc(var(--card-corner-radius) * 0.5);
+      }
+
+      /* The border on the backs of the cards is white to account for the
+         normal deviations of a commercial printer - they're bad at lining up
+         the back and front of the pages. If the card back border has any color
+         on a white page, then when I cut out the card front, there will be
+         noticeable white edges on the back. But if the back border is also
+         white, then there's no issue!
+
+         Note: the two classes make it a bit more specific than just
+               .card-communication for example.
+      */
+      .card__container.card-back {
+        background-color: white;
       }
 
       .card-back .card {
         color: darkgray;
         font-size: 24pt;
       }
-      .card-number-back,
-      .card-number-back .card-header {
+      .card-number.card-back,
+      .card-number.card-back .card-header {
         font-size: 28pt;
       }
       .card-back .card__body {
@@ -579,6 +666,18 @@ export const Body = () => (
       .card-number {
         font-family: var(--fancy-font-family);
         font-size: 72pt;
+      }
+      .card-number.card-number__saboteur .card__body {
+        color: var(--font-color);
+        font-size: 20pt;
+
+        /* Same as ".card-communication .card__body" below - make a var? */
+        padding-inline: calc(1in / 8);
+      }
+
+      .card-number .card-number__order-indicator {
+        padding-inline: calc(1in / 16);
+        color: darkgray;
       }
 
       .card-header {
@@ -603,6 +702,11 @@ export const Body = () => (
 
       .card-communication .card__body {
         padding-inline: calc(1in / 8);
+      }
+
+      .card-communication .card {
+        background-color: darkgray;
+        color: white;
       }
 
       .card-number .card__body {
