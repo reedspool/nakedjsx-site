@@ -6,7 +6,84 @@ After I explored Forth, I wondered if I could apply some of what I learned to my
 
 The TypeScript source code for the language [lives here](https://github.com/reedspool/reeds-website/blob/main/src/project-concatenative-javascript.tsx).
 
+## REPL
+
+<div class="h-[5em] overflow-y-scroll resize">
+</div>
+<script>
+{`
+const replOutput = document.currentScript.previousElementSibling
+`}
+</script>
+<textarea class="cpnt-button border border-black">
+</textarea>
+<script>
+{`
+const textarea = document.currentScript.previousElementSibling;
+
+const parameterStack = [];
+function executeTextAreaInput() {
+
+  // We're locked if we're scrolled all the way to the bottom with some
+  // constant for leeway/error
+  const wasAtBottomOfScroll =
+    replOutput.scrollTop + replOutput.getBoundingClientRect().height + 20 >=
+    replOutput.scrollHeight;
+  try {
+    catscript.query({ 
+      ctx: { 
+        ...catscript.newCtx(), 
+        inputStream: textarea.value,
+        parameterStack,
+        me: document.body, 
+        emit: (...args) => {
+          args.forEach(
+            (text) => replOutput.innerText += text)
+        }
+      }
+     })
+
+    replOutput.innerText += " ok\\n"
+  } catch (error) {
+    replOutput.innerText += error;
+    replOutput.innerText += "\\n"
+  }
+
+  if (wasAtBottomOfScroll) replOutput.scrollTop = replOutput.scrollHeight;
+  
+  // Let Enter default behavior complete, otherwise
+  // newline is created after clearing
+  setTimeout(() => textarea.value = '', 0)
+}
+
+textarea.addEventListener("keydown", ({ key }) => key === "Enter" &&  executeTextAreaInput())
+
+    replOutput.innerText += "Enter some text in the box below. \\n"
+`}
+</script>
+<button class="cpnt-button border border-black  justify-center align-center h-[2em]">
+Run
+</button>
+<script>
+{`
+const result = document.currentScript.previousElementSibling.addEventListener("click", () => executeTextAreaInput())
+
+console.log(result)
+`}
+</script>
+<label class="flex flex-row">
+Run on "Enter" <input type="checkbox" checked />
+<script>
+{`
+const runOnEnterCheckbox = document.currentScript.previousElementSibling
+`}
+</script>
+</label>
+
 ## Tests
+
+<details>
+<summary>Click here to toggle the visibility of this section</summary>
 
 If you see ❌ or 🚧, then that test has failed.
 
@@ -282,6 +359,8 @@ export const Test = ({ Title, code, TestTarget = () => <>🚧</> }) =>
     <tbody>{tests.map(Test)}</tbody>
 </table>
 
+</details>
+
 ## Logbook
 
 ### Tue Feb 06 21:53:03 PST 2024
@@ -411,8 +490,16 @@ I finally finished implementing `foreach` to allow me to iterate over an array e
 
 ### Thu Jun 27 08:53:33 AM PDT 2024
 
-After my success with the complicated `foreach` loop, I turned back to my main current goal. I wanted CatScript to have all the internals of the interpreter written in CatScript. The point is that they could be replaceable tat way, modifiable. And that's what I keep coming back to about CatScript in my mind. It's malleable. It's open and reworkable. That's what makes it attractive as a quick-n-dirty tool.
+After my success with the complicated `foreach` loop, I turned back to my main current goal. I wanted CatScript to have all the internals of the interpreter written in CatScript. The point is that they could be replaceable that way, modifiable. And that's what I keep coming back to about CatScript in my mind. It's malleable. It's open and reworkable. That's what makes it attractive as a quick-n-dirty tool.
 
 I was using the strategy "burn the candle at both ends," which I think I'd heard from a lecture by Gerald Sussman (it could also have been co-author Hal Abelson) from the MIT course on Scheme on YouTube. Or maybe I read it in SICP years ago. Anyways, the strategy is to write high-level code that doesn't work yet, and switch back and forth to low-level code that definitely does work, but doesn't do a complex, useful thing on its own. My high level code replaced the core functions which drove the interpreter that I'd previously written as JavaScript with CatScript versions. And the low level code amounted to all the improvements to the language I'd made in the past couple days. 
 
 I only had a few high-level concepts left to implement, the different modes of the interpreter, I called them "queryWord", "compileWord," and "executeCompiledWord". Forth would call them the binary interpreter "states".
+
+### Fri Jun 28 12:06:49 AM PDT 2024
+
+More bits of work on the high level portion of "burning the candle at both ends". 
+
+<Future>One of the big questions which kept coming up was "how am I going to encode calling JavaScript functions?" It came up a lot because of laziness - I didn't want to implement every single convenience function in CatScript. But even if I did go that route, I still want a seamless way to call JavaScript functions. There were a few options I could imagine. One involved eval, like ` evalJs' func()'` to call a JS function named `func`. That seemed like the most straight forward path and probably a good place to start. I had to remind myself yet again to just try the most obvious thing instead of ruminating on possibilities.</Future>
+
+I wrote a small REPL to play with. I knew it was difficult to work with if you didn't know exactly what was going on, but it was a fun diversion from some bigger questions.

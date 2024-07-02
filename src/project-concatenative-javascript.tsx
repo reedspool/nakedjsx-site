@@ -38,6 +38,7 @@ type Context = {
   peek: () => Context["parameterStack"][0];
   peekReturnStack: () => Context["returnStack"][0];
   advanceCurrentFrame: (value?: number) => void;
+  emit: typeof console.log;
 };
 const newCtx: () => Context = () => {
   return {
@@ -72,6 +73,9 @@ const newCtx: () => Context = () => {
     advanceCurrentFrame(value = 1) {
       const stackFrame = this.peekReturnStack();
       stackFrame.i += value;
+    },
+    emit: (...args) => {
+      console.log(...args);
     },
   };
 };
@@ -171,7 +175,14 @@ define({
 define({
   name: "log",
   impl: ({ ctx }) => {
-    console.log(ctx.pop());
+    ctx.emit(ctx.pop());
+  },
+});
+
+define({
+  name: ".s",
+  impl: ({ ctx }) => {
+    ctx.emit(`<${ctx.parameterStack.length}> ${ctx.parameterStack.join(" ")}`);
   },
 });
 
