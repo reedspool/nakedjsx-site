@@ -80,6 +80,15 @@ const newCtx: () => Context = () => {
   };
 };
 
+// Jonesforth names all code (core) words with assembly labels so that other core
+// words can call them by label instead of looking them up constantly. Looking
+// them up in the dictionary isn't just a (slight?) performance hit. If we looked
+// up the definition of core words by name, we might get words of the same name
+// defined by users later. We don't want that for core functionality. So when
+// a core word is defined, we also label it directly here.
+let doneDefiningCoreWords = false;
+const coreWords: Record<Dictionary["name"], Dictionary> = {};
+
 function define({
   name,
   impl,
@@ -92,9 +101,21 @@ function define({
   //       Maybe each dictionary could have its own dictionary which it searches
   //       first? Then I'd have to distinguish between which dictionary to apply
   //       a new word definition - doesn't seem to bad though.
-  // @ts-ignore debug info
-  if (impl) impl.__debug__originalWord = name;
+  // @ts-ignore Add debug info. How could we extend the type of our function to
+  //            include this?
+  impl.__debug__originalWord = name;
   latest = { previous: latest, name, impl, isImmediate };
+  if (!doneDefiningCoreWords) {
+    if (name in coreWords) throw new Error(`Redefining core word '${name}'`);
+    coreWords[name] = latest;
+  }
+}
+
+function coreWordImpl(name: Dictionary["name"]) {
+  const dictionaryEntry = coreWords[name];
+  if (!dictionaryEntry)
+    throw new Error(`Missing core word implementation for '${name}'`);
+  return dictionaryEntry.impl;
 }
 
 define({
@@ -159,9 +180,7 @@ define({
       // Move cursor past the single blank space between
       ctx.inputStreamPointer++;
       const text = consume({ until: "'", including: true, ctx });
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "lit" })!.impl,
-      );
+      ctx.compilationTarget!.compiled!.push(coreWordImpl("lit"));
       ctx.compilationTarget!.compiled!.push(text);
     } else {
       // Move cursor past the single blank space between
@@ -250,9 +269,7 @@ define({
           ctx.push(primitiveMaybe.value);
           return;
         } else {
-          ctx.compilationTarget!.compiled!.push(
-            findDictionaryEntry({ word: "lit" })!.impl,
-          );
+          ctx.compilationTarget!.compiled!.push(coreWordImpl("lit"));
           ctx.compilationTarget!.compiled!.push(primitiveMaybe.value);
           return;
         }
@@ -316,9 +333,7 @@ define({
   name: ";",
   isImmediate: true,
   impl: ({ ctx }) => {
-    ctx.compilationTarget!.compiled!.push(
-      findDictionaryEntry({ word: "exit" })!.impl,
-    );
+    ctx.compilationTarget!.compiled!.push(coreWordImpl("exit"));
 
     // TODO: If this is always the case, then `:` should throw an error if
     //       run from outside queryWord mode (i.e. can't define a word inside
@@ -729,7 +744,7 @@ function executeColonDefinition({ ctx }: { ctx: Context }) {
   ctx.advanceCurrentFrame();
   // If someone leaves off a `;`, e.g. `on click 1`, just exit normally
   if (i === dictionaryEntry!.compiled!.length) {
-    findDictionaryEntry({ word: "exit" })!.impl({ ctx });
+    coreWordImpl("exit")({ ctx });
     return;
   }
   const callable = dictionaryEntry!.compiled![i]!;
@@ -779,7 +794,7 @@ function query({ ctx }: { ctx: Context }) {
     if (ctx.returnStack.length !== 0) {
       executeColonDefinition({ ctx });
     } else {
-      findDictionaryEntry({ word: "interpret" })!.impl({ ctx });
+      coreWordImpl("interpret")({ ctx });
     }
   }
 }
@@ -846,19 +861,11 @@ define({
   name: "foreach",
   isImmediate: true,
   impl: ({ ctx }) => {
-    ctx.compilationTarget!.compiled!.push(
-      findDictionaryEntry({ word: "clone" })!.impl,
-    );
-    ctx.compilationTarget!.compiled!.push(
-      findDictionaryEntry({ word: ">control" })!.impl,
-    );
-    ctx.compilationTarget!.compiled!.push(
-      findDictionaryEntry({ word: "lit" })!.impl,
-    );
+    ctx.compilationTarget!.compiled!.push(coreWordImpl("clone"));
+    ctx.compilationTarget!.compiled!.push(coreWordImpl(">control"));
+    ctx.compilationTarget!.compiled!.push(coreWordImpl("lit"));
     ctx.compilationTarget!.compiled!.push(0);
-    ctx.compilationTarget!.compiled!.push(
-      findDictionaryEntry({ word: ">control" })!.impl,
-    );
+    ctx.compilationTarget!.compiled!.push(coreWordImpl(">control"));
 
     const impl: Dictionary["impl"] = ({ ctx }) => {
       const index = ctx.controlStack.pop() as number;
@@ -877,7 +884,7 @@ define({
 
     // Push to the param stack the location where we need to jump back before
     // every loop
-    findDictionaryEntry({ word: "here" })!.impl({ ctx });
+    coreWordImpl("here")({ ctx });
 
     // Aforementioned "every loop" stuff
     const impl2: Dictionary["impl"] = ({ ctx }) => {
@@ -906,8 +913,8 @@ define({
   name: "endforeach",
   isImmediate: true,
   impl: ({ ctx }) => {
-    findDictionaryEntry({ word: "here" })!.impl({ ctx });
-    findDictionaryEntry({ word: "-stackFrame" })!.impl({ ctx });
+    coreWordImpl("here")({ ctx });
+    coreWordImpl("-stackFrame")({ ctx });
     const offset = ctx.pop() as number;
 
     const impl: Dictionary["impl"] = ({ ctx }) => {
@@ -955,16 +962,10 @@ define({
       ctx.inputStreamPointer++;
       // TODO: Handle escaped forward slashes (\/)
       const regexp = consume({ until: "/", including: true, ctx });
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "lit" })!.impl,
-      );
+      ctx.compilationTarget!.compiled!.push(coreWordImpl("lit"));
       ctx.compilationTarget!.compiled!.push(new RegExp(regexp));
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "swap" })!.impl,
-      );
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "match" })!.impl,
-      );
+      ctx.compilationTarget!.compiled!.push(coreWordImpl("swap"));
+      ctx.compilationTarget!.compiled!.push(coreWordImpl("match"));
     } else {
       const str = ctx.pop();
       // Move cursor past the single blank space between
@@ -972,7 +973,7 @@ define({
       const regexp = consume({ until: "/", including: true, ctx });
       ctx.push(new RegExp(regexp));
       ctx.push(str);
-      findDictionaryEntry({ word: "match" })!.impl({ ctx });
+      coreWordImpl("match")({ ctx });
     }
   },
 });
@@ -1050,16 +1051,10 @@ define({
       // Move cursor past the single blank space between
       ctx.inputStreamPointer++;
       const selector = consume({ until: "'", including: true, ctx });
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "lit" })!.impl,
-      );
+      ctx.compilationTarget!.compiled!.push(coreWordImpl("lit"));
       ctx.compilationTarget!.compiled!.push(selector);
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "swap" })!.impl,
-      );
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "select" })!.impl,
-      );
+      ctx.compilationTarget!.compiled!.push(coreWordImpl("swap"));
+      ctx.compilationTarget!.compiled!.push(coreWordImpl("select"));
     } else {
       const element = ctx.pop();
       // Move cursor past the single blank space between
@@ -1067,7 +1062,7 @@ define({
       const selector = consume({ until: "'", including: true, ctx });
       ctx.push(selector);
       ctx.push(element);
-      findDictionaryEntry({ word: "select" })!.impl({ ctx });
+      coreWordImpl("select")({ ctx });
     }
   },
 });
@@ -1290,7 +1285,7 @@ function runAttributes() {
     }
   });
 }
-
+doneDefiningCoreWords = true;
 window.addEventListener("DOMContentLoaded", runAttributes);
 //@ts-ignore catscript doesn't exist on window
 window.catscript = {
