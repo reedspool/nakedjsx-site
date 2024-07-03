@@ -32,7 +32,7 @@ type Context = {
   paused: boolean;
   halted: boolean;
   inputStreamPointer: number;
-  interpreter: "queryWord" | "compileWord" | "executeColonDefinition";
+  interpreter: "queryWord" | "compileWord";
   pop: () => Context["parameterStack"][0];
   push: (...args: Context["parameterStack"]) => void;
   peek: () => Context["parameterStack"][0];
@@ -224,22 +224,71 @@ defineBinaryExactlyAsInJS({ name: "<" });
 defineBinaryExactlyAsInJS({ name: ">" });
 defineBinaryExactlyAsInJS({ name: ">=" });
 defineBinaryExactlyAsInJS({ name: "<=" });
+define({
+  name: "interpret",
+  impl: ({ ctx }) => {
+    const { interpreter } = ctx;
+
+    if (ctx.inputStreamPointer >= ctx.inputStream.length) {
+      // No input left to process
+      ctx.halted = true;
+      return;
+    }
+
+    const word = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
+
+    // Input only had whitespace, will halt on the next call to `execute`.
+    if (!word.match(/\S/)) return;
+
+    const dictionaryEntry = findDictionaryEntry({ word });
+
+    if (!dictionaryEntry) {
+      const primitiveMaybe = wordAsPrimitive({ word });
+
+      if (primitiveMaybe.isPrimitive) {
+        if (interpreter === "queryWord") {
+          ctx.push(primitiveMaybe.value);
+          return;
+        } else {
+          ctx.compilationTarget!.compiled!.push(
+            findDictionaryEntry({ word: "lit" })!.impl,
+          );
+          ctx.compilationTarget!.compiled!.push(primitiveMaybe.value);
+          return;
+        }
+      } else {
+        throw new Error(`Couldn't comprehend word '${word}'`);
+      }
+    }
+
+    if (interpreter === "queryWord" || dictionaryEntry.isImmediate) {
+      return dictionaryEntry.impl({ ctx });
+    } else {
+      ctx.compilationTarget!.compiled!.push(({ ctx }: { ctx: Context }) => {
+        dictionaryEntry.impl({ ctx });
+      });
+    }
+  },
+});
 
 define({
   name: ":",
   impl: ({ ctx }) => {
-    let dictionaryEntry: Dictionary | null;
+    let dictionaryEntry: typeof latest;
 
     const name = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
     define({
       name,
       impl: ({ ctx }) => {
+        // In Jonesforth and other "indirect threaded Forths", this code would
+        // be written in a different "codeword", often called "DOCOL" for "do
+        // colon definition". CatScript always calls `impl`, so we use this with
+        // a closure to `dictionaryEntry` to do what "DOCOL" does
         ctx.returnStack.push({
           dictionaryEntry: dictionaryEntry!,
           i: 0,
           prevInterpreter: ctx.interpreter,
         });
-        ctx.interpreter = "executeColonDefinition";
       },
     });
     // `define` will set `latest` to the new word, and that's the word we need
@@ -367,6 +416,9 @@ define({
 define({
   name: "here",
   impl: ({ ctx }) => {
+    // TODO: This should throw an error if no compilation target. I'm only not
+    //       implementing now because I want to implement tests asserting thrown
+    //       errors first
     const dictionaryEntry = ctx.compilationTarget;
     const i = dictionaryEntry?.compiled?.length || 0;
     // This shape merges the "return stack frame" and the "variable" types to
@@ -651,6 +703,9 @@ function findDictionaryEntry({ word }: { word: Dictionary["name"] }) {
   return undefined;
 }
 
+// Because a primitive value can be any of the falsy JS values, we can't signal
+// failure to parse by returning a falsy. Instead wrap the return value in a
+// non-primitive container with a flag and the value
 function wordAsPrimitive({ word }: { word: Dictionary["name"] }) {
   let value;
   if (word.match(/^-?\d+$/)) {
@@ -668,51 +723,7 @@ function wordAsPrimitive({ word }: { word: Dictionary["name"] }) {
   return { isPrimitive: true, value };
 }
 
-function queryWord({ word, ctx }: { word: Dictionary["name"]; ctx: Context }) {
-  const dictionaryEntry = findDictionaryEntry({ word });
-
-  if (dictionaryEntry) {
-    return dictionaryEntry!.impl({ ctx });
-  } else {
-    const primitiveMaybe = wordAsPrimitive({ word });
-
-    if (primitiveMaybe.isPrimitive) {
-      ctx.push(primitiveMaybe.value);
-    } else {
-      throw new Error(`Couldn't comprehend word '${word}'`);
-    }
-  }
-}
-
-function compileWord({
-  word,
-  ctx,
-}: {
-  word: Dictionary["name"];
-  ctx: Context;
-}) {
-  const dictionaryEntry = findDictionaryEntry({ word });
-
-  if (dictionaryEntry) {
-    if (dictionaryEntry.isImmediate) {
-      dictionaryEntry.impl({ ctx });
-    } else {
-      ctx.compilationTarget!.compiled!.push(dictionaryEntry.impl);
-    }
-  } else {
-    const primitiveMaybe = wordAsPrimitive({ word });
-
-    if (primitiveMaybe.isPrimitive) {
-      ctx.compilationTarget!.compiled!.push(
-        findDictionaryEntry({ word: "lit" })!.impl,
-      );
-      ctx.compilationTarget!.compiled!.push(primitiveMaybe.value);
-    } else {
-      throw new Error(`Couldn't comprehend word '${word}'`);
-    }
-  }
-}
-
+// TODO I think this is now basically Jonesforth's "NEXT"?
 function executeColonDefinition({ ctx }: { ctx: Context }) {
   const { dictionaryEntry, i } = ctx.peekReturnStack();
   ctx.advanceCurrentFrame();
@@ -760,31 +771,16 @@ function consume({
   return value;
 }
 
-function execute({ ctx }: { ctx: Context }) {
-  const { interpreter } = ctx;
-
-  if (interpreter === "queryWord" || interpreter === "compileWord") {
-    if (ctx.inputStreamPointer >= ctx.inputStream.length) {
-      // No input left to process
-      ctx.halted = true;
-      return;
-    }
-
-    const word = consume({ until: /\s/, ignoreLeadingWhitespace: true, ctx });
-
-    // Input only had whitespace, will halt on the next call to `execute`.
-    if (!word.match(/\S/)) return;
-
-    if (interpreter === "queryWord") return queryWord({ word, ctx });
-    return compileWord({ word, ctx });
-  } else if (interpreter === "executeColonDefinition") {
-    executeColonDefinition({ ctx });
-  }
-}
-
 function query({ ctx }: { ctx: Context }) {
+  // Unlike Jonesforth, don't begin with Quit because it's valid in CatScript to
+  // run with a non-empty, meaningful return stack, as in the case of async code
+  // which is resuming
   while (!ctx.halted && !ctx.paused) {
-    execute({ ctx });
+    if (ctx.returnStack.length !== 0) {
+      executeColonDefinition({ ctx });
+    } else {
+      findDictionaryEntry({ word: "interpret" })!.impl({ ctx });
+    }
   }
 }
 
@@ -1086,6 +1082,15 @@ define({
     // By not using `define` we don't adjust the dictionary pointer `latest`.
     // This is a divergence from Forth implementations I've seen, and I'm calling
     // it an "anonymous dictionary entry".
+    // NOTE: I did see someone describe an implementation which allowed
+    //       control structures like if's and loops at the base level, and
+    //       this might be how they did it. If any control structure
+    //       called outside of a compiled definition initiated such a
+    //       anonymous compilation, then it could be dropped when the
+    //       control structure finishes.
+    //       In fact, i'm struggling to see why everything on a REPL shouldn't
+    //       just be getting compiled into a colon definiton AND ALSO getting
+    //       executed until the instruction pointer goes to the end?
     const dictionaryEntry: Dictionary = {
       name: `anonymous-on-${event}-handler`,
       previous: null,
@@ -1111,7 +1116,6 @@ define({
               prevInterpreter: "queryWord", // Unused, I believe
             },
           ],
-          interpreter: "executeColonDefinition",
         },
       });
     });
