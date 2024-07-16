@@ -129,6 +129,22 @@ const communicationMethods: Array<{
     main: "Sing or hum a tone",
     tag: ["silly", "beginner"],
   },
+  {
+    main: "Superheroes.",
+    tag: ["silly"],
+  },
+  {
+    main: "Colors.",
+    tag: ["silly"],
+  },
+  {
+    main: "Flavors.",
+    tag: ["silly"],
+  },
+  {
+    main: "Vacations.",
+    tag: ["silly"],
+  },
 ];
 
 type CommunicationMethods = typeof communicationMethods;
@@ -241,37 +257,21 @@ const CommunicationMethodCard = ({ main, tag = [] }: CommunicationMethod) => {
     />
   );
 };
-const NumberCardOrderIndicator = ({ order }: { order: "greater" | "less" }) => (
-  <span class="card-number__order-indicator">
-    {order === "greater" ? "&gt;" : "&lt;"}
-  </span>
-);
 const NumberCard = ({ num }: { num: number }) => {
   return (
     <StandardCard
-      classList="card-number"
+      classList={
+        "card-number " +
+        (num === 9 || num === 6 ? "card-number--confusing-orientation" : "")
+      }
       HeaderContent={() => (
         <>
-          <span>
-            {num}
-            <NumberCardOrderIndicator order="less" />
-          </span>
-          <span>
-            <NumberCardOrderIndicator order="less" />
-            {num}
-          </span>
+          <span>{num}</span>
         </>
       )}
       FooterContent={() => (
         <>
-          <span>
-            {num}
-            <NumberCardOrderIndicator order="greater" />
-          </span>
-          <span>
-            <NumberCardOrderIndicator order="greater" />
-            {num}
-          </span>
+          <span>{num}</span>
         </>
       )}
       BodyContent={() => "#"}
@@ -344,9 +344,23 @@ const RulesCard1 = () => {
       )}
       BodyContent={() => (
         <>
-          <div style="text-decoration: underline;">Rules 1/3</div>
-          <p>Each player draws a number card.</p>
-          <p>One player draws a Communication Card. They are The Guesser.</p>
+          <p style="text-decoration: underline;">Rules 1/4</p>
+          <p>
+            Deal a random Number (<span>#</span>) to each player. Your Number is{" "}
+            <em>your secret</em>. The Numbers go from 1 to {NUM_OF_NUM_CARDS}.
+          </p>
+          <p>
+            One player (the Director) draws a Directive
+            <span>
+              {" "}
+              (<MaterialSymbol which="communication" />)
+            </span>
+            .
+          </p>
+          <p>
+            Everyone cooperates to reveal each Number in order from lowest to
+            highest.
+          </p>
         </>
       )}
     />
@@ -365,20 +379,67 @@ const RulesCard2 = () => {
       )}
       BodyContent={() => (
         <>
-          <div style="text-decoration: underline;">Rules 2/3</div>
-          <p>The Guesser holds their number card up.</p>
+          <p style="text-decoration: underline;">Rules 2/4</p>
           <p>
-            The goal is for The Guesser to correctly place each player's number
-            in their hand in order.
+            The Director has the final say. Don't reveal your Number until the
+            Director tells you to.
           </p>
           <p>
-            Each player attempts to convey which number they're holding
-            following the rules of the chosen Communication Card.
+            You must only communicate the value on your Number via the
+            Directive. You can't say any number or show numbers on your fingers
+            unless the Directive says.
+          </p>
+        </>
+      )}
+    />
+  );
+};
+const RulesCard3 = () => {
+  return (
+    <StandardCard
+      classList="card-rules"
+      HeaderContent={() => (
+        <>
+          <MaterialSymbol which="information" />
+          <MaterialSymbol which="information" />
+        </>
+      )}
+      BodyContent={() => (
+        <>
+          <p style="text-decoration: underline;">Rules 3/4</p>
+          <p>
+            The Directives are vague. You must discuss how to interpret the
+            Directive amongst you (without saying numbers!)
           </p>
           <p>
-            Each player attempts to convey which number they're holding
-            following the rules of the chosen Communication Card.
+            You can't lose the game. But, if you say a number or reveal a Number
+            out of order, you get a Strike. Try to get fewer Strikes each round!
           </p>
+        </>
+      )}
+    />
+  );
+};
+
+const RulesCard4 = () => {
+  return (
+    <StandardCard
+      classList="card-rules"
+      HeaderContent={() => (
+        <>
+          <MaterialSymbol which="information" />
+          <MaterialSymbol which="information" />
+        </>
+      )}
+      BodyContent={() => (
+        <>
+          <p style="text-decoration: underline;">Rules 4/4</p>
+          <p>The round ends when all the Numbers are revealed.</p>
+          <p>
+            The Director for the next round is the person to the left of the
+            current Director.{" "}
+          </p>
+          <p>Shuffle and re-deal the Numbers and pick a new Directive!</p>
         </>
       )}
     />
@@ -391,7 +452,6 @@ const InformationCardBack = () => {
       classList="card-back"
       HeaderContent={() => (
         <>
-          <MaterialSymbol which="information" />
           <MaterialSymbol which="information" />
         </>
       )}
@@ -410,7 +470,6 @@ const CommunicationMethodCardBack = () => {
       classList="card-back card-communication"
       HeaderContent={() => (
         <>
-          <MaterialSymbol which="communication" />
           <MaterialSymbol which="communication" />
         </>
       )}
@@ -431,24 +490,12 @@ const NumberCardBack = () => {
       classList="card-back card-number"
       HeaderContent={() => (
         <>
-          <span>
-            ?
-            <NumberCardOrderIndicator order="greater" />
-          </span>
-          <span>
-            <NumberCardOrderIndicator order="greater" />?
-          </span>
+          <span>?</span>
         </>
       )}
       FooterContent={() => (
         <>
-          <span>
-            ?
-            <NumberCardOrderIndicator order="less" />
-          </span>
-          <span>
-            <NumberCardOrderIndicator order="less" />?
-          </span>
+          <span>?</span>
         </>
       )}
       BodyContent={() => (
@@ -467,7 +514,7 @@ let lastCardFrontsLength = CardFronts.length;
 CardFronts.push(
   ...arrayFrom1ToN(NUM_OF_NUM_CARDS).map((n) => <NumberCard num={n} />),
 );
-CardFronts.push(<SaboteurCard />);
+/* CardFronts.push(<SaboteurCard />); */
 const numNumCards = CardFronts.length - lastCardFrontsLength;
 lastCardFrontsLength = CardFronts.length;
 
@@ -476,8 +523,10 @@ const numCommunicationCards = CardFronts.length - lastCardFrontsLength;
 lastCardFrontsLength = CardFronts.length;
 
 CardFronts.push(<KeyCard />);
-/*CardFronts.push(   <RulesCard1 />, )*/
-/*CardFronts.push( <RulesCard2 />, ) */
+CardFronts.push(<RulesCard1 />);
+CardFronts.push(<RulesCard2 />);
+CardFronts.push(<RulesCard3 />);
+CardFronts.push(<RulesCard4 />);
 const numInfoCards = CardFronts.length - lastCardFrontsLength;
 lastCardFrontsLength = CardFronts.length;
 
@@ -533,11 +582,39 @@ for (var i = 0; i < CardFronts.length; i += NUM_CARDS_PER_PAGE) {
   }
 }
 
+console.log(
+  [
+    `Rendered ${CardFronts.length} total cards (${CardFrontsAndBacks.length} fronts and backs)`,
+    `${numInfoCards} Info cards (rules and key)`,
+    `${numNumCards} Number cards (expected ${NUM_OF_NUM_CARDS} + maybe 1 Saboteur)`,
+    `${numCommunicationCards} Directives`,
+    `${numBlankCards} blank Directives (so ${
+      CardFronts.length - numBlankCards
+    } non-blanks)`,
+  ].join("\n"),
+);
 if (CardFrontsAndBacks.length !== 2 * CardFronts.length)
   throw new Error("CardFrontsAndBacks length mismatch");
 
 export const Body = () => (
   <div class="container">
+    <script type="text/javascript">
+      {`
+console.log(
+  [
+  'Rendered ${CardFronts.length} total cards (${
+    CardFrontsAndBacks.length
+  } fronts and backs)',
+  '${numInfoCards} Info cards (rules and key)',
+  '${numNumCards} Number cards (expected ${NUM_OF_NUM_CARDS} + maybe 1 Saboteur)',
+  '${numCommunicationCards} Directives',
+  '${numBlankCards} blank Directives (so ${
+    CardFronts.length - numBlankCards
+  } non-blanks)',
+ ].join("\\n")
+);
+`}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -695,8 +772,7 @@ export const Body = () => (
         color: darkgray;
         font-size: 16pt;
       }
-      .card-number .card[data-number="6"] .card-header,
-      .card-number .card[data-number="9"] .card-header {
+      .card-number.card-number--confusing-orientation .card-header {
         text-decoration: underline;
       }
 
@@ -720,10 +796,11 @@ export const Body = () => (
         vertical-align: text-bottom;
       }
       .card-rules .card__body {
-        font-size: 12pt;
+        font-size: 10pt;
+        line-height: 1.2em;
       }
       .card-rules .card__body p {
-        margin: 0;
+        margin: 0.4em;
       }
       .page-break {
         height: 0px;
