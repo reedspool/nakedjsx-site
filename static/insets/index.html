@@ -1,0 +1,987 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <head>
+      <title>Dynamic Insets That Preserve Visual Lines | Reed's Website</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+      <!-- Note the "text" at the end, a comma separated list of the icons I've chosen to use, to reduce the file size from ~3MB to a few kilobytes. Need to add to this list when using a new icon -->
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&text=tactic,touch_app,open_in_new,record_voice_over,voice_selection,link"
+      />
+      <style>
+        /*
+         * To optimize, took the stylesheet returned by Google Font's link tag,
+         * and inlined it. Then I took out the alphabets I'm not using. Can
+         * probably also remove the unused `unicode-range`.
+         */
+        /* latin */
+        @font-face {
+          font-family: "Bebas Neue";
+          font-style: normal;
+          font-weight: 400;
+          src: url(https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2)
+            format("woff2");
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+            U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC,
+            U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        /* latin */
+        @font-face {
+          font-family: "IBM Plex Mono";
+          font-style: normal;
+          font-weight: 400;
+          src: url(https://fonts.gstatic.com/s/ibmplexmono/v19/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2)
+            format("woff2");
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+            U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC,
+            U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        /* latin */
+        @font-face {
+          font-family: "Karla";
+          font-style: normal;
+          font-weight: 400;
+          src: url(https://fonts.gstatic.com/s/karla/v31/qkBIXvYC6trAT55ZBi1ueQVIjQTD-JqaE0lK.woff2)
+            format("woff2");
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+            U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC,
+            U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        :root {
+          --flashy-font: "Bebas Neue", sans-serif;
+          --prose-font: "Karla", sans-serif;
+          --mono-font: "IBM Plex Mono", monospace;
+
+          --color-bg-yellow: #ffe8d1;
+          --color-bg-blue: #dae3df;
+          --color-bg-purple: #eed4f7;
+          --color-bg-red: #ffbec1;
+          --color-fg-black: #282828;
+
+          background-color: var(--color-bg-yellow);
+          color: var(--color-fg-black);
+          font-size: 18px;
+          font-family: var(--prose-font);
+          line-height: 1.6em;
+          text-align: initial;
+          text-align-last: initial;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+          font-family: var(--flashy-font);
+          font-weight: 400;
+          font-style: normal;
+          margin-inline: 0;
+          margin-block-start: 1.8em;
+          margin-block-end: 0em;
+
+          text-align: initial;
+          text-align-last: initial;
+        }
+
+        h1 {
+          font-size: 1.8em;
+        }
+
+        h2 {
+          font-size: 1.4em;
+        }
+
+        h2 a {
+          color: var(--color-fg-black);
+          text-decoration: none;
+        }
+
+        h2 a:hover {
+          text-decoration: underline;
+
+          &:after {
+            font-family: "Material Symbols Outlined";
+            /* Narrow non-breaking space, then Material Icons "Link" */
+            content: "\202flink";
+            vertical-align: bottom;
+          }
+        }
+
+        code,
+        pre,
+        button {
+          font-family: var(--mono-font);
+        }
+
+        button {
+          background-color: var(--color-bg-red);
+          cursor: pointer;
+          margin-inline: 0.4em;
+          display: inline-flex;
+          padding-block: 3px;
+        }
+
+        aside,
+        blockquote {
+          position: relative;
+
+          margin-block: 1em;
+          margin-inline: 0px;
+
+          padding-block: 1em;
+          padding-inline: 40px;
+
+          background-color: var(--color-bg-blue);
+
+          text-align: initial;
+          text-align-last: initial;
+        }
+
+        aside:before,
+        blockquote:before {
+          font-family: "Material Symbols Outlined";
+          content: "voice_selection";
+          position: absolute;
+          top: 1em;
+          left: 0.4em;
+        }
+
+        blockquote {
+          background-color: var(--color-bg-purple);
+        }
+
+        blockquote:before {
+          content: "record_voice_over";
+        }
+
+        a[target="_blank"]:after {
+          font-family: "Material Symbols Outlined";
+          /* Narrow non-breaking space, then Material Icons "Open In New" */
+          content: "\202fopen_in_new";
+        }
+
+        .back-to-top:after {
+          font-family: "Material Symbols Outlined";
+          /* Narrow non-breaking space, then Material Icons "Tactic" */
+          content: "\202ftactic";
+        }
+
+        button:after {
+          font-family: "Material Symbols Outlined";
+          /* Narrow non-breaking space, then Material Icons "Touch App" */
+          content: "\202ftouch_app";
+        }
+
+        .layout {
+          display: grid;
+          grid-template-areas: "leftSpace article rightSpace";
+          --column-size-margin: minmax(5ch, 1fr);
+          gap: 0.4em;
+          grid-template-columns:
+            var(--column-size-margin)
+            minmax(25ch, 65ch)
+            var(--column-size-margin);
+
+          & .layout__article {
+            grid-area: article;
+          }
+        }
+      </style>
+    </head>
+  </head>
+
+  <body class="layout">
+    <article class="layout__article">
+      <h1 id="article-title">Dynamic Insets That Preserve Visual Lines</h1>
+
+      <h2 id="article-toc">
+        <a href="#article-toc" title="Link to this section"
+          >Table of Contents</a
+        >
+      </h2>
+
+      <ol>
+        <li><a href="#article-toc">Table of Contents</a></li>
+        <li><a href="#article-intro">Intro</a></li>
+        <li><a href="#article-demo">The Goods</a></li>
+        <li><a href="#article-goals">Goals</a></li>
+        <li><a href="#article-baby-steps">Baby Steps</a></li>
+      </ol>
+
+      <h2 id="article-intro">
+        <a href="#article-intro" title="Link to this section">The Intro</a>
+      </h2>
+
+      <p>
+        Boxes appear on web pages all the time, in all different places and
+        contexts. In this article, I present a novel way to position boxes which
+        dynamically interject between two visual lines of inline text with no
+        disruption to the flow of that text. I call these boxes "insets," which
+        I hope alludes to a familiar graphic design concept.
+      </p>
+
+      <a href="#article-title" class="back-to-top">Back to top</a>
+      <h2 id="article-demo">
+        <a href="#article-demo" title="Link to this section">The Goods</a>
+      </h2>
+
+      <p>
+        I have a lot to say about the what, why, and how. But before that, I
+        figure I should give you an example of the result I'm looking for. So
+        you can
+        <button data-js="press one of these to move the first quote to here">
+          press this button
+        </button>
+        to make a little quote appear. The point of this project is for that
+        quote not to interrupt the flow of the paragraph surrounding it. So, in
+        a very boring way, nothing should change except for a quote appearing
+        when you click that button. Oh, and you can
+        <button data-js="press one of these to move the first quote to here">
+          press this button
+        </button>
+        to remove the quote from up there and move it back to here. That way you
+        can get some picture that this is dynamic. Especially fun to try would
+        be resizing this paragraph with the little handlebar on the lower right
+        hand side, and then clicking both buttons to see how the flow of the
+        paragraph does or does not change around it.
+      </p>
+
+      <blockquote data-js="this is the first example blockquote to move around">
+        <p>
+          I've got gadgets and gizmos aplenty, I've got whosits and whatsits
+          galore - Ariel, The Little Mermaid
+        </p>
+      </blockquote>
+
+      <script type="text/javascript">
+        {
+          const blockquote = document.querySelector(
+            '[data-js="this is the first example blockquote to move around"]',
+          );
+          document
+            .querySelectorAll(
+              '[data-js="press one of these to move the first quote to here"]',
+            )
+            .forEach((button) => {
+              button.addEventListener("click", () => {
+                let range = document.createRange();
+                range.selectNode(button);
+                range = extendRangeToEndOfVisualLine(range);
+                range.collapse(false); // Sets start to equal end
+                if (
+                  range.startContainer instanceof HTMLElement &&
+                  range.startOffset === 0
+                ) {
+                  // The range is at the beginning of another element, so insert before that instead of after the start of the range
+                  range.startContainer.parentElement.insertBefore(
+                    blockquote,
+                    range.startContainer,
+                  );
+                } else {
+                  range.insertNode(blockquote);
+                }
+              });
+            });
+        }
+      </script>
+
+      <a href="#article-title" class="back-to-top">Back to top</a>
+      <h2 id="article-goals">
+        <a href="#article-goals" title="Link to this section">Goals</a>
+      </h2>
+
+      <p>
+        The description of the concept sure is a mouthful. One of my hopes in
+        sharing this article is that it sparks some conversations that lead to
+        brainstorms of better descriptions of the goal of this work. I would
+        also appreciate help to find a simpler or more effective method to
+        achieve the goal, since my method feels both complex and fragile.
+      </p>
+
+      <p>
+        I hope this article intrigues several audiences such as web developers,
+        browser developers, graphic designers, interface designers, and product
+        designers. For a different topic, I might chop up several more focused
+        chunks for each intended audience instead of one big'n. But here, the
+        conceptual purpose is to enable different folks to dig into different
+        aspects of a complicated subject, so I kept it all together. Please
+        disregard any JavaScript, jargon, or jokes you don't jive with.
+      </p>
+
+      <a href="#article-title" class="back-to-top">Back to top</a>
+      <h2 id="article-baby-steps">
+        <a href="#article-baby-steps" title="Link to this section"
+          >Baby Steps
+        </a>
+      </h2>
+
+      <p>
+        There's a surprising amount of complexity to unpack to present a full
+        picture of my goal. So in this section I'm going to work step-by-step
+        from the fundamentals of web development up to the whole shebang.
+      </p>
+
+      <p>Take for example a <code>blockquote</code> element like this one:</p>
+
+      <blockquote>
+        Toto, I've a feeling we're not in Kansas any more. - Dorothy Gale, The
+        Wizard of Oz
+      </blockquote>
+
+      <p>
+        The quote above is an example of an "inset." I got this word "inset"
+        from a graphic designer friend. What they told me, in my own words, is
+        that an inset is a design element which is distinct from the surrounding
+        area but whose content is contextually relevant. If you know a better
+        word, please let me know. Here's another
+        <code>aside</code> element used as an inset with some more commentary
+        from me:
+      </p>
+
+      <aside>
+        My own use of the word "inset" here confuses me in the context of web
+        development, because
+        <code>inset</code> has several distinct meaning in CSS
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/CSS/inset"
+          target="_blank"
+          title="MDN reference for the CSS property called 'inset'"
+          >as a shorthand for positioning</a
+        >,
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow#inset"
+          target="_blank"
+          title="MDN reference for the CSS box-shadow inset value"
+          >as a positional switch for box shadows</a
+        >,
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/CSS/border"
+          target="_blank"
+          title="MDN reference for CSS border line-style inset value"
+          >as a border style</a
+        >, and probably other places I'm unaware of.
+      </aside>
+
+      <p>
+        So you have two examples of insets already, the
+        <code>blockquote</code> and the <code>aside</code> above. They're
+        sitting there, inert in the flow of the document. They don't interject,
+        they wait their turn.
+      </p>
+
+      <p>
+        Now imagine that one of those could just appear out of nowhere. In fact,
+        you don't have to imagine it, you can
+        <button
+          data-js="press this for an inset between two paragraphs to appear"
+        >
+          press this button
+        </button>
+        to see one pop up below this paragraph. I'll also include a number (e.g.
+        <code>#1</code>), so when you click the button multiple times, you can
+        distinguish the order in which each appeared.
+      </p>
+
+      <script type="text/javascript">
+        {
+          const thisScript = document.currentScript;
+          let count = 0;
+          document
+            .querySelector(
+              '[data-js="press this for an inset between two paragraphs to appear"]',
+            )
+            .addEventListener("click", () => {
+              const blockquote = document.createElement("blockquote");
+              blockquote.innerText =
+                `We are as much informed of a writer\'s genius` +
+                ` by what he selects as by what he originates.` +
+                ` - Ralph Waldo Emerson, "Quotation and Originality,"` +
+                ` Letters and Social Aims, 1876 (#${++count})`;
+              thisScript.parentElement.insertBefore(
+                blockquote,
+                thisScript.nextElementSibling,
+              );
+            });
+        }
+      </script>
+
+      <p>
+        Note the position of the previous button is inline within a paragraph.
+      </p>
+      <p>
+        So, note the distance between the button in the prior paragraph and the
+        effect of that button. Sure, it's only a couple lines of text away. If
+        you're on a big screen, you may not even know what I mean by "distance."
+        It might feel like that new inset appears immediately after the button.
+        But if you're on a small screen, that button might be near the bottom of
+        your screen, in which case the effect of the button is completely
+        invisible! And that distance only gets larger as the width of the
+        paragraph shrinks, and the text extends downwards, even further from the
+        button.
+      </p>
+
+      <p>
+        So, that's the issue. Now, the first solution I imagined was: what if we
+        could do the same thing, have an inset magically appear, but it appears
+        immediately below the button. At first glance, this feels like a simple
+        and sufficient solution. Let's try it and observe what happens.
+        <button
+          data-js="press this to add a blockquote immediately after this button that breaks the paragraph up"
+        >
+          Press this button
+        </button>
+        to insert another quote. This one is a bit different in that more text
+        will be added over a period of 10 seconds. Hopefully you'll see the
+        problem I feel with this.
+      </p>
+      <script type="text/javascript">
+        {
+          let count = 0;
+          const button = document.querySelector(
+            '[data-js="press this to add a blockquote immediately after this button that breaks the paragraph up"]',
+          );
+          button.addEventListener("click", () => {
+            const blockquote = document.createElement("blockquote");
+            const text = [
+              "You're already in that cage. ",
+              "You built it yourself. ... ",
+              "No matter where you run,",
+              "you just end up running into yourself. ",
+              `- Truman Capote, Breakfast at Tiffany's (#${++count})`,
+            ];
+
+            button.parentElement.insertBefore(blockquote, button.nextSibling);
+            const addText = () => {
+              blockquote.innerHTML += text.shift() + "&nbsp;";
+              if (text.length !== 0) setTimeout(addText, 2500);
+            };
+            addText();
+          });
+        }
+      </script>
+      <p>
+        Because the <code>blockquote</code> element is a
+        <code>block</code> element, it immediately separates the
+        <code>inline</code> <code>button</code> immediately before it, and the
+        <code>inline</code> text node after it. The outcome is it that it looks
+        like 3 <code>block</code> elements stacked ontop of each other. This
+        disrupts the flow of the sentence. Depending on your screen width and
+        the font-size, it may also create a scenario where the button is sitting
+        on a row all by itself. In short, it works, but it feels awkward. And it
+        feels awkward enough taht I wouldn't want to use it.
+      </p>
+
+      <p>
+        To get the best of both of these scenarios, we'd like text to flow
+        exactly as it did before the new inset appeared, up to the point where a
+        new block element appears, and then for the text to continue below it
+        exactly as if it was always supposed to be this way.
+      </p>
+
+      <p>
+        To show what I'm looking for, I have this static example below. It's a
+        <code>blockquote</code> with an <code>aside</code> interjected. Sorry,
+        no buttons this time. But we'll be back to that soon.
+      </p>
+      <!-- prettier-ignore -->
+      <blockquote style="white-space: pre;">One fish
+two fish<aside style="white-space: initial;">The poem never refers to "fishes," which suggests they're all the same species, despite "not one of them [being] like another."</aside>red fish
+blue fish
+- Dr. Seuss, "One fish two fish red fish blue fish"</blockquote>
+
+      <p>
+        Imagine the button which created this dynamic effect was on the word
+        <q>two</q> in the poem above. That would result in <q>fish</q> being
+        split off from it inappropriately. So how would we make this happen?
+      </p>
+
+      <p>
+        It's obnoxiously hard to achieve because the algorithm for flowing text
+        on a webpage doesn't easily allow for it. The vagueness of this
+        statement might suggest that this is the limit of my understanding of
+        that algorithm, so maybe there is a simpler solution deep in the heart
+        of the HTML spec. Otherwise, my understanding is that mostly HTML
+        expects this sort of concept to be achieved via manually or
+        programattically splitting text notes into different elements or
+        separate text nodes.
+      </p>
+
+      <p>
+        So, that's exactly the plan. The trick will be to determine where to
+        split the text nodes up. To do that, we'll have to figure out where the
+        line break currently is before making the split. And that's most of the
+        business of achieving this. My thought on how to achieve this is to use
+        the JavaScript
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/API/Range"
+          target="_blank"
+          ><code>Range</code> API</a
+        >. A close cousin of <code>Range</code> is <code>Selection</code>. If
+        you've ever selected text on a webpage by clicking and dragging with
+        your mouse on text or long-pressing and dragging with your finger,
+        you've created a <code>Selection</code> in the native way. And if you
+        have, then you have some intimate, first-hand feel for how
+        <code>Range</code> works as well. With a <code>Range</code>, we can make
+        the JavaScript parallel of a native selection. We can also literally
+        select text and other HTML elements this way.
+      </p>
+
+      <p>
+        So, my idea is to create a <code>Range</code> object around the pressed
+        button, and then move it and shift it and calculate it to discover
+        exactly where the text breaks into a new line. And when I find the place
+        where the text breaks, I will split it there into two separate elements.
+        Finally, once the text is split, I can insert the new inset between the
+        two elements as I've done already.
+      </p>
+
+      <p>
+        To begin, you can
+        <button data-js="press this to select some text">
+          press this button
+        </button>
+        to
+        <span data-js="target for button to select some text"
+          >select this text (from the previous word "select" to the period after
+          this parenthetical)</span
+        >. When you press the button, you should see your native selection
+        appear.
+      </p>
+
+      <script type="text/javascript">
+        document
+          .querySelector("[data-js='press this to select some text']")
+          .addEventListener("click", () => {
+            const selection = document.getSelection();
+            const nodeToSelect = document.querySelector(
+              "[data-js='target for button to select some text']",
+            );
+            const range = document.createRange();
+
+            range.selectNodeContents(nodeToSelect);
+            selection.selectAllChildren(nodeToSelect);
+            // To confirm my understanding of the parity between these two APIs
+            console.log(
+              "Range:",
+              range,
+              "Selection:",
+              selection,
+              "Other:",
+              range.startContainer === range.endContainer &&
+                selection.anchorNode === selection.focusNode &&
+                selection.anchorNode === range.startContainer
+                ? "Range and selection target exactly the same thing:"
+                : "Something's off",
+              range.startContainer,
+            );
+          });
+      </script>
+
+      <p>
+        A <code>Range</code> works exactly the same way, but it's invisible. In
+        fact, the prior button also created a separate, new range which included
+        the same text. Well, technically, a selection can contain multiple
+        ranges, but we can ignore that complication for now. (Note to self, come
+        back to research this complication later. How does a selection with
+        multiple ranges get formed natively? If it can only be formed through
+        JavaScript, maybe this is not very interesting)
+      </p>
+
+      <p>
+        From here, the next experiment I wanted to do was to exactly select one
+        line of text. My idea was to add the button itself to the range, then
+        calculate the range's height using the
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/API/Range/getBoundingClientRect"
+          target="_blank"
+          ><code>Range: getBoundingClientRect()</code> method</a
+        >. Once I had that base height, I could extend the range in either
+        direction until the height changed, and then back track to find the
+        maximum extent of the range that maintains that base height. So you can
+        <button data-js="press this to select the surrounding line of text">
+          press this button</button
+        >, and it should select exactly the visual line as you see it. This is
+        an interesting result because this is all one text node within a single
+        <code>p</code> (paragraph) element. Compare with the previous
+        experiment, where I made a <code>span</code> element to target
+        specifically. Again, the goal is to create an invisible range. The
+        selection is just copying that result to visually show the
+        accomplishment. There's an additional complication here that if you
+        resize the browser with this selection, the visual line layout might
+        change. In that case, the selection should reset.
+      </p>
+
+      <script type="text/javascript">
+        {
+          const button = document.querySelector(
+            '[data-js="press this to select the surrounding line of text"]',
+          );
+
+          window.extendRangeToStartOfVisualLine = function (
+            range,
+            givenOptions = {},
+          ) {
+            const { heightChangeFactor } = {
+              heightChangeFactor: 1.8,
+            };
+            let lastGoodRange;
+            const baseRectHeight = range.getBoundingClientRect().height;
+            // First we're going to slide to the left until we violate the
+            // same-height constraint. Then `lastGoodRange` will be our mark
+            do {
+              let nextStartContainer;
+              let nextStartOffset;
+              const { startOffset, startContainer } = range;
+              // If the current range starts at the left boundary of a node,
+              // then we need to move the start of the range to the right-most
+              // boundary of the next-left node
+              if (startOffset === 0) {
+                // TODO: Do something different if this is a text node boundary?
+                const parent = startContainer.parentElement;
+                const currentIndexInParent = Array.from(
+                  parent.childNodes,
+                ).indexOf(startContainer);
+                if (currentIndexInParent === 0) {
+                  // TODO: Uh oh, then we need to loop up the ancestral tree
+                  // TODO Maybe check after each move if the range.commonAncestor is the expected parent element of that button, like a paragraph, and if it moves out of that then we want to do something different?
+                  throw new Error("Not yet implemented");
+                }
+
+                nextStartContainer =
+                  parent.childNodes[currentIndexInParent - 1];
+                // TODO: What if this is not a text node? Maybe we need to loop into this object until we find a text node
+                nextStartOffset = nextStartContainer.length - 1;
+              } else if (startContainer instanceof HTMLElement) {
+                nextStartContainer = startContainer.childNodes[startOffset - 1];
+
+                while (nextStartContainer instanceof HTMLElement) {
+                  nextStartContainer =
+                    nextStartContainer.childNodes[
+                      nextStartContainer.childNodes.length - 1
+                    ];
+                }
+
+                nextStartOffset = nextStartContainer.length - 1;
+              } else if (startContainer.nodeType == Node.TEXT_NODE) {
+                nextStartContainer = startContainer;
+                nextStartOffset = startOffset - 1;
+              } else {
+                console.error("What is it?", startContainer);
+                throw new Error("What is it?");
+              }
+              lastGoodRange = range.cloneRange();
+              range.setStart(nextStartContainer, nextStartOffset);
+            } while (
+              range.getBoundingClientRect().height <
+              heightChangeFactor * baseRectHeight
+            );
+
+            return lastGoodRange;
+          };
+
+          window.extendRangeToEndOfVisualLine = function (
+            range,
+
+            givenOptions = {},
+          ) {
+            const { heightChangeFactor } = {
+              heightChangeFactor: 1.8,
+            };
+            // TODO: In a final solution, where I dont want to show the whole
+            //       range, I only need to go in one direction (right for after
+            //       the current line, left for before the current line)
+            let lastGoodRange;
+            const baseRectHeight = range.getBoundingClientRect().height;
+            do {
+              let nextEndContainer;
+              let nextEndOffset;
+              const { endContainer, endOffset } = range;
+              // If the current range ends at the right boundary of a node,
+              // then we need to move the end of the range to the left-most
+              // boundary of the next-right node
+              if (
+                endContainer.nodeType === Node.TEXT_NODE &&
+                endOffset === endContainer.length - 1
+              ) {
+                const parent = endContainer.parentElement;
+                const currentIndexInParent = Array.from(
+                  parent.childNodes,
+                ).indexOf(endContainer);
+                if (currentIndexInParent === parent.childNodes.length - 1) {
+                  // TODO: Uh oh, then we need to loop up the ancestral tree
+                  // TODO Maybe check after each move if the commonAncestor is the expected parent element of that button, like a paragraph, and if it moves out of that then we want to do something different?
+                  throw new Error("Not yet implemented");
+                }
+
+                nextEndContainer = parent.childNodes[currentIndexInParent + 1];
+                nextEndOffset = 0;
+              } else if (endContainer.nodeType == Node.TEXT_NODE) {
+                nextEndContainer = endContainer;
+                nextEndOffset = endOffset + 1;
+              } else if (endContainer instanceof HTMLElement) {
+                // When the end container is not a text node, we just need to
+                // dig until we find the first text node
+                nextEndContainer = endContainer.childNodes[endOffset];
+
+                while (nextEndContainer instanceof HTMLElement) {
+                  nextEndContainer = nextEndContainer.childNodes[0];
+                }
+
+                if (nextEndContainer.nodeType !== Node.TEXT_NODE) {
+                  debugger;
+                  // TODO: What if this is not a text node? Maybe we need to loop into this object until we find a text node
+                  throw new Error(
+                    "Need to recurse here until we find a text node",
+                  );
+                }
+
+                nextEndOffset = 0;
+              } else {
+                console.error("What is it?", endContainer);
+                throw new Error("What is it?");
+              }
+              lastGoodRange = range.cloneRange();
+              if (
+                !nextEndContainer ||
+                (nextEndContainer.nodeType !== Node.TEXT_NODE &&
+                  !(nextEndContainer instanceof HTMLElement))
+              ) {
+                debugger;
+              }
+              range.setEnd(nextEndContainer, nextEndOffset);
+            } while (
+              range.getBoundingClientRect().height <
+              heightChangeFactor * baseRectHeight
+            );
+
+            return lastGoodRange;
+          };
+
+          button.addEventListener("click", () => {
+            const selection = document.getSelection();
+            let range = document.createRange();
+            range.selectNode(button);
+            range = extendRangeToStartOfVisualLine(range);
+            range = extendRangeToEndOfVisualLine(range);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          });
+        }
+      </script>
+
+      <aside>
+        I was surprised to find that the base height (that is, the
+        <code>height</code> property of the range's
+        <code>boundingClientRect</code> after the button was selected) was
+        exactly <code>21</code>. At that time, I had no CSS on the page, so only
+        the default user agent stylesheet (for Chrome) was active. The font size
+        was 16, and the <code>line-height</code> was set to <code>normal</code>.
+        I didn't know what <code>normal</code> meant, and I was surprised to
+        find that it wasn't easy to find. In fact, one of the only
+        <a href="https://stackoverflow.com/a/71278294" target="_blank"
+          >cohesive answers to that question on StackOverflow</a
+        >
+        was to do exactly what I was doing. So I concluded that the answer was
+        that the current line height value was <code>21/16=~1.3</code>.
+      </aside>
+
+      <aside>
+        I came back to this a few days later. In that time, I tried to search
+        again for other people's solutions to this challenge. I wasn't sure what
+        to search, so I tried a few things. The only phrase that got me where I
+        wanted was "detect rendered line breaks". That got me two relevant
+        results, a
+        <a
+          href="https://stackoverflow.com/questions/55604798/find-rendered-line-breaks-with-javascript/55605049#55605049"
+          target="_blank"
+          >StackOverflow answer</a
+        >
+        and a
+        <a
+          href="https://www.bennadel.com/blog/4310-detecting-rendered-line-breaks-in-a-text-node-in-javascript.htm"
+          target="_blank"
+          >blog post</a
+        >. The solutions were similar to each other, and similar to my approach
+        as well. They also shared a limitation that they relied on the
+        assumption that the element in question was only filled with text nodes.
+        This highlighted a difference from my approach. I wanted to achieve a
+        similar, but more complex goal, by supporting more complex DOM trees.
+        But, it also highlighted a path for me. I could start by achieving their
+        simpler task of traversing a single linear text node before traversing a
+        more complex DOM.
+      </aside>
+
+      <aside>
+        I discovered an API description which fascinated me.
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/API/Range/detach"
+          target="_blank"
+          ><code>Range:detach()</code></a
+        >
+        "does nothing."
+      </aside>
+      <aside>
+        I started reading the
+        <a
+          href="https://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html"
+          target="_blank"
+          >DOM spec on ranges and the Range API</a
+        >
+      </aside>
+      <aside>
+        I recognized this challenge in my concept for a solution. I was
+        depending on the height of a range changing. But how much change? For
+        example, in a simple case I was imagining a strict doubling of the
+        height to signal a new line. But if I extended the range into a span
+        with a different font size, for example, then the height might change by
+        a small amount. I wasn't sure how to account for this.
+      </aside>
+      <p>
+        Once I could show a range surrounding a rendered line, I felt my
+        solution was theoretically sound. I wasn't convinced that it was
+        practically sound because I hadn't tested every edge case exhaustively.
+        I could imagine a lot of edge cases, like:
+      </p>
+
+      <ol>
+        <li>Arbitrarily nested DOM elements near the rendered line break</li>
+        <li>Different font sizes within a rendered line</li>
+        <li>
+          Different box model adjustments like vertical padding within a
+          rendered line
+        </li>
+      </ol>
+      <p>
+        With that many edge cases which I could imagine, I guessed there were
+        many more edge cases I failed to imagine waiting just around the corner.
+        With known unknowns and unknown unknowns lurking, I could spend a lot of
+        time trying to achieve that basic selection example for as many
+        real-world cases as possible. Instead of spending that time, with a
+        theoretical win under my belt, I decided to press forward to see my
+        immediate goal functional. So, if you
+        <button
+          data-js="press this to make an inset appear beneath this visual line"
+        >
+          press this button
+        </button>
+        a new inset should appear beneath the current visual line. And that
+        visual line should not change at all. The Range API only has an
+        <code>insertNode</code> at the start, not at the end. Luckily this
+        <a href="https://stackoverflow.com/a/65357587" target="_blank"
+          >StackOverflow answer</a
+        >
+        presents an elegant solution to collapse the Range to its end, to make
+        its start and end the same. Oh, and you should be able to
+        <button
+          data-js="press this to make an inset appear above this visual line"
+        >
+          press this button
+        </button>
+        to make a new inset appear above this visual line! The solutions for
+        above and below should be exactly the same. As I wrote this, I only
+        imagined a use-case for creating a new inset beneath the current line,
+        but since they were so similar, it wasn't much effort to achieve both at
+        the same time.
+      </p>
+
+      <script type="text/javascript">
+        {
+          const button = document.querySelector(
+            '[data-js="press this to make an inset appear beneath this visual line"]',
+          );
+          let count = 0;
+          button.addEventListener("click", () => {
+            let range = document.createRange();
+            range.selectNode(button);
+            range = extendRangeToEndOfVisualLine(range);
+            range.collapse(false); // Sets start to equal end
+            const blockquote = document.createElement("blockquote");
+            blockquote.innerText = `Underneath it all, I'm really lucky. Underneath it all, you're really lovely. - Gwen Stefani (punctuation added) (#${++count})`;
+            if (
+              range.startContainer instanceof HTMLElement &&
+              range.startOffset === 0
+            ) {
+              // The range is at the beginning of another element, so insert before that instead of after the start of the range
+              range.startContainer.parentElement.insertBefore(
+                blockquote,
+                range.startContainer,
+              );
+            } else {
+              range.insertNode(blockquote);
+            }
+          });
+        }
+      </script>
+
+      <script type="text/javascript">
+        {
+          const button = document.querySelector(
+            '[data-js="press this to make an inset appear above this visual line"]',
+          );
+          let count = 0;
+          button.addEventListener("click", () => {
+            let range = document.createRange();
+            range.selectNode(button);
+            range = extendRangeToStartOfVisualLine(range);
+            const blockquote = document.createElement("blockquote");
+            blockquote.innerText = `First there is a mountain, then there is no mountain, then there is - Donovan (#${++count})`;
+            range.insertNode(blockquote);
+          });
+        }
+      </script>
+
+      <aside>
+        One caveat I found was that my functions seemed to work differently if I
+        started with <code>range.selectNode(button)</code> versus
+        <code>range.selectNodeContents(button)</code>. I thought these two
+        should work exactly the same since my DOM traversal algorithm had to
+        navigate outside wherever the selection began. So that signaled a bug in
+        the traversal code.
+      </aside>
+
+      <aside>
+        I immediately ran into an edge case. After inserting one block DOM node
+        after the current visual line, doing the same thing again erred. When I
+        tried to insert a second DOM node in the same position, my algorithm
+        actually inserted it inside the first one I inserted! This was because
+        my algorithm moved the <code>endContainer</code> of the range beyond the
+        line. A quick fix for this was to detect if after applying my algorithm
+        if the <code>endContainer</code> was at the beginning of an
+        <code>HTMLElement</code> and insert before that instead if so.
+      </aside>
+
+      <aside>
+        Interestingly, when I changed the body text to
+        <code>text-align: justify;</code>, that messed with the strategy. The
+        strategy still worked, but the text itself reflowed after the change.
+        When I went to figure out why, I found there was a similar value,
+        <code> text-align: justify-all;</code> that expressly fixed this issue.
+        All the <code>-all</code> suffix does is "also force the last line to be
+        justified." But,
+        <a href="https://stackoverflow.com/a/43427301" target="_blank"
+          >as this StackOverflow answer shows</a
+        >
+        it's completely unsupported. Luckily that same answer points to the
+        property <code>test-align-last</code>, which works perfectly on Chrome.
+        I'll need to test on other browsers. Unfortunately, it looks really bad
+        when the last visual line only has a few words. They get spread out
+        along the entire line. I can see why this is an uncommon strategy! So I
+        considered changing my strategy to, when interjecting an inset, if the
+        wrapper that I'm interjecting within is set to
+        <code>text-align: justify</code>, to then also set
+        <code>text-align-last: justify</code>, to preserve the spacing of the
+        last line.
+      </aside>
+      <aside>
+        Talk about the <code>heightChangeFactor</code> and what it means for the
+        ease of use of this technique.
+      </aside>
+    </article>
+  </body>
+</html>
