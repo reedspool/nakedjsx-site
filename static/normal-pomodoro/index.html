@@ -1,0 +1,163 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Totally Normal Pomodoro Clock</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css-1.8.1.min.css"
+    />
+
+    <!-- favicons from https://favicon.io/emoji-favicons/tomato  -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="site.webmanifest" />
+  </head>
+
+  <body>
+    <p>
+      Normal
+      <a href="https://en.wikipedia.org/wiki/Pomodoro_Technique" target="_blank"
+        >Pomodoro Timer</a
+      >.
+    </p>
+
+    <p title="How much time is left on the timer">25:00</p>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        let time = Date.now();
+        let millisPerMinute = 1000 * 60;
+        let millisecondsDuration = millisPerMinute * 25; // 25 minutes
+        let display = document.querySelector(
+          '[title="How much time is left on the timer"]',
+        );
+        let explainer = document.querySelector(
+          '[title="An explanation of the devious nature of this site"]',
+        );
+        let seenSinceLastMeddling = true;
+
+        // List of tuples of stuff that can happen, weighted. Each
+        // weight is out of the total of all weights, so the numbers are
+        // arbitrary other than with respect to the rest in the list
+        const outcomes = [
+          [
+            1,
+            () => {
+              time -= millisPerMinute;
+            },
+          ],
+          [
+            1,
+            () => {
+              time += millisPerMinute * 0.5;
+            },
+          ],
+          [
+            1,
+            () => {
+              time += millisPerMinute * 0.5;
+            },
+          ],
+          [
+            1,
+            () => {
+              explainer.style.display =
+                explainer.style.display === "none" ? "initial" : "none";
+            },
+          ],
+          [
+            8,
+            () => {
+              /* noop, nothing happens */
+            },
+          ],
+        ];
+
+        function update() {
+          const now = Date.now();
+          const elapsed = now - time;
+          const remaining = millisecondsDuration - elapsed;
+          const remainingMinutes = Math.floor(remaining / millisPerMinute);
+          const remainingSeconds = Math.floor((remaining / 1000) % 60);
+          requestAnimationFrame(() => {
+            display.innerText = `${remainingMinutes}:${String(
+              remainingSeconds,
+            ).padStart(2, "0")}`;
+          });
+
+          setTimeout(update, 16);
+        }
+        update();
+
+        document.addEventListener("visibilitychange", () => {
+          console.log(`Visibility change - ${document.visibilityState}`);
+
+          switch (document.visibilityState) {
+            case "hidden":
+              if (seenSinceLastMeddling) {
+                seenSinceLastMeddling = false;
+                // Meddle
+                const roll = Math.random();
+
+                let totalWeight = 0;
+                for (let i = 0; i < outcomes.length; i++) {
+                  const [weight] = outcomes[i];
+                  totalWeight += weight;
+                }
+
+                let accumuluatedWeightNormalized = 0;
+                for (let i = 0; i < outcomes.length; i++) {
+                  const [currentWeight, effect] = outcomes[i];
+                  const currentWeightNormalized = currentWeight / totalWeight;
+                  console.log({
+                    currentWeightNormalized,
+                    currentWeight,
+                    totalWeight,
+                    accumuluatedWeightNormalized,
+                    roll,
+                  });
+                  if (
+                    roll >= accumuluatedWeightNormalized &&
+                    roll <=
+                      accumuluatedWeightNormalized + currentWeightNormalized
+                  ) {
+                    console.log(`Executing ${effect.toString()}`);
+                    effect();
+                    break;
+                  }
+                  accumuluatedWeightNormalized += currentWeightNormalized;
+                }
+              }
+              break;
+            case "visible":
+              seenSinceLastMeddling = true;
+              break;
+            default:
+              console.error(
+                `Unexpected visibility state: '${document.visibilityState}'`,
+              );
+          }
+        });
+      });
+    </script>
+
+    <p
+      title="An explanation of the devious nature of this site"
+      style="display: none"
+    >
+      Okay but it's not really normal. Actually, it gaslights you. When you
+      somehow hide this page, detected via the
+      <a
+        href="https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API"
+        target="_blank"
+        >Page Visibility API</a
+      >, the time remaining may or may not be changed on you.
+    </p>
+  </body>
+</html>
