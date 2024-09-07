@@ -45,7 +45,8 @@
     "project-creative-coding-5-15-24---give-the-devil-his-due": "project-creative-coding-5-15-24---give-the-devil-his-due.html",
     "project-javascript-keyword-new": "project-javascript-keyword-new.html",
     "article-html-considered-simple": "article-html-considered-simple.html",
-    "performance-with-hydra": "performance-with-hydra.html"
+    "performance-with-hydra": "performance-with-hydra.html",
+    "project-write-every-change-in-emacs-buffer-to-disk": "project-write-every-change-in-emacs-buffer-to-disk.html"
   },
   "slugsToHashes": {
     "project-improve-this-website": [
