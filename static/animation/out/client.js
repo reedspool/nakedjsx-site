@@ -1,3 +1,7 @@
+// emacs-colors.json
+var foreground = "#FFB8D1";
+var background = "#5a5475";
+
 // client.ts
 var setCanvasDimensions = function() {
   let clientRect = canvas.getBoundingClientRect();
@@ -19,10 +23,10 @@ var circle = function({ x, y, radius }) {
   c.fill();
 };
 var setup = function() {
-  c.fillStyle = "#282828";
+  c.fillStyle = background;
   c.fillRect(0, 0, d.width, d.height);
-  numSegments = 80;
-  const radius = d.width / numSegments / 1 - 1;
+  numSegments = 40;
+  const radius = d.width / numSegments / 3 - 1;
   segments = Array(numSegments).fill(null).map((_, i) => ({
     x: 40 + d.width / numSegments * i + radius + 1,
     y: d.center.y,
@@ -36,7 +40,7 @@ var setup = function() {
   };
 };
 var draw = function() {
-  c.fillStyle = "rgba(0, 0, 0, 0.001)";
+  c.fillStyle = background;
   c.fillRect(0, 0, d.width, d.height);
   c.strokeStyle = "white";
   c.fillStyle = "white";
@@ -61,7 +65,7 @@ var draw = function() {
       nextDirection = atan2(d.center.y - head.y, d.center.x - head.x);
     }
     head.direction = circularLerp(head.direction, nextDirection, 0.02);
-    const speed = 8;
+    const speed = 2;
     head.x += cos(head.direction) * speed;
     head.y += sin(head.direction) * speed;
   }
@@ -75,7 +79,7 @@ var draw = function() {
     const other = last2.y - current.y;
     const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
     const angle = atan2(other, adjacent);
-    const moveDistance = hypoteneuse - (last2.radius + current.radius) * 0.3;
+    const moveDistance = hypoteneuse - (last2.radius + current.radius) * segmentSpread;
     current.x += cos(angle) * moveDistance;
     current.y += sin(angle) * moveDistance;
   }
@@ -163,32 +167,36 @@ var draw = function() {
       circle({ x, y, radius: 5 });
     });
   }
-  const now = Date.now();
-  for (let index = 1;index < skinPoints.length; index++) {
-    const last2 = skinPoints[index - 1];
-    const current = skinPoints[index];
-    const i = index / skinPoints.length;
-    const t = (cos(TAO * now / 2000) + 1) / 2;
-    c.beginPath();
-    c.moveTo(last2.x, last2.y);
-    c.strokeStyle = `rgba(${floor(i * 255)}, ${floor(t * 255)}, ${floor(floor(255 - i * 255))}, 1)`;
-    c.lineTo(current.x, current.y);
-    c.stroke();
-  }
-  {
-    const last2 = skinPoints.at(-1);
-    const first2 = skinPoints.at(0);
-    c.beginPath();
-    c.moveTo(last2.x, last2.y);
-    c.lineTo(first2.x, first2.y);
-    c.stroke();
-    c.closePath();
+  if (SHOW_SKIN) {
+    const now = Date.now();
+    for (let index = 1;index < skinPoints.length; index++) {
+      const last2 = skinPoints[index - 1];
+      const current = skinPoints[index];
+      const i = index / skinPoints.length;
+      const t = (cos(TAO * now / 2000) + 1) / 2;
+      c.beginPath();
+      c.moveTo(last2.x, last2.y);
+      c.strokeStyle = foreground;
+      c.lineTo(current.x, current.y);
+      c.stroke();
+    }
+    {
+      const last2 = skinPoints.at(-1);
+      const first2 = skinPoints.at(0);
+      c.beginPath();
+      c.moveTo(last2.x, last2.y);
+      c.lineTo(first2.x, first2.y);
+      c.stroke();
+      c.closePath();
+    }
   }
   requestAnimationFrame(draw);
 };
-var SHOW_HEAD = false;
-var SHOW_SEGMENTS = false;
+var SHOW_HEAD = true;
+var segmentSpread = 1;
+var SHOW_SEGMENTS = true;
 var SHOW_SKIN_POINTS = false;
+var SHOW_SKIN = false;
 var { PI, cos, sin, sqrt, atan2, abs, min, floor } = Math;
 var TAO = PI * 2;
 var PHI = 1.618033988749895;

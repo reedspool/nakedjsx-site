@@ -70,7 +70,7 @@ console.log(`Server running at ${url}`);
 const watcher = watch(import.meta.dir, async (event, filename) => {
     console.log(`File watcher detected ${event} in ${filename}`);
     if (filename === "index.ts") return;
-    if (filename === "client.ts") {
+    if (filename === "client.ts" || filename === "emacs-colors.json") {
         // TODO: Feels like there's a possible race condition where watcher
         //       fires this callback again while the build occurs.
         await buildClientAndSetupClientText();

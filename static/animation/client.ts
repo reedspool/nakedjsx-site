@@ -1,6 +1,9 @@
-const SHOW_HEAD = false;
-const SHOW_SEGMENTS = false;
+import { foreground, background } from "./emacs-colors.json";
+const SHOW_HEAD = true;
+const segmentSpread = 1;
+const SHOW_SEGMENTS = true;
 const SHOW_SKIN_POINTS = false;
+const SHOW_SKIN = false;
 const { PI, cos, sin, sqrt, atan2, abs, min, floor } = Math;
 const TAO = PI * 2;
 const PHI = 1.618033988749895;
@@ -72,10 +75,10 @@ let mouseY: number;
 let controllingWithMouse = false;
 let head: Circle & { direction: number };
 function setup() {
-    c.fillStyle = "#282828"; // TODO Get calculated body font color
+    c.fillStyle = background; // TODO Get calculated body font color
     c.fillRect(0, 0, d.width, d.height);
-    numSegments = 80;
-    const radius = d.width / numSegments / 1 - 1;
+    numSegments = 40;
+    const radius = d.width / numSegments / 3 - 1;
     segments = Array(numSegments)
         .fill(null)
         .map((_, i) => ({
@@ -91,8 +94,8 @@ function setup() {
     };
 }
 function draw() {
-    c.fillStyle = "rgba(0, 0, 0, 0.001)"; // TODO Get calculated body font color
-    // c.fillStyle = "#282828"; // TODO Get calculated body font color
+    // c.fillStyle = "rgba(0, 0, 0, 0.001)"; // TODO Get calculated body font color
+    c.fillStyle = background; // TODO Get calculated body font color
     c.fillRect(0, 0, d.width, d.height);
     c.strokeStyle = "white"; // TODO Get calculated body font color
     c.fillStyle = "white"; // TODO Get calculated body font color
@@ -140,7 +143,7 @@ function draw() {
 
         head.direction = circularLerp(head.direction, nextDirection, 0.02);
 
-        const speed = 8;
+        const speed = 2;
         // Advance
         head.x += cos(head.direction) * speed;
         head.y += sin(head.direction) * speed;
@@ -160,7 +163,8 @@ function draw() {
         const other = last.y - current.y;
         const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
         const angle = atan2(other, adjacent);
-        const moveDistance = hypoteneuse - (last.radius + current.radius) * 0.3;
+        const moveDistance =
+            hypoteneuse - (last.radius + current.radius) * segmentSpread;
 
         current.x += cos(angle) * moveDistance;
         current.y += sin(angle) * moveDistance;
@@ -278,30 +282,33 @@ function draw() {
         });
     }
 
-    const now = Date.now();
-    for (let index = 1; index < skinPoints.length; index++) {
-        const last = skinPoints[index - 1];
-        const current = skinPoints[index];
-        const i = index / skinPoints.length;
-        const t = (cos((TAO * now) / 2000) + 1) / 2;
+    if (SHOW_SKIN) {
+        const now = Date.now();
+        for (let index = 1; index < skinPoints.length; index++) {
+            const last = skinPoints[index - 1];
+            const current = skinPoints[index];
+            const i = index / skinPoints.length;
+            const t = (cos((TAO * now) / 2000) + 1) / 2;
 
-        c.beginPath();
-        c.moveTo(last.x, last.y);
-        c.strokeStyle = `rgba(${floor(i * 255)}, ${floor(t * 255)}, ${floor(
-            floor(255 - i * 255),
-        )}, 1)`;
-        c.lineTo(current.x, current.y);
-        c.stroke();
-    }
+            c.beginPath();
+            c.moveTo(last.x, last.y);
+            c.strokeStyle = foreground;
+            // c.strokeStyle = `rgba(${floor(i * 255)}, ${floor(t * 255)}, ${floor(
+            //     floor(255 - i * 255),
+            // )}, 1)`;
+            c.lineTo(current.x, current.y);
+            c.stroke();
+        }
 
-    {
-        const last = skinPoints.at(-1)!;
-        const first = skinPoints.at(0)!;
-        c.beginPath();
-        c.moveTo(last.x, last.y);
-        c.lineTo(first.x, first.y);
-        c.stroke();
-        c.closePath();
+        {
+            const last = skinPoints.at(-1)!;
+            const first = skinPoints.at(0)!;
+            c.beginPath();
+            c.moveTo(last.x, last.y);
+            c.lineTo(first.x, first.y);
+            c.stroke();
+            c.closePath();
+        }
     }
 
     requestAnimationFrame(draw);
