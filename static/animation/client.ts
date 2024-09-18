@@ -1,7 +1,7 @@
 import { foreground, background } from "./emacs-colors.json";
-const SHOW_HEAD = true;
-const segmentSpread = 1;
-const SHOW_SEGMENTS = true;
+const SHOW_HEAD = false;
+const segmentSpread = 0.3;
+const SHOW_SEGMENTS = false;
 const SHOW_SKIN_POINTS = false;
 const SHOW_SKIN = false;
 const { PI, cos, sin, sqrt, atan2, abs, min, floor } = Math;
@@ -74,6 +74,15 @@ let mouseX: number;
 let mouseY: number;
 let controllingWithMouse = false;
 let head: Circle & { direction: number };
+
+type Bone = {
+    top: Point;
+    bottom: Point;
+};
+let bones: Array<Bone>;
+let boneSets: Array<typeof bones>;
+let numBones: number;
+let boneLength: number;
 function setup() {
     c.fillStyle = background; // TODO Get calculated body font color
     c.fillRect(0, 0, d.width, d.height);
@@ -92,6 +101,26 @@ function setup() {
         radius: radius * PHI,
         direction: TAO / -8,
     };
+
+    // Second creature
+    numBones = 10;
+    boneLength = 40;
+    boneSets = [];
+    for (let i = 0; i < 10; i++) {
+        bones = Array(numBones)
+            .fill(null)
+            .map((_, i) => ({
+                top: {
+                    x: (i / numBones) * d.width,
+                    y: (i / numBones) * d.height,
+                },
+                bottom: {
+                    x: (i / numBones) * d.width + boneLength,
+                    y: (i / numBones) * d.height + 0,
+                },
+            }));
+        boneSets.push(bones);
+    }
 }
 function draw() {
     // c.fillStyle = "rgba(0, 0, 0, 0.001)"; // TODO Get calculated body font color
@@ -311,6 +340,124 @@ function draw() {
         }
     }
 
+    //
+    // SECOND CREATURE
+    //
+
+    for (let k = 0; k < boneSets.length; k++) {
+        bones = boneSets[k];
+        for (let j = 0; j < 10; j++) {
+            // FORWARDS
+            const firstBone = bones[0];
+            firstBone.top.x = lerp(
+                firstBone.top.x,
+                (head.x + k * 13097) % d.width,
+                0.07,
+            );
+            firstBone.top.y = lerp(
+                firstBone.top.y,
+                (head.y + k * 13097) % d.height,
+                0.07,
+            );
+            firstBone.bottom.x = lerp(firstBone.top.x, head.x, 0.002);
+            firstBone.bottom.y = lerp(firstBone.top.y, head.y, 0.002);
+
+            // Every bone follows the previous one
+            for (let i = 1; i < bones.length; i++) {
+                let lastBone = bones[i - 1];
+                let currentBone = bones[i];
+                let last = lastBone.bottom;
+                let currentTop = currentBone.top;
+                let currentBottom = currentBone.bottom;
+
+                const originalAdjacent = currentBottom.x - currentTop.x;
+                const originalOther = currentBottom.y - currentTop.y;
+                const originalBoneLength = sqrt(
+                    originalAdjacent ** 2 + originalOther ** 2,
+                );
+                {
+                    const adjacent = last.x - currentTop.x;
+                    const other = last.y - currentTop.y;
+                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+                    const angle = atan2(other, adjacent);
+                    const moveDistance = hypoteneuse - 10;
+
+                    currentTop.x += cos(angle) * moveDistance;
+                    currentTop.y += sin(angle) * moveDistance;
+                }
+
+                {
+                    const adjacent = currentBottom.x - currentTop.x;
+                    const other = currentBottom.y - currentTop.y;
+                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+                    const angle = atan2(other, adjacent);
+                    const moveDistance = originalBoneLength - hypoteneuse;
+
+                    currentBottom.x += cos(angle) * moveDistance;
+                    currentBottom.y += sin(angle) * moveDistance;
+                }
+            }
+
+            // BACKWARDS
+
+            const lastBone = bones.at(-1);
+            lastBone.bottom.x = lerp(lastBone.bottom.x, d.width / 2, 0.07);
+            lastBone.bottom.y = lerp(lastBone.bottom.y, d.height / 2, 0.07);
+            lastBone.top.x = lerp(lastBone.bottom.x, head.x, 0.002);
+            lastBone.top.y = lerp(lastBone.bottom.y, head.y, 0.002);
+
+            // Every bone follows the previous one
+            for (let i = bones.length - 2; i >= 0; i--) {
+                let lastBone = bones[i + 1];
+                let currentBone = bones[i];
+                let last = lastBone.top;
+                let currentBottom = currentBone.bottom;
+                let currentTop = currentBone.top;
+
+                const originalAdjacent = currentTop.x - currentBottom.x;
+                const originalOther = currentTop.y - currentBottom.y;
+                const originalBoneLength = sqrt(
+                    originalAdjacent ** 2 + originalOther ** 2,
+                );
+                {
+                    const adjacent = last.x - currentBottom.x;
+                    const other = last.y - currentBottom.y;
+                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+                    const angle = atan2(other, adjacent);
+                    const moveDistance = hypoteneuse - 10;
+
+                    currentBottom.x += cos(angle) * moveDistance;
+                    currentBottom.y += sin(angle) * moveDistance;
+                }
+
+                {
+                    const adjacent = currentTop.x - currentBottom.x;
+                    const other = currentTop.y - currentBottom.y;
+                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+                    const angle = atan2(other, adjacent);
+                    const moveDistance = originalBoneLength - hypoteneuse;
+
+                    currentTop.x += cos(angle) * moveDistance;
+                    currentTop.y += sin(angle) * moveDistance;
+                }
+            }
+        }
+
+        for (let i = 0; i < bones.length; i++) {
+            const { top, bottom } = bones[i];
+            c.beginPath();
+            c.moveTo(top.x, top.y);
+            // c.strokeStyle = foreground;
+            c.strokeStyle = `rgba(${floor(i * 255)}, 128, ${floor(
+                floor(255 - i * 255),
+            )}, 1)`;
+            c.fillStyle = c.strokeStyle;
+            c.lineWidth = i * PHI;
+            c.lineTo(bottom.x, bottom.y);
+            c.stroke();
+        }
+    }
+    circle({ x: d.width / 2, y: d.height / 2, radius: 50 });
     requestAnimationFrame(draw);
 }
 

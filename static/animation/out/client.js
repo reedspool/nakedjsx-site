@@ -38,6 +38,22 @@ var setup = function() {
     radius: radius * PHI,
     direction: TAO / -8
   };
+  numBones = 10;
+  boneLength = 40;
+  boneSets = [];
+  for (let i = 0;i < 10; i++) {
+    bones = Array(numBones).fill(null).map((_, i2) => ({
+      top: {
+        x: i2 / numBones * d.width,
+        y: i2 / numBones * d.height
+      },
+      bottom: {
+        x: i2 / numBones * d.width + boneLength,
+        y: i2 / numBones * d.height + 0
+      }
+    }));
+    boneSets.push(bones);
+  }
 };
 var draw = function() {
   c.fillStyle = background;
@@ -190,11 +206,93 @@ var draw = function() {
       c.closePath();
     }
   }
+  for (let k = 0;k < boneSets.length; k++) {
+    bones = boneSets[k];
+    for (let j = 0;j < 10; j++) {
+      const firstBone = bones[0];
+      firstBone.top.x = lerp(firstBone.top.x, (head.x + k * 13097) % d.width, 0.07);
+      firstBone.top.y = lerp(firstBone.top.y, (head.y + k * 13097) % d.height, 0.07);
+      firstBone.bottom.x = lerp(firstBone.top.x, head.x, 0.002);
+      firstBone.bottom.y = lerp(firstBone.top.y, head.y, 0.002);
+      for (let i = 1;i < bones.length; i++) {
+        let lastBone2 = bones[i - 1];
+        let currentBone = bones[i];
+        let last2 = lastBone2.bottom;
+        let currentTop = currentBone.top;
+        let currentBottom = currentBone.bottom;
+        const originalAdjacent = currentBottom.x - currentTop.x;
+        const originalOther = currentBottom.y - currentTop.y;
+        const originalBoneLength = sqrt(originalAdjacent ** 2 + originalOther ** 2);
+        {
+          const adjacent = last2.x - currentTop.x;
+          const other = last2.y - currentTop.y;
+          const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+          const angle = atan2(other, adjacent);
+          const moveDistance = hypoteneuse - 10;
+          currentTop.x += cos(angle) * moveDistance;
+          currentTop.y += sin(angle) * moveDistance;
+        }
+        {
+          const adjacent = currentBottom.x - currentTop.x;
+          const other = currentBottom.y - currentTop.y;
+          const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+          const angle = atan2(other, adjacent);
+          const moveDistance = originalBoneLength - hypoteneuse;
+          currentBottom.x += cos(angle) * moveDistance;
+          currentBottom.y += sin(angle) * moveDistance;
+        }
+      }
+      const lastBone = bones.at(-1);
+      lastBone.bottom.x = lerp(lastBone.bottom.x, d.width / 2, 0.07);
+      lastBone.bottom.y = lerp(lastBone.bottom.y, d.height / 2, 0.07);
+      lastBone.top.x = lerp(lastBone.bottom.x, head.x, 0.002);
+      lastBone.top.y = lerp(lastBone.bottom.y, head.y, 0.002);
+      for (let i = bones.length - 2;i >= 0; i--) {
+        let lastBone2 = bones[i + 1];
+        let currentBone = bones[i];
+        let last2 = lastBone2.top;
+        let currentBottom = currentBone.bottom;
+        let currentTop = currentBone.top;
+        const originalAdjacent = currentTop.x - currentBottom.x;
+        const originalOther = currentTop.y - currentBottom.y;
+        const originalBoneLength = sqrt(originalAdjacent ** 2 + originalOther ** 2);
+        {
+          const adjacent = last2.x - currentBottom.x;
+          const other = last2.y - currentBottom.y;
+          const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+          const angle = atan2(other, adjacent);
+          const moveDistance = hypoteneuse - 10;
+          currentBottom.x += cos(angle) * moveDistance;
+          currentBottom.y += sin(angle) * moveDistance;
+        }
+        {
+          const adjacent = currentTop.x - currentBottom.x;
+          const other = currentTop.y - currentBottom.y;
+          const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+          const angle = atan2(other, adjacent);
+          const moveDistance = originalBoneLength - hypoteneuse;
+          currentTop.x += cos(angle) * moveDistance;
+          currentTop.y += sin(angle) * moveDistance;
+        }
+      }
+    }
+    for (let i = 0;i < bones.length; i++) {
+      const { top, bottom } = bones[i];
+      c.beginPath();
+      c.moveTo(top.x, top.y);
+      c.strokeStyle = `rgba(${floor(i * 255)}, 128, ${floor(floor(255 - i * 255))}, 1)`;
+      c.fillStyle = c.strokeStyle;
+      c.lineWidth = i * PHI;
+      c.lineTo(bottom.x, bottom.y);
+      c.stroke();
+    }
+  }
+  circle({ x: d.width / 2, y: d.height / 2, radius: 50 });
   requestAnimationFrame(draw);
 };
-var SHOW_HEAD = true;
-var segmentSpread = 1;
-var SHOW_SEGMENTS = true;
+var SHOW_HEAD = false;
+var segmentSpread = 0.3;
+var SHOW_SEGMENTS = false;
 var SHOW_SKIN_POINTS = false;
 var SHOW_SKIN = false;
 var { PI, cos, sin, sqrt, atan2, abs, min, floor } = Math;
@@ -214,6 +312,10 @@ var mouseX;
 var mouseY;
 var controllingWithMouse = false;
 var head;
+var bones;
+var boneSets;
+var numBones;
+var boneLength;
 canvas.addEventListener("mousemove", ({ clientX, clientY }) => {
   mouseX = clientX;
   mouseY = clientY;
