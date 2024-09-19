@@ -1,4 +1,4 @@
-export const { PI, cos, sin, sqrt, atan2, abs, floor, min, max } = Math;
+export const { PI, cos, sin, sqrt, atan2, abs, floor, min, max, random } = Math;
 export const TAO = PI * 2;
 export const PHI = 1.618033988749895;
 export const lerp = (v0: number, v1: number, t: number) => v0 + t * (v1 - v0);
@@ -48,3 +48,47 @@ export const generateArray: <T>(
         .map((_, index) => {
             return callback({ index, fraction: index / n });
         });
+
+export const randInt = (max: number) => Math.floor(Math.random() * max);
+export const randIntBetween = (min: number, max: number) =>
+    randInt(max - min) + min;
+export const randFrom = (array: unknown[]) => array[randInt(array.length)];
+export const clamp = (n: number, min: number, max: number) =>
+    Math.min(max, Math.max(n, min));
+
+export const wait = (millis: number) =>
+    new Promise((resolve) => setTimeout(resolve, millis));
+
+export const complexStringify = (object: unknown) =>
+    JSON.stringify(
+        object,
+        function replacer(_key, value) {
+            if (value instanceof Map) {
+                return {
+                    dataType: "Map",
+                    value: Array.from(value.entries()),
+                };
+            } else if (value instanceof Set) {
+                return {
+                    dataType: "Set",
+                    value: Array.from(value.entries()),
+                };
+            } else {
+                return value;
+            }
+        },
+        2,
+    );
+
+// From https://stackoverflow.com/a/12646864
+export function shuffle<T>(array: T[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+export function shuffleCopy<T>(array: T[]) {
+    const copy = [...array];
+    shuffle(copy);
+    return copy;
+}

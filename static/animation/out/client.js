@@ -1,9 +1,8 @@
 // emacs-colors.json
-var foreground = "#FFB8D1";
 var background = "#6A6483";
 
 // utilities.ts
-var { PI, cos, sin, sqrt, atan2, abs, floor, min, max } = Math;
+var { PI, cos, sin, sqrt, atan2, abs, floor, min, max, random } = Math;
 var TAO = PI * 2;
 var PHI = 1.618033988749895;
 var lerp = (v0, v1, t) => v0 + t * (v1 - v0);
@@ -52,14 +51,14 @@ var setup = function() {
     y: d.center.y,
     radius
   }));
-  const { x, y } = snake.at(0);
-  head = {
-    x,
-    y,
+  const numAppendages = 16;
+  heads = generateArray(numAppendages, ({ fraction }) => ({
+    x: fraction * random() * d.width,
+    y: fraction * random() * d.height,
     radius: radius * PHI,
-    direction: TAO / -8
-  };
-  appendages = generateArray(16, () => generateArray(40, ({ fraction }) => ({
+    direction: TAO * random()
+  }));
+  appendages = generateArray(numAppendages, () => generateArray(40, ({ fraction }) => ({
     top: {
       x: fraction * d.width,
       y: fraction * d.height
@@ -71,42 +70,44 @@ var setup = function() {
   })));
 };
 var draw = function() {
-  c.fillStyle = background;
+  c.fillStyle = `hsla(${i++ % 360}, 50%, 50%, 0.005)`;
   c.fillRect(0, 0, d.width, d.height);
   c.strokeStyle = "white";
   c.fillStyle = "white";
-  const prevHead = { ...head };
-  let nextDirection = head.direction;
-  if (controllingWithMouse) {
-    head.x = mouseX ?? head.x;
-    head.y = mouseY ?? head.y;
-    if (abs(head.x - prevHead.x) > 0.0001 && abs(head.y - prevHead.y) > 0.0001) {
-      nextDirection = atan2(head.y - prevHead.y, head.x - prevHead.x);
-      head.direction = circularLerp(head.direction, nextDirection, 0.6);
+  heads.forEach((head) => {
+    const prevHead = { ...head };
+    let nextDirection = head.direction;
+    if (controllingWithMouse) {
+      head.x = mouseX ?? head.x;
+      head.y = mouseY ?? head.y;
+      if (abs(head.x - prevHead.x) > 0.0001 && abs(head.y - prevHead.y) > 0.0001) {
+        nextDirection = atan2(head.y - prevHead.y, head.x - prevHead.x);
+        head.direction = circularLerp(head.direction, nextDirection, 0.6);
+      }
+    } else {
+      const wayOut = -80;
+      const margin = 40;
+      if (d.width - head.x < wayOut || d.height - head.y < wayOut || head.x < wayOut || head.y < wayOut) {
+        head.x = d.center.x;
+        head.y = d.center.y;
+        nextDirection = Math.random() * TAO;
+        head.direction = nextDirection;
+      } else if (d.width - head.x < margin || d.height - head.y < margin || head.x < margin || head.y < margin) {
+        nextDirection = atan2(d.center.y - head.y, d.center.x - head.x);
+      }
+      head.direction = circularLerp(head.direction, nextDirection, 0.02);
+      const speed = 2;
+      head.x += cos(head.direction) * speed;
+      head.y += sin(head.direction) * speed;
     }
-  } else {
-    const wayOut = -80;
-    const margin = 40;
-    if (d.width - head.x < wayOut || d.height - head.y < wayOut || head.x < wayOut || head.y < wayOut) {
-      head.x = d.center.x;
-      head.y = d.center.y;
-      nextDirection = Math.random() * TAO;
-      head.direction = nextDirection;
-    } else if (d.width - head.x < margin || d.height - head.y < margin || head.x < margin || head.y < margin) {
-      nextDirection = atan2(d.center.y - head.y, d.center.x - head.x);
-    }
-    head.direction = circularLerp(head.direction, nextDirection, 0.02);
-    const speed = 2;
-    head.x += cos(head.direction) * speed;
-    head.y += sin(head.direction) * speed;
-  }
-  followPoint(snake.at(0), head, 0.07);
+  });
+  followPoint(snake.at(0), heads[0], 0.07);
   forEachCurrentAndLast(snake, ({ last: last2, current, index: i }) => {
     constrainDistance(last2, current, last2.radius + current.radius, SEGMENT_SPREAD);
   });
   let skinPoints = [];
   const first = snake.at(0);
-  const directionToHead = atan2(head.y - first.y, head.x - first.x);
+  const directionToHead = atan2(heads[0].y - first.y, heads[0].x - first.x);
   const increment = TAO / 16;
   const cheekCount = 5;
   for (let i = 0;i < cheekCount; i++) {
@@ -162,16 +163,18 @@ var draw = function() {
       y: last.y + sin(i) * last.radius
     });
   }
-  if (SHOW_HEAD) {
-    c.fillStyle = "rgba(255, 255, 255, 0.2)";
-    circle({ ...head });
-    c.strokeStyle = "tomato";
-    c.lineWidth = 3;
-    c.lineCap = "round";
-    c.beginPath();
-    c.moveTo(head.x, head.y);
-    c.lineTo(head.x + cos(head.direction) * PHI * head.radius, head.y + sin(head.direction) * PHI * head.radius);
-    c.stroke();
+  if (SHOW_HEADS) {
+    heads.forEach((head) => {
+      c.fillStyle = "rgba(255, 255, 255, 0.2)";
+      circle({ ...head });
+      c.strokeStyle = "tomato";
+      c.lineWidth = 3;
+      c.lineCap = "round";
+      c.beginPath();
+      c.moveTo(head.x, head.y);
+      c.lineTo(head.x + cos(head.direction) * PHI * head.radius, head.y + sin(head.direction) * PHI * head.radius);
+      c.stroke();
+    });
   }
   if (SHOW_SEGMENTS) {
     snake.forEach(({ x, y, radius }) => {
@@ -211,8 +214,8 @@ var draw = function() {
     for (let j = 0;j < 10; j++) {
       const firstBone = bones[0];
       followPoint(firstBone.top, {
-        x: (head.x + k * 13097) % d.width,
-        y: (head.y + k * 13097) % d.height
+        x: heads[k].x,
+        y: heads[k].y
       }, 0.07);
       constrainDistance(firstBone.top, firstBone.bottom, 0);
       forEachCurrentAndLast(bones, ({ last: last2, current }) => {
@@ -234,7 +237,7 @@ var draw = function() {
       const { top, bottom } = bones[i];
       c.beginPath();
       c.moveTo(top.x, top.y);
-      c.strokeStyle = foreground;
+      c.strokeStyle = "black";
       c.fillStyle = c.strokeStyle;
       c.lineWidth = min(i / PHI, 5);
       c.lineTo(bottom.x, bottom.y);
@@ -244,11 +247,11 @@ var draw = function() {
   circle({ x: d.width / 2, y: d.height / 2, radius: 10 });
   requestAnimationFrame(draw);
 };
-var SHOW_HEAD = false;
+var SHOW_HEADS = false;
 var SEGMENT_SPREAD = 0.3;
 var SHOW_SEGMENTS = false;
 var SHOW_SKIN_POINTS = false;
-var SHOW_SKIN = true;
+var SHOW_SKIN = false;
 var BONE_SPREAD = 0;
 var canvas = document.querySelector("canvas");
 var c = canvas.getContext("2d");
@@ -275,9 +278,10 @@ var snake;
 var mouseX;
 var mouseY;
 var controllingWithMouse = false;
-var head;
+var heads;
 var bones;
 var appendages;
+var i = 0;
 canvas.addEventListener("mousemove", ({ clientX, clientY }) => {
   mouseX = clientX;
   mouseY = clientY;
@@ -289,6 +293,11 @@ canvas.addEventListener("touchmove", ({ touches }) => {
 });
 canvas.addEventListener("mouseup", () => {
   controllingWithMouse = !controllingWithMouse;
+  if (!controllingWithMouse) {
+    heads.forEach((head) => {
+      head.direction = TAO * random();
+    });
+  }
 });
 canvas.addEventListener("mousedown", () => {
 });
