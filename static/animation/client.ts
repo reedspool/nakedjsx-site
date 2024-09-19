@@ -1,43 +1,38 @@
+// @ Imports
 import { foreground, background } from "./emacs-colors.json";
+import {
+    PI,
+    cos,
+    sin,
+    sqrt,
+    atan2,
+    floor,
+    abs,
+    TAO,
+    PHI,
+    lerp,
+    circularLerp,
+    forEachCurrentAndLast,
+    generateArray,
+    min,
+} from "./utilities";
+
+// @ Constants
+
 const SHOW_HEAD = false;
-const segmentSpread = 0.3;
+const SEGMENT_SPREAD = 0.3;
 const SHOW_SEGMENTS = false;
 const SHOW_SKIN_POINTS = false;
-const SHOW_SKIN = false;
-const { PI, cos, sin, sqrt, atan2, abs, min, floor } = Math;
-const TAO = PI * 2;
-const PHI = 1.618033988749895;
-const lerp = (v0: number, v1: number, t: number) => v0 + t * (v1 - v0);
-const normalizeAngle = (angle: number) => (angle + TAO) % TAO;
-// From https://stackoverflow.com/a/14498790
-const circularLerp = (v0: number, v1: number, t: number) => {
-    const shortestAngle = ((v1 - v0 + PI) % TAO) - PI;
-    // TODO: This still doesn't quite work how I want it to.
-    return lerp(v0, v0 + shortestAngle, t);
-};
+const SHOW_SKIN = true;
+const BONE_SPREAD = 0;
 
-// The unit circle starts pointing directly east, and sweeps south then west
-// because Y grows downwards.
-const mapDirections = (angle: number) => {
-    angle = normalizeAngle(angle);
-    if (
-        (angle >= (15 * TAO) / 16 && angle <= TAO) ||
-        (angle >= 0 && angle <= TAO / 16)
-    )
-        return "east";
-    if (angle >= TAO / 16 && angle <= (3 * TAO) / 16) return "southeast";
-    if (angle >= (3 * TAO) / 16 && angle <= (5 * TAO) / 16) return "south";
-    if (angle >= (5 * TAO) / 16 && angle <= (7 * TAO) / 16) return "southwest";
-    if (angle >= (7 * TAO) / 16 && angle <= (9 * TAO) / 16) return "west";
-    if (angle >= (9 * TAO) / 16 && angle <= (11 * TAO) / 16) return "northwest";
-    if (angle >= (11 * TAO) / 16 && angle <= (13 * TAO) / 16) return "north";
-    if (angle >= (13 * TAO) / 16 && angle <= (15 * TAO) / 16)
-        return "northeast";
-};
+// @ Canvas Setup
+
 const canvas = document.querySelector("canvas")!;
-const c = canvas.getContext("2d")!; // Context
+// @ c for Context
+const c = canvas.getContext("2d")!;
+// @ d for Dimensions
 let d: {
-    // Dimensions
     width: number;
     height: number;
     center: {
@@ -60,6 +55,9 @@ function setCanvasDimensions() {
     setup();
 }
 
+// @ Entity definitions
+
+// @ Abstract entities like points
 type Point = { x: number; y: number };
 type Circle = Point & { radius: number };
 function circle({ x, y, radius }: Circle) {
@@ -68,75 +66,106 @@ function circle({ x, y, radius }: Circle) {
     c.fill();
 }
 
-let numSegments: number;
-let segments: Array<Circle>;
+const constrainDistance = (
+    anchor: Point,
+    mover: Point,
+    distance: number,
+    spread: number = 1,
+) => {
+    const adjacent = anchor.x - mover.x;
+    const other = anchor.y - mover.y;
+    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
+    const angle = atan2(other, adjacent);
+    const moveDistance = hypoteneuse - distance * spread;
+
+    mover.x += cos(angle) * moveDistance;
+    mover.y += sin(angle) * moveDistance;
+};
+
+const followPoint = (first: Point, other: Point, factor: number) => {
+    first.x = lerp(first.x, other.x, factor);
+    first.y = lerp(first.y, other.y, factor);
+};
+
+const distance = (first: Point, second: Point) => {
+    const adjacent = first.x - second.x;
+    const other = first.y - second.y;
+    return sqrt(adjacent ** 2 + other ** 2);
+};
+
+// @ Snakes
+let snake: Array<Circle>;
+
 let mouseX: number;
 let mouseY: number;
 let controllingWithMouse = false;
 let head: Circle & { direction: number };
 
+// @ Bones
 type Bone = {
     top: Point;
     bottom: Point;
 };
 let bones: Array<Bone>;
-let boneSets: Array<typeof bones>;
-let numBones: number;
-let boneLength: number;
+let appendages: Array<typeof bones>;
+
+// @ Setup
+
 function setup() {
-    c.fillStyle = background; // TODO Get calculated body font color
+    c.fillStyle = background;
     c.fillRect(0, 0, d.width, d.height);
-    numSegments = 40;
+    const numSegments = 40;
     const radius = d.width / numSegments / 3 - 1;
-    segments = Array(numSegments)
-        .fill(null)
-        .map((_, i) => ({
-            x: 40 + (d.width / numSegments) * i + radius + 1,
-            y: d.center.y,
-            radius,
-        }));
+    // @ Snake
+    snake = generateArray(numSegments, ({ index }) => ({
+        x: 40 + (d.width / numSegments) * index + radius + 1,
+        y: d.center.y,
+        radius,
+    }));
+
+    // @ Head
+    const { x, y } = snake.at(0)!;
     head = {
-        x: segments[0].x,
-        y: segments[0].y,
+        x,
+        y,
         radius: radius * PHI,
         direction: TAO / -8,
     };
 
-    // Second creature
-    numBones = 10;
-    boneLength = 40;
-    boneSets = [];
-    for (let i = 0; i < 10; i++) {
-        bones = Array(numBones)
-            .fill(null)
-            .map((_, i) => ({
-                top: {
-                    x: (i / numBones) * d.width,
-                    y: (i / numBones) * d.height,
-                },
-                bottom: {
-                    x: (i / numBones) * d.width + boneLength,
-                    y: (i / numBones) * d.height + 0,
-                },
-            }));
-        boneSets.push(bones);
-    }
+    // @ All the bones
+    appendages = generateArray(16, () =>
+        generateArray(40, ({ fraction }) => ({
+            top: {
+                x: fraction * d.width,
+                y: fraction * d.height,
+            },
+            bottom: {
+                x: fraction * d.width + 10, // This original distance is the length of the bone
+                y: fraction * d.height + 0,
+            },
+        })),
+    );
 }
-function draw() {
-    // c.fillStyle = "rgba(0, 0, 0, 0.001)"; // TODO Get calculated body font color
-    c.fillStyle = background; // TODO Get calculated body font color
-    c.fillRect(0, 0, d.width, d.height);
-    c.strokeStyle = "white"; // TODO Get calculated body font color
-    c.fillStyle = "white"; // TODO Get calculated body font color
 
-    // head.direction = normalizeAngle(head.direction);
+// @ Draw (in which all data us updated every frame before drawing)
+function draw() {
+    // @ Draw the background
+    // c.fillStyle = "rgba(0, 0, 0, 0.01)";
+    c.fillStyle = background;
+    c.fillRect(0, 0, d.width, d.height);
+    c.strokeStyle = "white";
+    c.fillStyle = "white";
+
+    // @ Move the Head
     const prevHead: Point = { ...head };
     let nextDirection = head.direction;
-    // The head follows the mouse
+
+    // @ Sometimes head follows the mouse
     if (controllingWithMouse) {
         head.x = mouseX ?? head.x;
         head.y = mouseY ?? head.y;
-        // Adjust head direction based on movement (none if no movement)
+
+        // @ Adjust head direction based on movement (none if no movement)
         if (
             abs(head.x - prevHead.x) > 0.0001 &&
             abs(head.y - prevHead.y) > 0.0001
@@ -145,9 +174,10 @@ function draw() {
             head.direction = circularLerp(head.direction, nextDirection, 0.6);
         }
     } else {
+        // @ Sometimes head drives around on its own
         const wayOut = -80;
         const margin = 40;
-        // Way out of bounds?
+        // @ Head went way out of bounds?
         if (
             d.width - head.x < wayOut ||
             d.height - head.y < wayOut ||
@@ -159,48 +189,42 @@ function draw() {
             nextDirection = Math.random() * TAO;
             head.direction = nextDirection;
         }
-        // normal Out of bounds?
+        // @ Head went a little out of bounds?
         else if (
             d.width - head.x < margin ||
             d.height - head.y < margin ||
             head.x < margin ||
             head.y < margin
         ) {
-            // Turn towards the center
+            // @ Turn towards the center
             nextDirection = atan2(d.center.y - head.y, d.center.x - head.x);
         }
 
         head.direction = circularLerp(head.direction, nextDirection, 0.02);
 
         const speed = 2;
-        // Advance
+        // @ Move the head forward
         head.x += cos(head.direction) * speed;
         head.y += sin(head.direction) * speed;
     }
 
-    // The first segment follows the head
-    const first = segments[0];
-    first.x = lerp(first.x, head.x, 0.07);
-    first.y = lerp(first.y, head.y, 0.07);
+    // @ The first snake segment follows the head
+    followPoint(snake.at(0)!, head, 0.07);
 
-    // Then every segment follows the previous one
-    for (let i = 1; i < segments.length; i++) {
-        let last = segments[i - 1];
-        let current = segments[i];
-
-        const adjacent = last.x - current.x;
-        const other = last.y - current.y;
-        const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
-        const angle = atan2(other, adjacent);
-        const moveDistance =
-            hypoteneuse - (last.radius + current.radius) * segmentSpread;
-
-        current.x += cos(angle) * moveDistance;
-        current.y += sin(angle) * moveDistance;
-    }
+    // @ Then every snake segment follows the previous one
+    forEachCurrentAndLast(snake, ({ last, current, index: i }) => {
+        constrainDistance(
+            last,
+            current,
+            last.radius + current.radius,
+            SEGMENT_SPREAD,
+        );
+    });
     let skinPoints: Array<Point> = [];
 
-    // Points on the head, from left cheek to right before nose
+    // @ Collect points from the border of the snake to create skin
+    // @ from left cheek to right before nose
+    const first = snake.at(0)!;
     const directionToHead = atan2(head.y - first.y, head.x - first.x);
     const increment = TAO / 16;
     const cheekCount = 5;
@@ -212,13 +236,13 @@ function draw() {
         });
     }
 
-    // The nose
+    // @ the nose
     skinPoints.push({
         x: first.x + cos(directionToHead) * first.radius * PHI,
         y: first.y + sin(directionToHead) * first.radius * PHI,
     });
 
-    // Now down to the right cheek
+    // @ then down to the right cheek
     for (let i = 1; i <= cheekCount; i++) {
         const angle = directionToHead + increment * i;
         skinPoints.push({
@@ -227,43 +251,48 @@ function draw() {
         });
     }
 
-    for (let i = 1; i < segments.length - 1; i++) {
-        let last = segments[i - 1];
-        let current = segments[i];
+    forEachCurrentAndLast(snake, ({ current, last, index }) => {
+        if (index === snake.length - 1) return;
+
         const direction = atan2(last.y - current.y, last.x - current.x);
 
         const increment = TAO / 8;
-        // At the end we push the right side
-        skinPoints.push({
-            x: current.x + cos(direction + increment * 1) * current.radius,
-            y: current.y + sin(direction + increment * 1) * current.radius,
-        });
-        skinPoints.push({
-            x: current.x + cos(direction + increment * 2) * current.radius,
-            y: current.y + sin(direction + increment * 2) * current.radius,
-        });
-        skinPoints.push({
-            x: current.x + cos(direction + increment * 3) * current.radius,
-            y: current.y + sin(direction + increment * 3) * current.radius,
-        });
+        // @ Push the skin points on the right side of the body to the end of the list
+        skinPoints.push(
+            {
+                x: current.x + cos(direction + increment * 1) * current.radius,
+                y: current.y + sin(direction + increment * 1) * current.radius,
+            },
+            {
+                x: current.x + cos(direction + increment * 2) * current.radius,
+                y: current.y + sin(direction + increment * 2) * current.radius,
+            },
+            {
+                x: current.x + cos(direction + increment * 3) * current.radius,
+                y: current.y + sin(direction + increment * 3) * current.radius,
+            },
+        );
 
-        // At the beginning we unshift the left side
-        skinPoints.unshift({
-            x: current.x + cos(direction - increment * 1) * current.radius,
-            y: current.y + sin(direction - increment * 1) * current.radius,
-        });
-        skinPoints.unshift({
-            x: current.x + cos(direction - increment * 2) * current.radius,
-            y: current.y + sin(direction - increment * 2) * current.radius,
-        });
-        skinPoints.unshift({
-            x: current.x + cos(direction - increment * 3) * current.radius,
-            y: current.y + sin(direction - increment * 3) * current.radius,
-        });
-    }
+        // @ Simultaneously unshift the right side skin points to the beginning of the list
+        skinPoints.unshift(
+            {
+                x: current.x + cos(direction - increment * 1) * current.radius,
+                y: current.y + sin(direction - increment * 1) * current.radius,
+            },
+            {
+                x: current.x + cos(direction - increment * 2) * current.radius,
+                y: current.y + sin(direction - increment * 2) * current.radius,
+            },
+            {
+                x: current.x + cos(direction - increment * 3) * current.radius,
+                y: current.y + sin(direction - increment * 3) * current.radius,
+            },
+        );
+    });
 
-    let secondToLast = segments.at(-2)!;
-    let last = segments.at(-1)!;
+    // @ Finally, add the skin points on the butt of the snake
+    let secondToLast = snake.at(-2)!;
+    let last = snake.at(-1)!;
     const lastDirection = atan2(
         secondToLast.y - last.y,
         secondToLast.x - last.x,
@@ -279,7 +308,7 @@ function draw() {
         });
     }
 
-    // An indicator as to the head, for development purposes.
+    // @ Draw the head
     if (SHOW_HEAD) {
         c.fillStyle = "rgba(255, 255, 255, 0.2)";
         circle({ ...head });
@@ -295,39 +324,37 @@ function draw() {
         c.stroke();
     }
 
-    // The segments
+    // @ Draw the snake
     if (SHOW_SEGMENTS) {
-        segments.forEach(({ x, y, radius }, index) => {
-            c.fillStyle = `rgba(170, 156, 40, 0.8)`; // TODO Get calculated body font color
+        snake.forEach(({ x, y, radius }) => {
+            c.fillStyle = `rgba(170, 156, 40, 0.8)`;
             circle({ x, y, radius });
         });
     }
 
-    // The skin
+    // @ Draw the skin control points
     if (SHOW_SKIN_POINTS) {
         skinPoints.forEach(({ x, y }) => {
-            c.fillStyle = `rgba(40, 156, 170, 0.8)`; // TODO Get calculated body font color
+            c.fillStyle = `rgba(40, 156, 170, 0.8)`;
             circle({ x, y, radius: 5 });
         });
     }
 
+    // @ Draw the actual skin
     if (SHOW_SKIN) {
         const now = Date.now();
-        for (let index = 1; index < skinPoints.length; index++) {
-            const last = skinPoints[index - 1];
-            const current = skinPoints[index];
+        forEachCurrentAndLast(skinPoints, ({ current, last, index }) => {
             const i = index / skinPoints.length;
             const t = (cos((TAO * now) / 2000) + 1) / 2;
 
             c.beginPath();
             c.moveTo(last.x, last.y);
-            c.strokeStyle = foreground;
-            // c.strokeStyle = `rgba(${floor(i * 255)}, ${floor(t * 255)}, ${floor(
-            //     floor(255 - i * 255),
-            // )}, 1)`;
+            c.strokeStyle = `rgba(${floor(i * 255)}, ${floor(t * 255)}, ${floor(
+                floor(255 - i * 255),
+            )}, 1)`;
             c.lineTo(current.x, current.y);
             c.stroke();
-        }
+        });
 
         {
             const last = skinPoints.at(-1)!;
@@ -340,124 +367,92 @@ function draw() {
         }
     }
 
-    //
-    // SECOND CREATURE
-    //
+    // @ Begin moving around the second creature
 
-    for (let k = 0; k < boneSets.length; k++) {
-        bones = boneSets[k];
+    for (let k = 0; k < appendages.length; k++) {
+        bones = appendages[k];
+        // @ Inverse kinematics loop: going to repeat the backwards and forward motions
         for (let j = 0; j < 10; j++) {
-            // FORWARDS
+            // @ First, move each appendage forward towards its goal
             const firstBone = bones[0];
-            firstBone.top.x = lerp(
-                firstBone.top.x,
-                (head.x + k * 13097) % d.width,
+            followPoint(
+                firstBone.top,
+                {
+                    // @ Every appendage is following a random shadow of the head a deterministic distance away
+                    x: (head.x + k * 13097) % d.width,
+                    y: (head.y + k * 13097) % d.height,
+                },
                 0.07,
             );
-            firstBone.top.y = lerp(
-                firstBone.top.y,
-                (head.y + k * 13097) % d.height,
-                0.07,
-            );
-            firstBone.bottom.x = lerp(firstBone.top.x, head.x, 0.002);
-            firstBone.bottom.y = lerp(firstBone.top.y, head.y, 0.002);
+            constrainDistance(firstBone.top, firstBone.bottom, 0);
+            // followPoint(firstBone.bottom, firstBone.top, 0.02);
 
-            // Every bone follows the previous one
-            for (let i = 1; i < bones.length; i++) {
-                let lastBone = bones[i - 1];
-                let currentBone = bones[i];
-                let last = lastBone.bottom;
-                let currentTop = currentBone.top;
-                let currentBottom = currentBone.bottom;
-
-                const originalAdjacent = currentBottom.x - currentTop.x;
-                const originalOther = currentBottom.y - currentTop.y;
-                const originalBoneLength = sqrt(
-                    originalAdjacent ** 2 + originalOther ** 2,
+            // @ Every bone in the appendage follows the previous one
+            forEachCurrentAndLast(bones, ({ last, current }) => {
+                // @ Calculate the bone length before moving
+                // TODO Could record this in the data structure instead
+                const originalBoneLength = distance(
+                    current.bottom,
+                    current.top,
                 );
-                {
-                    const adjacent = last.x - currentTop.x;
-                    const other = last.y - currentTop.y;
-                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
-                    const angle = atan2(other, adjacent);
-                    const moveDistance = hypoteneuse - 10;
 
-                    currentTop.x += cos(angle) * moveDistance;
-                    currentTop.y += sin(angle) * moveDistance;
-                }
+                // @ Then constrain one bone's connection to the previous one
+                constrainDistance(last.bottom, current.top, BONE_SPREAD);
 
-                {
-                    const adjacent = currentBottom.x - currentTop.x;
-                    const other = currentBottom.y - currentTop.y;
-                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
-                    const angle = atan2(other, adjacent);
-                    const moveDistance = originalBoneLength - hypoteneuse;
-
-                    currentBottom.x += cos(angle) * moveDistance;
-                    currentBottom.y += sin(angle) * moveDistance;
-                }
-            }
-
-            // BACKWARDS
-
-            const lastBone = bones.at(-1);
-            lastBone.bottom.x = lerp(lastBone.bottom.x, d.width / 2, 0.07);
-            lastBone.bottom.y = lerp(lastBone.bottom.y, d.height / 2, 0.07);
-            lastBone.top.x = lerp(lastBone.bottom.x, head.x, 0.002);
-            lastBone.top.y = lerp(lastBone.bottom.y, head.y, 0.002);
-
-            // Every bone follows the previous one
-            for (let i = bones.length - 2; i >= 0; i--) {
-                let lastBone = bones[i + 1];
-                let currentBone = bones[i];
-                let last = lastBone.top;
-                let currentBottom = currentBone.bottom;
-                let currentTop = currentBone.top;
-
-                const originalAdjacent = currentTop.x - currentBottom.x;
-                const originalOther = currentTop.y - currentBottom.y;
-                const originalBoneLength = sqrt(
-                    originalAdjacent ** 2 + originalOther ** 2,
+                // @ Then constrain the bone's original length, so it doesn't stretch
+                constrainDistance(
+                    current.top,
+                    current.bottom,
+                    originalBoneLength,
+                    1,
                 );
-                {
-                    const adjacent = last.x - currentBottom.x;
-                    const other = last.y - currentBottom.y;
-                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
-                    const angle = atan2(other, adjacent);
-                    const moveDistance = hypoteneuse - 10;
+            });
 
-                    currentBottom.x += cos(angle) * moveDistance;
-                    currentBottom.y += sin(angle) * moveDistance;
-                }
+            // @ Now reverse the kinematics, move the last bone back to its original position
+            const lastBone = bones.at(-1)!;
+            // @ Each appendage is anchored at the center of the screen
+            lastBone.bottom.x = d.width / 2;
+            lastBone.bottom.y = d.height / 2;
+            followPoint(lastBone.top, lastBone.bottom, 0.2);
 
-                {
-                    const adjacent = currentTop.x - currentBottom.x;
-                    const other = currentTop.y - currentBottom.y;
-                    const hypoteneuse = sqrt(adjacent ** 2 + other ** 2);
-                    const angle = atan2(other, adjacent);
-                    const moveDistance = originalBoneLength - hypoteneuse;
+            // @ Every bone follows the previous one
+            forEachCurrentAndLast(bones.toReversed(), ({ current, last }) => {
+                // @ Again, calculate bone length
+                const originalBoneLength = distance(
+                    current.top,
+                    current.bottom,
+                );
 
-                    currentTop.x += cos(angle) * moveDistance;
-                    currentTop.y += sin(angle) * moveDistance;
-                }
-            }
+                // @ Again, move the bone connector to match its pair
+                constrainDistance(last.top, current.bottom, BONE_SPREAD);
+                // @ And again, constrain the length of the bone to not stretch
+                constrainDistance(
+                    current.bottom,
+                    current.top,
+                    originalBoneLength,
+                );
+            });
         }
-
+        // @ Finally, draw each bone
         for (let i = 0; i < bones.length; i++) {
             const { top, bottom } = bones[i];
             c.beginPath();
             c.moveTo(top.x, top.y);
-            // c.strokeStyle = foreground;
-            c.strokeStyle = `rgba(${floor(i * 255)}, 128, ${floor(
-                floor(255 - i * 255),
-            )}, 1)`;
+            c.strokeStyle = foreground;
+            // c.strokeStyle = `rgba(${floor(i * 255)}, 128, ${floor(
+            //     floor(255 - i * 255),
+            // )}, 1)`;
             c.fillStyle = c.strokeStyle;
-            c.lineWidth = i * PHI;
+            c.lineWidth = min(i / PHI, 5);
             c.lineTo(bottom.x, bottom.y);
             c.stroke();
         }
     }
-    circle({ x: d.width / 2, y: d.height / 2, radius: 50 });
+
+    // @ Draw the spider's body
+    circle({ x: d.width / 2, y: d.height / 2, radius: 10 });
+
+    // @ Repeat all calculations and drawing each frame
     requestAnimationFrame(draw);
 }
 
@@ -470,15 +465,17 @@ canvas.addEventListener("touchmove", ({ touches }) => {
     mouseX = clientX;
     mouseY = clientY;
 });
-canvas.addEventListener("mouseup", ({ clientX, clientY }) => {
+canvas.addEventListener("mouseup", () => {
+    // @ Click to toggle beings following the mouse
     controllingWithMouse = !controllingWithMouse;
 });
-canvas.addEventListener("mousedown", ({ clientX, clientY }) => {
+canvas.addEventListener("mousedown", () => {
     // draw();
 });
 
 document.body.addEventListener("keydown", (event) => {
     const { key } = event;
+    // @ Press 'r' to redraw (useful when background is semitransparent)
     if (key == "r") {
         c.fillStyle = "#282828"; // TODO Get calculated body font color
         c.fillRect(0, 0, d.width, d.height);
