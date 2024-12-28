@@ -10,11 +10,11 @@
     <link rel="manifest" href="./site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
-		<link rel="modulepreload" href="./_app/immutable/entry/start.8Zob8Hdo.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/entry.Bkm36hYI.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.DrUP0gi3.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/entry.DArxu8PF.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/runtime.Bm73Tpmf.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/index-client.B3YRV3HL.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.C6vG5tCg.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.DiXhZk1v.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/render.BfQ3xYTj.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/disclose-version.CLXa-AFD.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/this.CnBV6IW7.js">
@@ -25,14 +25,27 @@
     <style>
       :root,
       :fullscreen {
-        --color-bg-black: #282828;
-        --color-fg-white: white;
-        --color-fg-link: lightskyblue;
+        --color-bg-light: white;
+        --color-fg-light: black;
+        --color-fg-light-link: steelblue;
+        --color-bg-dark: #282828;
+        --color-fg-dark: white;
+        --color-fg-dark-link: lightskyblue;
+        --color-fg: var(--color-fg-light);
+        --color-bg: var(--color-bg-light);
+        --color-fg-link: var(--color-fg-light-link);
 
-        background-color: var(--color-bg-black);
-        color: var(--color-fg-white);
+        background-color: var(--color-bg);
+        color: var(--color-fg);
       }
-
+      @media (prefers-color-scheme: dark) {
+        :root,
+        :fullscreen {
+          --color-fg: var(--color-fg-dark);
+          --color-bg: var(--color-bg-dark);
+          --color-fg-link: var(--color-fg-dark-link);
+        }
+      }
       html,
       body {
         width: 100vw;
@@ -73,15 +86,15 @@ Room</a>, <a href="https://kittensgame.com/web/" rel="nofollow">Kittens Game</a>
 			
 			<script>
 				{
-					__sveltekit_1b9dx9s = {
+					__sveltekit_ylk5lr = {
 						base: new URL(".", location).pathname.slice(0, -1)
 					};
 
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("./_app/immutable/entry/start.8Zob8Hdo.js"),
-						import("./_app/immutable/entry/app.C6vG5tCg.js")
+						import("./_app/immutable/entry/start.DrUP0gi3.js"),
+						import("./_app/immutable/entry/app.DiXhZk1v.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element, {
 							node_ids: [0, 3],
