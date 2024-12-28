@@ -1,4 +1,4 @@
-import{a,t}from"../chunks/disclose-version.Chs3MZKY.js";import"../chunks/legacy.DUy_6n_X.js";import{e as n}from"../chunks/runtime.CSRt9162.js";var r=t(`<h1>Design Notes</h1> <p><a href="/">Back to game title screen</a></p> <h2>History</h2> <p>This game is a confluence of disparate interests of mine. Maybe all those
+import{a,t}from"../chunks/disclose-version.CLXa-AFD.js";import"../chunks/legacy.C3VcKABZ.js";import{e as n}from"../chunks/runtime.Bm73Tpmf.js";var r=t(`<h1>Design Notes</h1> <p><a href="/">Back to game title screen</a></p> <h2>History</h2> <p>This game is a confluence of disparate interests of mine. Maybe all those
 interests were inevitably related, or maybe this game is my attempt to fit all
 my favorite tchotchkes in some wrong-sized luggage.</p> <p>An image which has bounced around in my head for a long time is a mad
 scientist’s wall filled with an uneven grid of gadgets, panels, latches, knobs,
