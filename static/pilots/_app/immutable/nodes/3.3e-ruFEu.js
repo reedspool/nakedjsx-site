@@ -15,4 +15,9 @@ Neon Genesis Evangelion, Macross, Gundam, Pacific Rim.</p> <p>For visual aesthet
 watched a YouTube video <a href="https://www.youtube.com/watch?v=brpKGTnkVdI" rel="nofollow">“Evangelion UI, Sound Designed” by Yuta Endo 遠藤ユウ
 タ</a>. “Anime UI” search on CodePen
 yielded <a href="https://codepen.io/alliwalk/pen/aboyKXz" rel="nofollow">a fun example</a>. “Futuristic”
-was a better search there, yielding more good stuff: <a href="https://codepen.io/nw/pen/QWgpgQ" rel="nofollow">[1]</a> <a href="https://codepen.io/thpoi/pen/GYBZar" rel="nofollow">[2]</a> <a href="https://codepen.io/LukyVj/pen/xxyEYMJ" rel="nofollow">[3]</a> <a href="https://codepen.io/puritanner/pen/BKzqMW" rel="nofollow">[4]</a></p> <p><a href="/">Back to game title screen</a></p>`,1);function p(e){var o=r();n(14),a(e,o)}export{p as component};
+was a better search there, yielding more good stuff like <a href="https://codepen.io/nw/pen/QWgpgQ" rel="nofollow">[1]</a>, <a href="https://codepen.io/thpoi/pen/GYBZar" rel="nofollow">[2]</a>, <a href="https://codepen.io/LukyVj/pen/xxyEYMJ" rel="nofollow">[3]</a>, and <a href="https://codepen.io/puritanner/pen/BKzqMW" rel="nofollow">[4]</a>.</p> <p>This game is also inspired by incremental idle games. The kind where there’s an
+simulation happening and the player manages some abstract interface for some
+part of the interface. The most recent one I played, <a href="https://faedine.com/games/crank/b39/" rel="nofollow">Crank by
+FaeDine</a>. See <a href="https://www.decisionproblem.com/paperclips/index2.html" rel="nofollow">Universal
+Paperclis</a>, <a href="https://adarkroom.doublespeakgames.com/" rel="nofollow">A Dark
+Room</a>, <a href="https://kittensgame.com/web/" rel="nofollow">Kittens Game</a>.</p> <p><a href="/">Back to game title screen</a></p>`,1);function p(e){var o=r();n(16),a(e,o)}export{p as component};

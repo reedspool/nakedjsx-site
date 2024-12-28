@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <title>Pilots</title>
     <!-- favicons from https://favicon.io/emoji-favicons/battery  -->
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
@@ -9,39 +10,50 @@
     <link rel="manifest" href="./site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
-		<link href="./_app/immutable/assets/2.BRxu25xn.css" rel="stylesheet">
-		<link rel="modulepreload" href="./_app/immutable/entry/start.DuHOVFlV.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/entry.C_SJctp_.js">
+		<link href="./_app/immutable/assets/2.CZG8oCa0.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.v9GcFAuJ.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/entry.eUoeD3w2.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/runtime.Bm73Tpmf.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/index-client.B3YRV3HL.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.--K-Sq3h.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.Dc7q8Khi.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/render.BfQ3xYTj.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/disclose-version.CLXa-AFD.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/this.CnBV6IW7.js">
 		<link rel="modulepreload" href="./_app/immutable/nodes/0.DAyIue8V.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/snippet.Cwy7Ud8A.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/2.DOvD_eJO.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/2.CSBtdmKs.js">
     <style>
+      :root {
+        --color-bg-black: #282828;
+        --color-fg-white: white;
+
+        background-color: var(--color-bg-black);
+        color: var(--color-fg-white);
+      }
+
       html,
       body {
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
       }
     </style>
   </head>
   <body data-sveltekit-preload-data="hover">
-    <div style="display: contents"><!--[--><!--[--><!----><!----><div class="fs svelte-13gl6av "><div style="width:100%;height: 100%; display: flex; flex-direction: column; gap:2em;"><!--[!--><!--[--><!--[!--><!--[--><div style="max-width: 60rem; min-width:40rem; height: 100%; margin: auto;"><!--[!--><!--]--> <div style="border:4px inset; border-radius: 1em; padding: 2em; margin: 2em;"><h2 class="svelte-2s92ts">Enemy</h2> <div style="display: grid; grid-template-columns: 1fr 1fr;"><div style="padding: 1em; border: 2px outset;"><!--[!--><div>Health 100/100 <meter style="will-change: contents;" min="0" low="40" high="99" optimum="99.9" max="100" value="100">100 of 100</meter><!----></div><!--]--><!----></div><!----> <div style="padding: 1em; border: 2px outset;"><!--[!--><label>Auto Pistol Cooldown <meter style="will-change: contents;" min="0" low="1.2" high="2.97" optimum="2.9970000000000003" max="3" value="0">0 of 3</meter><!----></label><!--]--><!----></div><!----></div></div> <h2 class="svelte-2s92ts">Player</h2> <div style="display: grid; grid-template-columns: 1fr 1fr;"><div style="padding: 1em; border: 2px outset;"><!--[!--><div>health</div> <div>100/100</div> <div><meter style="will-change: contents;" min="0" low="40" high="99" optimum="99.9" max="100" value="100">100 of 100</meter><!----></div><!--]--><!----></div><!----> <div style="padding: 1em; border: 2px outset;"><!--[!--><div>Fuel 100/100 <meter style="will-change: contents;" min="0" low="40" high="99" optimum="99.9" max="100" value="100">100 of 100</meter><!----></div><!--]--><!----></div><!----> <div style="padding: 1em; border: 2px outset;"><!--[!--><div>Sword</div> <label style="display: block;">Cooldown <meter style="will-change: contents;" min="0" low="40" high="99" optimum="99.9" max="100" value="0">0 of 100</meter><!----></label> <label style="display: block;">Fuel cost <meter style="will-change: contents;" min="0" low="36" high="89.1" optimum="89.91" max="90" value="90">90 of 90</meter><!----></label> <button style="border-radius: 9999px; border: 4px inset tomato; background-color: tomato; padding: 1em; display: block; aspect-ratio:1;">Swing</button><!--]--><!----></div><!----> <div style="padding: 1em; border: 2px outset;"><!--[!--><div>Shield</div> <label style="display: block;">Cooldown <meter style="will-change: contents;" min="0" low="40" high="99" optimum="99.9" max="100" value="0">0 of 100</meter><!----></label> <label style="display: block;">Fuel cost <meter style="will-change: contents;" min="0" low="36" high="89.1" optimum="89.91" max="90" value="90">90 of 90</meter><!----></label> <label style="display:block;">3/3 <meter style="will-change: contents;" min="0" low="1.2" high="2.97" optimum="2.9970000000000003" max="3" value="3">3 of 3</meter><!----></label> <button style="border-radius: 9999px; border: 4px inset lightsteelblue; background-color: lightsteelblue; padding: 1em; display: block; aspect-ratio:1;">Block</button><!--]--><!----></div><!----></div></div><!--]--><!--]--> <nav><a href="?">Restart</a> <a href="?">Back To Title</a> <!--[!--><!--]--> <a href="?">Pause</a></nav><!--]--><!--]--></div><!----> <!--[!--><!--]--></div><!----><!----><!----><!--]--> <!--[!--><!--]--><!--]-->
+    <div style="display: contents"><!--[--><!--[--><!----><!----><div class="svelte-fodtdp "><main style="width: calc(100vw - 1px); height: 100vh; display: grid; grid-template-rows: 1fr; grid-template-columns: 1fr; justify-items: center; align-items: center;" class="svelte-1jve5dt"><!--[--><div style="display: flex; flex-direction: column; justify-content: start; align-items: flex-start; padding-bottom: 4em; gap:2em;" class="svelte-1jve5dt"><div class="svelte-1jve5dt"><h1 class="svelte-1jve5dt">Pilots</h1> <h2 class="svelte-1jve5dt">A game about ...?</h2></div> <div><a href="?">Cockpit</a></div> <div><a href="?">Shop</a></div> <div><a href="?">Inventory</a></div> <div><a href="/design">Design notes</a></div></div><!--]--></main><!----> <!--[!--><!--]--></div><!----><!----><!----><!--]--> <!--[!--><!--]--><!--]-->
 			
 			<script>
 				{
-					__sveltekit_1ua1i66 = {
+					__sveltekit_fjc8n2 = {
 						base: new URL(".", location).pathname.slice(0, -1)
 					};
 
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("./_app/immutable/entry/start.DuHOVFlV.js"),
-						import("./_app/immutable/entry/app.--K-Sq3h.js")
+						import("./_app/immutable/entry/start.v9GcFAuJ.js"),
+						import("./_app/immutable/entry/app.Dc7q8Khi.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element, {
 							node_ids: [0, 2],
